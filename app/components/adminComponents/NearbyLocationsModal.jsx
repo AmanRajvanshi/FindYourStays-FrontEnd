@@ -1,0 +1,162 @@
+import { useContext, useEffect, useState } from 'react';
+import toast from 'react-hot-toast';
+import { Form, Input, Modal } from 'rsuite';
+import { apiUrl } from '../../../envConfig';
+import { AuthContext } from '../../AuthContextProvider';
+import Swal from 'sweetalert2';
+
+function NearbyLocationsModal({
+  openAmenitiesModal,
+  setOpenAmenitiesModal,
+  edit,
+  get_all_nearby_locations,
+  selectedNearbyLocations, // receive selectedNearbyLocations instead of 'amenity'
+}) {
+  const { authData } = useContext(AuthContext);
+  const [nearbyLocationName, setNearbyLocationName] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (edit && selectedNearbyLocations) {
+      setNearbyLocationName(selectedNearbyLocations.nearby_location_name || '');
+    } else {
+      setNearbyLocationName('');
+    }
+  }, [edit, selectedNearbyLocations, openAmenitiesModal]);
+
+  const handleSave = () => {
+    setLoading(true);
+    const url = edit
+      ? `${apiUrl}admin/edit-nearby-locations/${selectedNearbyLocations.id}`
+      : `${apiUrl}admin/add-nearby-locations`; // Set your API endpoints accordingly!
+    const method = edit ? 'PUT' : 'POST';
+    const body = {
+      name: nearbyLocationName,
+    };
+    fetch(url, {
+      method,
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+        Authorization: authData.token,
+      },
+      body: JSON.stringify(body),
+    })
+      .then((response) => response.json())
+      .then((json) => {
+        if (json.status) {
+          setOpenAmenitiesModal(false);
+          get_all_nearby_locations();
+          setNearbyLocationName('');
+          toast.success(json.message || 'Success!');
+        } else {
+          toast.error(json.message || 'Failed to save!');
+        }
+      })
+      .catch((error) => {
+        console.error('Error:', error);
+        toast.error('Something went wrong!');
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  };
+
+  const handleDelete = () => {
+    Swal.fire({
+      title: 'Are you sure?',
+      text: "You won't be able to revert this!",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, delete it!',
+    }).then((result) => {
+      setLoading(true);
+      fetch(
+        `${apiUrl}admin/delete-nearby-locations/${selectedNearbyLocations.id}`,
+        {
+          method: 'DELETE',
+          headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
+            Authorization: authData.token,
+          },
+        }
+      )
+        .then((response) => response.json())
+        .then((json) => {
+          if (json.status) {
+            setOpenAmenitiesModal(false);
+            get_all_nearby_locations();
+            setNearbyLocationName('');
+            toast.success(json.message || 'Deleted!');
+          } else {
+            toast.error(json.message || 'Failed to delete!');
+          }
+        })
+        .catch((error) => {
+          console.error('Error:', error);
+          toast.error('Something went wrong!');
+        })
+        .finally(() => {
+          setLoading(false);
+        });
+    });
+  };
+
+  return (
+    <Modal
+      open={openAmenitiesModal}
+      onClose={() => {
+        setOpenAmenitiesModal(false);
+      }}
+    >
+      <Modal.Header>
+        <Modal.Title>
+          <strong>
+            {edit ? 'Edit Nearby Facility' : 'Add Nearby Facility'}
+          </strong>
+        </Modal.Title>
+      </Modal.Header>
+
+      <Modal.Body className="pb-4">
+        <Form.Group controlId="name">
+          <Form.ControlLabel>Nearby Facility Name</Form.ControlLabel>
+          <Input
+            placeholder="Enter Nearby Facility name"
+            value={nearbyLocationName}
+            onChange={setNearbyLocationName}
+          />
+        </Form.Group>
+      </Modal.Body>
+
+      <Modal.Footer>
+        <div
+          className={`d-flex align-items-center w-100 ${
+            edit ? 'justify-content-between' : 'justify-content-end'
+          }`}
+        >
+          {edit && (
+            <button
+              className="btn btn-danger"
+              onClick={handleDelete}
+              disabled={loading}
+            >
+              Delete
+            </button>
+          )}
+          <button
+            className="btn btn-thm"
+            onClick={handleSave}
+            disabled={loading}
+          >
+            {loading ? 'Saving...' : 'Save'}
+          </button>
+        </div>
+      </Modal.Footer>
+    </Modal>
+  );
+}
+
+export default NearbyLocationsModal;

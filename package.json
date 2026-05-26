@@ -1,0 +1,37 @@
+{
+  "name": "findyourstays",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "react-router build",
+    "dev": "react-router dev",
+    "start": "react-router-serve ./build/server/index.js"
+  },
+  "dependencies": {
+    "@loadable/component": "^5.16.7",
+    "@react-router/node": "^7.5.3",
+    "@react-router/serve": "^7.5.3",
+    "framer-motion": "^12.18.1",
+    "highcharts": "^12.3.0",
+    "highcharts-react-official": "^3.2.2",
+    "isbot": "^5.1.27",
+    "moment": "^2.30.1",
+    "quill": "^2.0.3",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "react-hot-toast": "^2.5.2",
+    "react-markdown": "^10.1.0",
+    "react-owl-carousel": "^2.3.3",
+    "react-quilljs": "^2.0.5",
+    "react-router": "^7.5.3",
+    "react-share": "^5.2.2",
+    "react-simple-wysiwyg": "^3.4.0",
+    "remark-gfm": "^4.0.1",
+    "rsuite": "^5.76.3",
+    "sweetalert2": "^11.22.0"
+  },
+  "devDependencies": {
+    "@react-router/dev": "^7.5.3",
+    "vite": "^6.3.3"
+  }
+}
