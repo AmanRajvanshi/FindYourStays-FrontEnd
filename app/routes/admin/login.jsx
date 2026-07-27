@@ -103,12 +103,6 @@ function login() {
             </div>
             <p className="text-sm text-center mt20">
               Don't have an account? Contact Admin.
-              <br />
-              Meanwhile you can visit our{' '}
-              <Link to="/" className="text-thm fw500 text-decoration-underline">
-                Website
-              </Link>
-              .
             </p>
           </div>
         </div>

@@ -1,23 +1,9 @@
 import { index, route, layout } from '@react-router/dev/routes';
 
 export default [
-  // Website layout
-  layout('layouts/WebLayout.jsx', [
-    index('routes/websiteRoutes/home.jsx'),
-    route(
-      '/property-listing/:propertyId/:cityId',
-      'routes/websiteRoutes/propertyListing.jsx'
-    ),
-    route('/single-property/:slug', 'routes/websiteRoutes/singleProperty.jsx'),
-    route('/blogs-listing', 'routes/websiteRoutes/blogsListing.jsx'),
-    route('/single-blog/:id', 'routes/websiteRoutes/singleBlog.jsx'),
-    route(
-      '/terms-and-conditions',
-      'routes/websiteRoutes/termsAndConditions.jsx'
-    ),
-    route('/privacy-policy', 'routes/websiteRoutes/privacy.jsx'),
-    route('/contact-us', 'routes/websiteRoutes/contact.jsx'),
-    route('/about-us', 'routes/websiteRoutes/about.jsx'),
+  layout('layouts/LoginLayout.jsx', [
+    index('routes/admin/rootRedirect.jsx'),
+    route('/admin/login', 'routes/admin/login.jsx'),
   ]),
 
   layout('layouts/AdminLayout.jsx', [
@@ -49,8 +35,6 @@ export default [
     route('/admin/counters', 'routes/admin/counters.jsx'),
     route('/admin/users', 'routes/admin/users.jsx'),
   ]),
-
-  layout('layouts/LoginLayout.jsx', [
-    route('/admin/login', 'routes/admin/login.jsx'),
-  ]),
 ];
+
+

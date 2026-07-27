@@ -29,11 +29,6 @@ function AdminTopbar() {
                   Update Password
                 </span>
               </li>
-              <li>
-                <Link to="/">
-                  <span className="title text-thm">Website</span>
-                </Link>
-              </li>
               {hasAccessToProfile && (
                 <li>
                   <Link to="/admin/admin-profile">
