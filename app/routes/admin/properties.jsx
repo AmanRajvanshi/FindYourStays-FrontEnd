@@ -46,6 +46,8 @@ function Properties() {
   useEffect(() => {
     if (authData?.token) {
       fetchProperties(paginationMeta.current_page, paginationMeta.per_page);
+    } else if (authData && !authData.token) {
+      setLoading(false);
     }
     // eslint-disable-next-line
   }, [

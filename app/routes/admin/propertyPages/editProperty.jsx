@@ -137,8 +137,10 @@ function editProperty() {
   };
 
   useEffect(() => {
-    fetchStates();
-  }, []);
+    if (authData?.token) {
+      fetchStates();
+    }
+  }, [authData]);
 
   // Fetch all states
   const fetchStates = async () => {
@@ -218,6 +220,7 @@ function editProperty() {
   useEffect(() => {
     async function loadSingleProperty() {
       if (!slug) return;
+      if (!authData?.token) return;
       setLoading(true);
 
       try {
@@ -292,7 +295,7 @@ function editProperty() {
     }
     loadSingleProperty();
     // eslint-disable-next-line
-  }, [slug]);
+  }, [slug, authData]);
 
   // When state changes, fetch dependent cities
   useEffect(() => {

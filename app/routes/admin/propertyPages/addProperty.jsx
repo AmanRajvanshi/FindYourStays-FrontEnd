@@ -138,8 +138,12 @@ function addProperty() {
   };
 
   useEffect(() => {
-    fetchStates();
-  }, []);
+    if (authData?.token) {
+      fetchStates();
+    } else if (authData && !authData.token) {
+      setLoading(false);
+    }
+  }, [authData]);
 
   // Fetch cities when state changes
   useEffect(() => {
