@@ -1,0 +1,83 @@
+@import "tailwindcss";
+@import "bootstrap/dist/css/bootstrap-grid.min.css";
+
+@theme {
+  --color-ink: #18140f;
+  --color-paper: #ffffff;
+  --color-section: #fbf6ef;
+  --color-muted: #7c7267;
+  --color-coral: #69418b;
+  --color-coral-light: rgba(105, 65, 139, 0.2);
+  --color-coraldark: #54346f;
+  --color-pine: #0e3b34;
+  --color-pinelight: #155048;
+  --color-line: #eae2d6;
+  --color-peach: #ffe6d9;
+
+  --font-display: "Inter", sans-serif;
+  --font-body: "Inter", sans-serif;
+}
+
+@layer base {
+  /* Tailwind base layer */
+}
+
+:root {
+  --rs-text-font-family: "Inter", sans-serif !important;
+  --rs-text-font-family-sans-serif: "Inter", sans-serif !important;
+}
+
+/* Unlayered global styles to override rsuite's unlayered styles */
+body {
+  margin: 0;
+  font-family: "Inter", sans-serif !important;
+  background-color: var(--color-section, #fbf6ef);
+  color: var(--color-ink, #18140f);
+}
+
+* {
+  font-family: "Inter", sans-serif;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.font-display,
+.rs-table-cell-header {
+  font-family: var(--font-display, "Inter", sans-serif) !important;
+}
+
+/* Ensure links inherit correctly and don't get the rsuite default blue unless intended */
+a:not(.rs-btn) {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* RSuite Button Brand Overrides */
+.rs-btn-primary {
+  background-color: var(--color-coral, #69418b) !important;
+  color: var(--color-paper, #ffffff) !important;
+}
+.rs-btn-primary:hover,
+.rs-btn-primary:focus {
+  background-color: var(--color-coraldark, #54346f) !important;
+}
+
+.rs-btn-subtle {
+  color: var(--color-coral, #69418b) !important;
+}
+.rs-btn-subtle:hover,
+.rs-btn-subtle:focus {
+  background-color: rgba(105, 65, 139, 0.1) !important; /* coral/10 */
+  color: var(--color-coraldark, #54346f) !important;
+}
+
+/* Fix table action buttons alignment */
+.rs-table-cell-content:has(.rs-btn) {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+}
