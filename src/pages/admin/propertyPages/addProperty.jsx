@@ -25,7 +25,7 @@ import {
   sharingTypeOptions,
 } from '../../../consonants/propertyOptions';
 
-function addProperty() {
+function AddProperty() {
   const { authData } = useContext(AuthContext);
 
   // Form State
@@ -424,8 +424,12 @@ function addProperty() {
     formValue.amenities.forEach((id) => {
       formData.append('amenities[]', id);
     });
-    formValue.nearby_locations.forEach((id) => {
-      formData.append('nearby_locations[]', id);
+    formValue.nearby_locations.forEach((loc, index) => {
+      if (loc.nearby_location_id) {
+        formData.append(`nearby_locations[${index}][nearby_location_id]`, loc.nearby_location_id);
+        formData.append(`nearby_locations[${index}][name]`, loc.name || '');
+        formData.append(`nearby_locations[${index}][distance]`, loc.distance || '');
+      }
     });
 
     // Add images
@@ -475,20 +479,30 @@ function addProperty() {
     );
   };
 
-  const handleNearbyLocationsChange = (value, checked) => {
-    setFormValue((prev) => {
-      let updated = checked
-        ? [...prev.nearby_locations, value]
-        : prev.nearby_locations.filter((id) => id !== value);
-      return { ...prev, nearby_locations: updated };
-    });
+  const addNearbyLocationRow = () => {
+    setFormValue((prev) => ({
+      ...prev,
+      nearby_locations: [
+        ...prev.nearby_locations,
+        { nearby_location_id: '', name: '', distance: '' },
+      ],
+    }));
+  };
 
-    // If you want to mark as checked in the source array:
-    setNearbyLocations((prev) =>
-      prev.map((item) =>
-        item.id === value ? { ...item, checked: checked } : item
-      )
-    );
+  const removeNearbyLocationRow = (index) => {
+    setFormValue((prev) => ({
+      ...prev,
+      nearby_locations: prev.nearby_locations.filter((_, i) => i !== index),
+    }));
+  };
+
+  const handleNearbyLocationRowChange = (index, field, value) => {
+    setFormValue((prev) => ({
+      ...prev,
+      nearby_locations: prev.nearby_locations.map((loc, i) =>
+        i === index ? { ...loc, [field]: value } : loc
+      ),
+    }));
   };
 
   if (loading) {
@@ -523,14 +537,14 @@ function addProperty() {
         <Form fluid>
           <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
             <div className="col-span-1 md:col-span-12">
-              <h5 className="text-lg font-semibold text-gray-800 border-b pb-3 mb-2">Basic Information</h5>
+              <h5 className="text-lg font-semibold text-ink border-b pb-3 mb-2">Basic Information</h5>
             </div>
             <div className="col-span-1 md:col-span-12">
               <Form.Group controlId="propertyTitle">
-                <Form.ControlLabel>
+                <Form.Label>
                   Property Title
                   <span className="text-red-500">*</span>
-                </Form.ControlLabel>
+                </Form.Label>
                 <Input
                   placeholder="Property Title"
                   value={formValue.property_name}
@@ -545,10 +559,10 @@ function addProperty() {
             </div>
             <div className="col-span-1 md:col-span-12">
               <Form.Group controlId="propertyDescription">
-                <Form.ControlLabel>
+                <Form.Label>
                   Property Description
                   <span className="text-red-500">*</span>
-                </Form.ControlLabel>
+                </Form.Label>
                 <Input
                   as="textarea"
                   rows={4}
@@ -565,11 +579,11 @@ function addProperty() {
             </div>
 
             <div className="col-span-1 md:col-span-12">
-              <h5 className="text-lg font-semibold text-gray-800 border-b pb-3 mb-2">Address</h5>
+              <h5 className="text-lg font-semibold text-ink border-b pb-3 mb-2">Address</h5>
             </div>
             <div className="col-span-1 md:col-span-12">
               <Form.Group controlId="address">
-                <Form.ControlLabel>Street Address</Form.ControlLabel>
+                <Form.Label>Street Address</Form.Label>
                 <Input
                   placeholder="Enter Street Address"
                   value={formValue.property_address}
@@ -581,9 +595,9 @@ function addProperty() {
             </div>
             <div className="col-span-1 md:col-span-12">
               <Form.Group controlId="address">
-                <Form.ControlLabel>
+                <Form.Label>
                   Map Link<span className="text-red-500">*</span>
-                </Form.ControlLabel>
+                </Form.Label>
                 <Input
                   placeholder="Enter Map Link"
                   value={formValue.map_link}
@@ -595,7 +609,7 @@ function addProperty() {
             </div>
             <div className="col-span-1 md:col-span-4">
               <Form.Group controlId="state">
-                <Form.ControlLabel className="flex items-center justify-between">
+                <Form.Label className="flex items-center justify-between">
                   <span>
                     State
                     <span className="text-red-500">*</span>
@@ -607,7 +621,7 @@ function addProperty() {
                   >
                     Add State
                   </Button>
-                </Form.ControlLabel>
+                </Form.Label>
                 <SelectPicker
                   name="state_id"
                   data={stateList}
@@ -624,7 +638,7 @@ function addProperty() {
             </div>
             <div className="col-span-1 md:col-span-4">
               <Form.Group controlId="city">
-                <Form.ControlLabel className="flex items-center justify-between">
+                <Form.Label className="flex items-center justify-between">
                   <span>
                     City
                     <span className="text-red-500">*</span>
@@ -636,7 +650,7 @@ function addProperty() {
                   >
                     Add City
                   </Button>
-                </Form.ControlLabel>
+                </Form.Label>
                 <SelectPicker
                   name="city_id"
                   data={cityList}
@@ -654,7 +668,7 @@ function addProperty() {
             </div>
             <div className="col-span-1 md:col-span-4">
               <Form.Group controlId="area">
-                <Form.ControlLabel className="flex items-center justify-between">
+                <Form.Label className="flex items-center justify-between">
                   <span>
                     Area
                     <span className="text-red-500">*</span>
@@ -666,7 +680,7 @@ function addProperty() {
                   >
                     Add Area
                   </Button>
-                </Form.ControlLabel>
+                </Form.Label>
                 <SelectPicker
                   name="area_id"
                   data={areaList}
@@ -684,11 +698,11 @@ function addProperty() {
             </div>
 
             <div className="col-span-1 md:col-span-12">
-              <h5 className="text-lg font-semibold text-gray-800 border-b pb-3 mb-2">Property Details</h5>
+              <h5 className="text-lg font-semibold text-ink border-b pb-3 mb-2">Property Details</h5>
             </div>
             <div className="col-span-1 md:col-span-6">
               <Form.Group controlId="rental">
-                <Form.ControlLabel className="flex items-center justify-between">
+                <Form.Label className="flex items-center justify-between">
                   <span>
                     Rental
                     <span className="text-red-500">*</span>
@@ -700,7 +714,7 @@ function addProperty() {
                   >
                     Add Property Type
                   </Button>
-                </Form.ControlLabel>
+                </Form.Label>
                 <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
                   <div className="col-span-1 md:col-span-7">
                     <Input
@@ -732,7 +746,7 @@ function addProperty() {
             </div>
             <div className="col-span-1 md:col-span-6">
               <Form.Group controlId="propertyType">
-                <Form.ControlLabel className="flex items-center justify-between">
+                <Form.Label className="flex items-center justify-between">
                   <span>
                     Property Type
                     <span className="text-red-500">*</span>
@@ -747,7 +761,7 @@ function addProperty() {
                   >
                     Add Property Type
                   </Button>
-                </Form.ControlLabel>
+                </Form.Label>
                 <SelectPicker
                   data={propertyTypesList}
                   placeholder="Select Type"
@@ -763,7 +777,7 @@ function addProperty() {
             </div>
             {/* <div className="col-span-1 md:col-span-4">
               <Form.Group controlId="rooms">
-                <Form.ControlLabel>No. of Rooms</Form.ControlLabel>
+                <Form.Label>No. of Rooms</Form.Label>
                 <Input
                   placeholder="Enter Number of Rooms"
                   value={formValue.no_of_rooms}
@@ -775,7 +789,7 @@ function addProperty() {
             </div> */}
             {/* <div className="col-span-1 md:col-span-4">
               <Form.Group controlId="bathrooms">
-                <Form.ControlLabel>No. of Bathrooms</Form.ControlLabel>
+                <Form.Label>No. of Bathrooms</Form.Label>
                 <Input
                   placeholder="Enter Number of Bathrooms"
                   value={formValue.no_of_bathrooms}
@@ -787,10 +801,10 @@ function addProperty() {
             </div> */}
             <div className="col-span-1 md:col-span-3">
               <Form.Group controlId="sharingType">
-                <Form.ControlLabel>
+                <Form.Label>
                   Sharing Type
                   <span className="text-red-500">*</span>
-                </Form.ControlLabel>
+                </Form.Label>
                 <SelectPicker
                   data={sharingTypeOptions} block
                   value={formValue.sharing_type}
@@ -804,10 +818,10 @@ function addProperty() {
             </div>
             <div className="col-span-1 md:col-span-3">
               <Form.Group controlId="occupancyType">
-                <Form.ControlLabel>
+                <Form.Label>
                   Occupancy Type
                   <span className="text-red-500">*</span>
-                </Form.ControlLabel>
+                </Form.Label>
                 <SelectPicker
                   data={occupancyTypeOptions} block
                   value={formValue.occupancy_type}
@@ -821,10 +835,10 @@ function addProperty() {
             </div>
             <div className="col-span-1 md:col-span-3">
               <Form.Group controlId="status">
-                <Form.ControlLabel>
+                <Form.Label>
                   Status
                   <span className="text-red-500">*</span>
-                </Form.ControlLabel>{' '}
+                </Form.Label>{' '}
                 <SelectPicker
                   data={
                     [
@@ -846,7 +860,7 @@ function addProperty() {
             </div>
             <div className="col-span-1 md:col-span-3">
               <Form.Group controlId="year">
-                <Form.ControlLabel>Year Build</Form.ControlLabel>
+                <Form.Label>Year Build</Form.Label>
                 <Input
                   placeholder="Enter Year Build"
                   value={formValue.year_built}
@@ -859,10 +873,10 @@ function addProperty() {
 
             <div className="col-span-1 md:col-span-3">
               <Form.Group controlId="status">
-                <Form.ControlLabel>
+                <Form.Label>
                   Pricing Options
                   <span className="text-red-500">*</span>
-                </Form.ControlLabel>{' '}
+                </Form.Label>{' '}
                 <Toggle
                   checked={formValue.has_multiple_pricing}
                   onChange={handleToggleMultiplePricing}
@@ -909,10 +923,10 @@ function addProperty() {
                         <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
                           <div className="col-span-1 md:col-span-6">
                             <Form.Group controlId="rentalAmount">
-                              <Form.ControlLabel>
+                              <Form.Label>
                                 Rental Amount
                                 <span className="text-red-500">*</span>
-                              </Form.ControlLabel>
+                              </Form.Label>
                               <Input
                                 placeholder="Rental Amount"
                                 type="number"
@@ -930,10 +944,10 @@ function addProperty() {
                           </div>
                           <div className="col-span-1 md:col-span-6">
                             <Form.Group controlId="rentalFrequency">
-                              <Form.ControlLabel>
+                              <Form.Label>
                                 Rental Frequency
                                 <span className="text-red-500">*</span>
-                              </Form.ControlLabel>
+                              </Form.Label>
 
                               <SelectPicker
                                 data={rentFrequencyOptions}
@@ -955,10 +969,10 @@ function addProperty() {
                           </div>
                           <div className="col-span-1 md:col-span-6">
                             <Form.Group controlId="sharingType">
-                              <Form.ControlLabel>
+                              <Form.Label>
                                 Sharing Type
                                 <span className="text-red-500">*</span>
-                              </Form.ControlLabel>
+                              </Form.Label>
                               <SelectPicker
                                 data={sharingTypeOptions} block
                                 value={pricing.sharing_type}
@@ -977,10 +991,10 @@ function addProperty() {
                           </div>
                           <div className="col-span-1 md:col-span-6">
                             <Form.Group controlId="occupancyType">
-                              <Form.ControlLabel>
+                              <Form.Label>
                                 Occupancy Type
                                 <span className="text-red-500">*</span>
-                              </Form.ControlLabel>
+                              </Form.Label>
 
                               <SelectPicker
                                 data={occupancyTypeOptions} block
@@ -1008,7 +1022,7 @@ function addProperty() {
 
 
             <div className="col-span-1 md:col-span-12 flex items-center justify-between border-b pb-2 mb-3 mt-4">
-              <h5 className="text-lg font-semibold text-gray-800 m-0">
+              <h5 className="text-lg font-semibold text-ink m-0">
                 Amenities
                 <span className="text-red-500">*</span>
               </h5>
@@ -1036,34 +1050,124 @@ function addProperty() {
             ))}
 
             <div className="col-span-1 md:col-span-12 flex items-center justify-between border-b pb-2 mb-3 mt-4">
-              <h5 className="text-lg font-semibold text-gray-800 m-0">
+              <h5 className="text-lg font-semibold text-ink m-0">
                 Nearby Facilities
-                <span className="text-red-500">*</span>
               </h5>
-              <Button
-                type="button"
-                appearance="link" size="sm"
-                onClick={() => {
-                  handleOpen('nearbyLocations');
-                  setSelectedNearbyLocations(null);
-                }}
-              >
-                Add Nearby Facilities
-              </Button>
-            </div>
-            {nearbyLocations.map((nearbyLocations, index) => (
-              <div className="col-span-1 md:col-span-2 mb-2" key={index}>
-                <Checkbox
-                  value={nearbyLocations.id}
-                  checked={formValue.nearby_locations.includes(
-                    nearbyLocations.id
-                  )}
-                  onChange={handleNearbyLocationsChange}
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  color="violet"
+                  appearance="primary"
+                  size="sm"
+                  onClick={addNearbyLocationRow}
                 >
-                  {nearbyLocations.nearby_location_name}
-                </Checkbox>
+                  + Add Row
+                </Button>
+                <Button
+                  type="button"
+                  color="violet"
+                  appearance="subtle"
+                  size="sm"
+                  onClick={() => {
+                    handleOpen('nearbyLocations');
+                    setSelectedNearbyLocations(null);
+                  }}
+                >
+                  Manage Facility Types
+                </Button>
               </div>
-            ))}
+            </div>
+
+            <div className="col-span-1 md:col-span-12">
+              {formValue.nearby_locations.length === 0 ? (
+                <div className="text-center py-8 border rounded border-dashed border-gray-300 text-gray-500 bg-gray-50/50">
+                  No nearby facilities added yet. Click "+ Add Row" to start adding facilities.
+                </div>
+              ) : (
+                <div className="border border-gray-200 rounded-lg overflow-hidden bg-white shadow-sm">
+                  {/* Grid Table Header */}
+                  <div className="grid grid-cols-12 gap-4 bg-slate-50 border-b border-gray-200 px-4 py-3 font-semibold text-xs text-slate-600 uppercase tracking-wider items-center">
+                    <div className="col-span-4">
+                      Facility Type <span className="text-red-500">*</span>
+                    </div>
+                    <div className="col-span-4">
+                      Name <span className="text-red-500">*</span>
+                    </div>
+                    <div className="col-span-2">
+                      Distance (in km) <span className="text-red-500">*</span>
+                    </div>
+                    <div className="col-span-2 text-center">
+                      Action
+                    </div>
+                  </div>
+
+                  {/* Grid Table Body */}
+                  <div className="divide-y divide-gray-100">
+                    {formValue.nearby_locations.map((loc, index) => (
+                      <div className="grid grid-cols-12 gap-4 px-4 py-3.5 items-center hover:bg-slate-50/40 transition-colors duration-150" key={index}>
+                        <div className="col-span-4">
+                          <SelectPicker
+                            data={nearbyLocations.map((item) => ({
+                              label: item.nearby_location_name,
+                              value: item.id,
+                            }))}
+                            placeholder="Select Facility Type"
+                            block
+                            cleanable={false}
+                            searchable
+                            value={loc.nearby_location_id || null}
+                            onChange={(value) =>
+                              handleNearbyLocationRowChange(
+                                index,
+                                'nearby_location_id',
+                                value
+                              )
+                            }
+                          />
+                        </div>
+                        <div className="col-span-4">
+                          <Input
+                            placeholder="e.g. Indira Gandhi Metro"
+                            value={loc.name || ''}
+                            onChange={(value) =>
+                              handleNearbyLocationRowChange(
+                                index,
+                                'name',
+                                value
+                              )
+                            }
+                          />
+                        </div>
+                        <div className="col-span-2">
+                          <Input
+                            placeholder="e.g. 1.5"
+                            value={loc.distance || ''}
+                            onChange={(value) =>
+                              handleNearbyLocationRowChange(
+                                index,
+                                'distance',
+                                value
+                              )
+                            }
+                          />
+                        </div>
+                        <div className="col-span-2 flex justify-center">
+                          <Button
+                            type="button"
+                            color="red"
+                            appearance="subtle"
+                            size="sm"
+                            onClick={() => removeNearbyLocationRow(index)}
+                          >
+                            Remove
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
 
             <div className="col-span-1 md:col-span-12">
               <Form.Group controlId="propertyImages">
@@ -1074,9 +1178,9 @@ function addProperty() {
                     marginBottom: 8,
                   }}
                 >
-                  <Form.ControlLabel>
+                  <Form.Label>
                     <u>Property Media</u> <span className="text-red-500">*</span>
-                  </Form.ControlLabel>
+                  </Form.Label>
                   {/* Dropdown for selecting Main Image */}
                   {previews.length > 0 && (
                     <div style={{ marginLeft: 20 }}>
@@ -1157,7 +1261,7 @@ function addProperty() {
                 </div>
 
                 <small
-                  className="text-gray-500"
+                  className="text-muted"
                   style={{ marginTop: 5, display: 'block' }}
                 >
                   Max 5 images. Only images allowed.
@@ -1166,14 +1270,14 @@ function addProperty() {
             </div>
 
             <div className="col-span-1 md:col-span-12">
-              <h5 className="text-lg font-semibold text-gray-800 border-b pb-3 mb-2">Meta Information</h5>
+              <h5 className="text-lg font-semibold text-ink border-b pb-3 mb-2">Meta Information</h5>
             </div>
             <div className="col-span-1 md:col-span-12">
               <Form.Group controlId="metaTitle">
-                <Form.ControlLabel>
+                <Form.Label>
                   Meta Title
                   <span className="text-red-500">*</span>
-                </Form.ControlLabel>
+                </Form.Label>
                 <Input
                   placeholder="Meta Title"
                   value={formValue.meta_title}
@@ -1188,10 +1292,10 @@ function addProperty() {
             </div>
             <div className="col-span-1 md:col-span-12">
               <Form.Group controlId="metaDescription">
-                <Form.ControlLabel>
+                <Form.Label>
                   Meta Description
                   <span className="text-red-500">*</span>
-                </Form.ControlLabel>
+                </Form.Label>
                 <Input
                   as="textarea"
                   rows={2}
@@ -1208,10 +1312,10 @@ function addProperty() {
             </div>
             <div className="col-span-1 md:col-span-12">
               <Form.Group controlId="metaKeywords">
-                <Form.ControlLabel>
+                <Form.Label>
                   Meta Keywords
                   <span className="text-red-500">*</span>
-                </Form.ControlLabel>
+                </Form.Label>
                 <TagInput
                   trigger={['Enter', 'Space', 'Comma']}
                   placeholder="Meta Keywords"
@@ -1317,4 +1421,4 @@ function addProperty() {
   );
 }
 
-export default addProperty;
+export default AddProperty;

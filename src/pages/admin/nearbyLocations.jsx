@@ -87,25 +87,21 @@ function NearbyLocations() {
                 + Add New Nearby Facility
               </Button>
             </div>
-            <div className="flex flex-wrap">
-              <div className="col-lg-12">
-                <div className="flex flex-wrap gap-3">
-                  {nearbyLocations.map((nearbyLocation, index) => (
-                    <button
-                      key={index}
-                      type="button"
-                      className="px-4 py-2 !bg-slate-100 !text-slate-700 border !border-slate-200 font-medium !rounded-full hover:!bg-blue-600 hover:!text-white hover:!border-blue-600 transition-all text-sm shadow-sm"
-                      onClick={() => {
-                        setOpenNearbyLocationsModal(true);
-                        setEdit(true);
-                        setSelectedNearbyLocations(nearbyLocation);
-                      }}
-                    >
-                      {nearbyLocation.nearby_location_name}
-                    </button>
-                  ))}
-                </div>
-              </div>
+            <div className="flex flex-wrap gap-3">
+              {nearbyLocations.map((nearbyLocation, index) => (
+                <button
+                  key={index}
+                  type="button"
+                  className="px-4 py-2 !bg-slate-100 !text-slate-700 border !border-slate-200 font-medium !rounded-full hover:!bg-blue-600 hover:!text-white hover:!border-blue-600 transition-all text-sm shadow-sm"
+                  onClick={() => {
+                    setOpenNearbyLocationsModal(true);
+                    setEdit(true);
+                    setSelectedNearbyLocations(nearbyLocation);
+                  }}
+                >
+                  {nearbyLocation.nearby_location_name}
+                </button>
+              ))}
             </div>
           </>
         )}

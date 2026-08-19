@@ -207,7 +207,7 @@ export default function Cities() {
 
     return (
       <span
-        className={`inline-block px-2 py-1 text-xs font-semibold rounded-full ${status === 'active' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}
+        className={`inline-block px-2.5 py-0.5 text-xs font-medium rounded ${status === 'active' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}
       >
         {status === 'active' ? 'Active' : 'Coming Soon'}
       </span>
@@ -223,7 +223,7 @@ export default function Cities() {
       originalCityData?.is_main === true;
 
     return (
-      <span className={`inline-block px-2 py-1 text-xs font-semibold rounded-full ${isMain ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'}`}>
+      <span className={`inline-block px-2.5 py-0.5 text-xs font-medium rounded ${isMain ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-600'}`}>
         {isMain ? 'Yes' : 'No'}
       </span>
     );
@@ -278,8 +278,8 @@ export default function Cities() {
               </Button>
             )}
             {searching && (
-              <small className="text-gray-500 block mt-1">
-                <i className="fa fa-spinner fa-spin me-1"></i>
+              <small className="text-muted block mt-1">
+                <span className="loader !w-3.5 !h-3.5 !border-2 align-middle"></span>
                 Searching...
               </small>
             )}
@@ -288,7 +288,7 @@ export default function Cities() {
           {/* Search Results Info */}
           {searchTerm && !searching && (
             <div className="mb-3">
-              <small className="text-gray-500">
+              <small className="text-muted">
                 {cityData.length > 0
                   ? `Found ${cityData.length} result(s) for "${searchTerm}"`
                   : `No results found for "${searchTerm}"`}
@@ -306,10 +306,10 @@ export default function Cities() {
           {showNoData && searchTerm && !searching ? (
             <div className="text-center py-12">
               <div className="mb-3">
-                <i className="fa fa-search fa-3x text-gray-500"></i>
+                <svg className="w-12 h-12 text-muted mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-4.35-4.35M11 19a8 8 0 100-16 8 8 0 000 16z"/></svg>
               </div>
               <h5>No cities found</h5>
-              <p className="text-gray-500">
+              <p className="text-muted">
                 No cities match your search for "{searchTerm}"
               </p>
               <Button  appearance="ghost" color="blue" onClick={clearSearch}>
@@ -336,22 +336,22 @@ export default function Cities() {
                 rowHeight={50}
                 headerHeight={40}
               >
-                <Column width={80}>
+                <Column width={80} align="center">
                   <HeaderCell>ID</HeaderCell>
                   <Cell dataKey="id" />
                 </Column>
 
-                <Column width={100}>
+                <Column width={60} align="center">
                   <HeaderCell>Image</HeaderCell>
                   <Cell>
                     {(rowData) =>
                       rowData.image ? (
                         <span className="text-green-500">
-                          <i className="fa fa-check"></i>
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 13l4 4L19 7"/></svg>
                         </span>
                       ) : (
                         <span className="text-red-500">
-                          <i className="fa fa-times"></i>
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 6l12 12M18 6L6 18"/></svg>
                         </span>
                       )
                     }
@@ -368,17 +368,17 @@ export default function Cities() {
                   <Cell dataKey="state_name" />
                 </Column>
 
-                <Column width={120}>
+                <Column width={120} align="center">
                   <HeaderCell>Status</HeaderCell>
                   <Cell>{(rowData) => <StatusCell rowData={rowData} />}</Cell>
                 </Column>
 
-                <Column width={100}>
+                <Column width={100} align="center">
                   <HeaderCell>Main City</HeaderCell>
                   <Cell>{(rowData) => <MainCityCell rowData={rowData} />}</Cell>
                 </Column>
 
-                <Column width={100}>
+                <Column width={130} align="center">
                   <HeaderCell>Actions</HeaderCell>
                   <Cell>
                     {(rowData) => {
@@ -387,7 +387,7 @@ export default function Cities() {
                       );
                       return (
                         <Button
-                           appearance="ghost" color="blue" size="sm"
+                           appearance="link" color="blue" size="xs"
                           onClick={() =>
                             handleOpen('city', true, originalCityData)
                           }

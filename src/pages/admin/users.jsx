@@ -2,7 +2,7 @@ import { useContext, useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import { Form, Loader, Modal, SelectPicker, Table, TagPicker } from 'rsuite';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPenToSquare, faTrashCan } from '@fortawesome/free-solid-svg-icons';
+import { faPenToSquare, faTrashCan, faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
 import { apiUrl } from '../../envConfig';
 import { AuthContext } from '../../AuthContextProvider';
 import DataLoader from '../../components/sharedComponents/DataLoader';
@@ -199,124 +199,157 @@ export default function UsersPage() {
         />
       ) : (
         <>
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="mb-0 text-lg font-semibold">Users</h2>
+          <div className="flex justify-between items-center mb-6">
+            <div>
+              <h2 className="mb-0 text-2xl font-bold text-slate-800">Users</h2>
+              <p className="text-sm text-slate-500 mt-1">Manage system administrators, editors, and support personnel.</p>
+            </div>
             <Button
               appearance="primary"
+              color="violet"
               type="button"
               onClick={() => handleOpen(null)}
             >
               + Add User
             </Button>
           </div>
-          <Table
-            data={users}
-            hover
-            showHeader
-            bordered
-            cellBordered
-            autoHeight
-            rowHeight={45}
-            headerHeight={40}
-          >
-            <Column width={80} align="center" fixed>
-              <HeaderCell>S. No.</HeaderCell>
-              <Cell>{(_, index) => index + 1}</Cell>
-            </Column>
-            <Column flexGrow={1}>
-              <HeaderCell>User Name</HeaderCell>
-              <Cell className="text-capitalize" dataKey="name" />
-            </Column>
-            <Column flexGrow={2}>
-              <HeaderCell>Email</HeaderCell>
-              <Cell dataKey="email" />
-            </Column>
-            <Column flexGrow={1}>
-              <HeaderCell>Role</HeaderCell>
-              <Cell className="text-capitalize" dataKey="type" />
-            </Column>
-            <Column flexGrow={2}>
-              <HeaderCell>Permissions</HeaderCell>
-              <Cell>{(rowData) => rowData.routes?.join(', ') || '-'}</Cell>
-            </Column>
-            <Column width={170} fixed="right">
-              <HeaderCell>Actions</HeaderCell>
-              <Cell>
-                {(rowData, index) => (
-                  <div className="flex gap-2">
-                    <Button
-                      appearance="link"
-                      onClick={() => handleOpen(rowData, index)}
-                    >
-                      <FontAwesomeIcon icon={faPenToSquare} className="text-thm" />
-                    </Button>
-                    <Button
-                      appearance="link"
-                      onClick={() => handleDelete(rowData.id)}
-                      disabled={rowData.type === 'admin'}
-                    >
-                      <FontAwesomeIcon icon={faTrashCan} className="text-red-500" />
-                    </Button>
-                  </div>
-                )}
-              </Cell>
-            </Column>
-          </Table>
+          <div className="bg-white p-6 rounded-xl shadow-sm border border-line">
+            <Table
+              data={users}
+              hover
+              showHeader
+              bordered
+              cellBordered
+              autoHeight
+              rowHeight={45}
+              headerHeight={40}
+            >
+              <Column width={80} align="center" fixed>
+                <HeaderCell>S. No.</HeaderCell>
+                <Cell>{(_, index) => index + 1}</Cell>
+              </Column>
+              <Column flexGrow={1}>
+                <HeaderCell>User Name</HeaderCell>
+                <Cell className="text-capitalize" dataKey="name" />
+              </Column>
+              <Column flexGrow={2}>
+                <HeaderCell>Email</HeaderCell>
+                <Cell dataKey="email" />
+              </Column>
+              <Column flexGrow={1}>
+                <HeaderCell>Role</HeaderCell>
+                <Cell className="text-capitalize" dataKey="type" />
+              </Column>
+              <Column flexGrow={2}>
+                <HeaderCell>Permissions</HeaderCell>
+                <Cell>{(rowData) => rowData.routes?.join(', ') || '-'}</Cell>
+              </Column>
+              <Column width={170} fixed="right">
+                <HeaderCell>Actions</HeaderCell>
+                <Cell>
+                  {(rowData, index) => (
+                    <div className="flex gap-2">
+                      <Button
+                        appearance="link"
+                        onClick={() => handleOpen(rowData, index)}
+                      >
+                        <FontAwesomeIcon icon={faPenToSquare} className="text-thm" />
+                      </Button>
+                      <Button
+                        appearance="link"
+                        onClick={() => handleDelete(rowData.id)}
+                        disabled={rowData.type === 'admin'}
+                      >
+                        <FontAwesomeIcon icon={faTrashCan} className="text-red-500" />
+                      </Button>
+                    </div>
+                  )}
+                </Cell>
+              </Column>
+            </Table>
+          </div>
         </>
       )}
 
       {/* Edit/Add User Modal */}
       <Modal open={openModal} onClose={() => setOpenModal(false)} size="sm">
-        <Modal.Header>
-          <Modal.Title>
-            {editIndex !== null ? 'Edit User' : 'Add User'}
+        <Modal.Header className="border-b border-slate-100 pb-3">
+          <Modal.Title className="text-xl font-bold text-slate-800">
+            {editIndex !== null ? 'Edit User Profile' : 'Create New User'}
           </Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <div className="container-fluid">
-            <Form
-              fluid
-              formValue={formValue}
-              onChange={setFormValue}
-              className="flex flex-wrap"
-            >
-              <div className="col-lg-6 mb-3">
-                <Form.Group controlId="username">
-                  <Form.ControlLabel>User Name</Form.ControlLabel>
-                  <Form.Control name="username" />
+          <Form
+            fluid
+            formValue={formValue}
+            onChange={setFormValue}
+            className="flex flex-col gap-6"
+          >
+            {/* Section 1: Profile Information */}
+            <div style={{ width: '100%' }} >
+              <h6 className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-3">
+                Profile Information
+              </h6>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Form.Group controlId="username" className="mb-0">
+                  <Form.Label className="text-xs font-semibold text-slate-600 mb-1.5 block">
+                    User Name <span className="text-red-500">*</span>
+                  </Form.Label>
+                  <Form.Control name="username" placeholder="Enter username" />
+                </Form.Group>
+
+                <Form.Group controlId="email" className="mb-0">
+                  <Form.Label className="text-xs font-semibold text-slate-600 mb-1.5 block">
+                    Email Address <span className="text-red-500">*</span>
+                  </Form.Label>
+                  <Form.Control name="email" type="email" placeholder="name@example.com" />
                 </Form.Group>
               </div>
-              <div className="col-lg-6 mb-3">
-                <Form.Group controlId="email">
-                  <Form.ControlLabel>Email</Form.ControlLabel>
-                  <Form.Control name="email" type="email" />
-                </Form.Group>
-              </div>
-              <div className="col-lg-12 mb-3">
-                <Form.Group controlId="password">
-                  <Form.ControlLabel>Password</Form.ControlLabel>
-                  <div className="relative">
-                    <Form.Control
-                      name="password"
-                      type={viewPassword ? 'text' : 'password'}
+            </div>
+
+            {/* Section 2: Security */}
+            <div className="border-t border-slate-100 pt-4" style={{ width: '100%' }} >
+              <h6 className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-3">
+                Security
+              </h6>
+              <Form.Group controlId="password" className="mb-0">
+                <Form.Label className="text-xs font-semibold text-slate-600 mb-1.5 block">
+                  Password {editIndex === null && <span className="text-red-500">*</span>}
+                </Form.Label>
+                <div className="relative">
+                  <Form.Control
+                    name="password"
+                    type={viewPassword ? 'text' : 'password'}
+                    placeholder={editIndex !== null ? 'Leave blank to keep current' : 'Enter password'}
+                    style={{ width: '100%' }}
+                  />
+                  {viewPassword ? (
+                    <FontAwesomeIcon
+                      icon={faEyeSlash}
+                      className="custom-eye text-slate-400 hover:text-coral transition-colors"
+                      onClick={() => setViewPassword(false)}
                     />
-                    {viewPassword ? (
-                      <i
-                        className="fa fa-eye-slash custom-eye"
-                        onClick={() => setViewPassword(false)}
-                      ></i>
-                    ) : (
-                      <i
-                        className="fa fa-eye custom-eye"
-                        onClick={() => setViewPassword(true)}
-                      ></i>
-                    )}
-                  </div>
-                </Form.Group>
-              </div>
-              <div className="col-lg-12 mb-3">
-                <Form.Group controlId="role">
-                  <Form.ControlLabel>Role</Form.ControlLabel>
+                  ) : (
+                    <FontAwesomeIcon
+                      icon={faEye}
+                      className="custom-eye text-slate-400 hover:text-coral transition-colors"
+                      onClick={() => setViewPassword(true)}
+                    />
+                  )}
+                </div>
+              </Form.Group>
+            </div>
+
+            {/* Section 3: Access Control */}
+            <div className="border-t border-slate-100 pt-4" style={{ width: '100%' }} >
+              <h6 className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-3">
+                Access & Permissions
+              </h6>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Form.Group controlId="role" className="mb-0">
+                  <Form.Label className="text-xs font-semibold text-slate-600 mb-1.5 block">
+                    Role <span className="text-red-500">*</span>
+                  </Form.Label>
                   <SelectPicker
                     name="role"
                     value={formValue.role}
@@ -324,15 +357,16 @@ export default function UsersPage() {
                       setFormValue((prev) => ({ ...prev, role: value }))
                     }
                     data={roles}
-                    style={{ width: '100%' }}
-                    placeholder="Select role"
+                    placeholder="Select user role"
                     placement="auto"
+                    style={{ width: '100%' }}
                   />
                 </Form.Group>
-              </div>
-              <div className="col-lg-12">
-                <Form.Group controlId="tags">
-                  <Form.ControlLabel>Permissions</Form.ControlLabel>
+
+                <Form.Group controlId="tags" className="mb-0">
+                  <Form.Label className="text-xs font-semibold text-slate-600 mb-1.5 block">
+                    Permissions <span className="text-red-500">*</span>
+                  </Form.Label>
                   <TagPicker
                     name="tags"
                     value={formValue.tags}
@@ -340,26 +374,32 @@ export default function UsersPage() {
                       setFormValue((prev) => ({ ...prev, tags: value }))
                     }
                     data={permissions}
-                    style={{ width: '100%' }}
                     placeholder="Select permissions"
                     placement="auto"
+                    style={{ width: '100%' }}
                   />
                 </Form.Group>
               </div>
-            </Form>
-          </div>
+            </div>
+          </Form>
         </Modal.Body>
-        <Modal.Footer>
-          <div className="flex items-center justify-end">
+        <Modal.Footer className="border-t border-slate-100 pt-3">
+          <div className="flex items-center justify-end gap-2.5">
             <Button
-              appearance="primary" className="mr-2"
+              appearance="subtle"
+              onClick={() => setOpenModal(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              appearance="primary"
               onClick={handleSave}
               disabled={formValue.loader}
             >
               {formValue.loader ? (
-                <Loader size="xs" content="Saving" />
+                <Loader size="xs" content="Saving..." />
               ) : (
-                'Save'
+                'Save Changes'
               )}
             </Button>
           </div>

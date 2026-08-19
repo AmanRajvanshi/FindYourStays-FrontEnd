@@ -2,7 +2,7 @@ import { Link } from 'react-router';
 
 function Breadcrumb({ title }) {
   return (
-    <section className="inner_page_breadcrumb">
+    <section className="mb-6">
       <div className="container mx-auto px-4">
         <div className="flex flex-wrap">
           <div className="col-xl-6">

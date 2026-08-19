@@ -263,8 +263,8 @@ export default function CitiesAndAreas() {
               </Button>
             )}
             {searching && (
-              <small className="text-gray-500 block mt-1">
-                <i className="fa fa-spinner fa-spin me-1"></i>
+              <small className="text-muted block mt-1">
+                <span className="loader !w-3.5 !h-3.5 !border-2 align-middle"></span>
                 Searching...
               </small>
             )}
@@ -273,7 +273,7 @@ export default function CitiesAndAreas() {
           {/* Search Results Info */}
           {searchTerm && !searching && (
             <div className="mb-3">
-              <small className="text-gray-500">
+              <small className="text-muted">
                 {areasData.length > 0
                   ? `Found ${areasData.length} result(s) for "${searchTerm}"`
                   : `No results found for "${searchTerm}"`}
@@ -291,10 +291,10 @@ export default function CitiesAndAreas() {
           {showNoData && searchTerm && !searching ? (
             <div className="text-center py-12">
               <div className="mb-3">
-                <i className="fa fa-search fa-3x text-gray-500"></i>
+                <svg className="w-12 h-12 text-muted mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-4.35-4.35M11 19a8 8 0 100-16 8 8 0 000 16z"/></svg>
               </div>
               <h5>No areas found</h5>
-              <p className="text-gray-500">
+              <p className="text-muted">
                 No areas match your search for "{searchTerm}"
               </p>
               <Button appearance="ghost" color="blue" onClick={clearSearch}>
@@ -339,12 +339,12 @@ export default function CitiesAndAreas() {
                     )}
                   </Cell>
                 </Column>
-                <Column width={100}>
+                <Column width={120}>
                   <HeaderCell>Actions</HeaderCell>
                   <Cell>
                     {(rowData) => (
                       <Button
-                        appearance="ghost" color="blue" size="sm"
+                        appearance="ghost" color="blue" size="xs"
                         onClick={() => handleOpenEditArea(rowData)}
                       >
                         Edit

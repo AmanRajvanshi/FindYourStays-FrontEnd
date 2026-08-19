@@ -162,10 +162,10 @@ function AreaModal({
       </Modal.Header>
       <Modal.Body>
         <Form fluid>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="col-span-1">
+          <div className="flex flex-col gap-4 w-full">
+            <div className="w-full">
               <Form.Group controlId="selectState">
-                <Form.ControlLabel>Select State</Form.ControlLabel>
+                <Form.Label>Select State</Form.Label>
                 <SelectPicker
                   data={stateList}
                   value={formValue.state_id}
@@ -173,13 +173,15 @@ function AreaModal({
                     setFormValue((prev) => ({ ...prev, state_id: value }))
                   }
                   style={{ width: '100%' }}
+                  className="w-full"
                   placeholder="Select a state"
+                  block
                 />
               </Form.Group>
             </div>
-            <div className="col-span-1">
+            <div className="w-full">
               <Form.Group controlId="selectCity">
-                <Form.ControlLabel>Select City</Form.ControlLabel>
+                <Form.Label>Select City</Form.Label>
                 <SelectPicker
                   data={cityList}
                   value={formValue.city_id}
@@ -187,14 +189,16 @@ function AreaModal({
                     setFormValue((prev) => ({ ...prev, city_id: value }))
                   }
                   style={{ width: '100%' }}
+                  className="w-full"
                   placeholder="Select a city"
                   disabled={!formValue.state_id}
+                  block
                 />
               </Form.Group>
             </div>
-            <div className="col-span-1 md:col-span-2 mt-2">
+            <div className="w-full">
               <Form.Group controlId="areaName">
-                <Form.ControlLabel>Area Name</Form.ControlLabel>
+                <Form.Label>Area Name</Form.Label>
                 <Input
                   placeholder="Enter area name"
                   value={formValue.area_name}
@@ -210,14 +214,13 @@ function AreaModal({
 
       <Modal.Footer>
         <div
-          className={`flex items-center w-full ${
-            edit.editing ? 'justify-between' : 'justify-end'
-          }`}
+          className={`flex items-center w-full ${edit.editing ? 'justify-between' : 'justify-end'
+            }`}
         >
           {edit.editing && (
             <Button
               type="button"
-               appearance="primary" color="red" className="ml-auto"
+              appearance="primary" color="red" className="ml-auto"
               onClick={handleDelete}
               disabled={loading}
             >
@@ -226,7 +229,7 @@ function AreaModal({
           )}
           <Button
             type="button"
-             appearance="primary"
+            appearance="primary"
             onClick={handleSubmit}
             disabled={loading}
           >

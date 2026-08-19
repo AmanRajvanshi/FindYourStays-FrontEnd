@@ -1,5 +1,4 @@
 @import "tailwindcss";
-@import "bootstrap/dist/css/bootstrap-grid.min.css";
 
 @theme {
   --color-ink: #18140f;
@@ -7,77 +6,362 @@
   --color-section: #fbf6ef;
   --color-muted: #7c7267;
   --color-coral: #69418b;
-  --color-coral-light: rgba(105, 65, 139, 0.2);
+  --color-coral-light: rgba(105, 65, 139, 0.15);
   --color-coraldark: #54346f;
   --color-pine: #0e3b34;
   --color-pinelight: #155048;
   --color-line: #eae2d6;
+  --color-border: #eae2d6;
   --color-peach: #ffe6d9;
 
-  --font-display: "Inter", sans-serif;
-  --font-body: "Inter", sans-serif;
+  --font-display: "Montserrat", sans-serif;
+  --font-body: "Montserrat", sans-serif;
 }
 
 @layer base {
-  /* Tailwind base layer */
-}
+  * {
+    box-sizing: border-box;
+  }
 
-:root {
-  --rs-text-font-family: "Inter", sans-serif !important;
-  --rs-text-font-family-sans-serif: "Inter", sans-serif !important;
-}
+  body {
+    font-family: var(--font-body, "Montserrat", sans-serif);
+    background-color: var(--color-section, #fbf6ef);
+    color: var(--color-ink, #18140f);
+  }
 
-/* Unlayered global styles to override rsuite's unlayered styles */
-body {
-  margin: 0;
-  font-family: "Inter", sans-serif !important;
-  background-color: var(--color-section, #fbf6ef);
-  color: var(--color-ink, #18140f);
-}
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-display, "Montserrat", sans-serif);
+    font-weight: 600;
+    line-height: 1.25;
+  }
 
-* {
-  font-family: "Inter", sans-serif;
-}
+  a:not(.rs-btn) {
+    color: inherit;
+    text-decoration: none;
+  }
 
-h1,
-h2,
-h3,
-h4,
-h5,
-h6,
-.font-display,
-.rs-table-cell-header {
-  font-family: var(--font-display, "Inter", sans-serif) !important;
-}
-
-/* Ensure links inherit correctly and don't get the rsuite default blue unless intended */
-a:not(.rs-btn) {
-  color: inherit;
-  text-decoration: none;
-}
-
-/* RSuite Button Brand Overrides */
-.rs-btn-primary {
-  background-color: var(--color-coral, #69418b) !important;
-  color: var(--color-paper, #ffffff) !important;
-}
-.rs-btn-primary:hover,
-.rs-btn-primary:focus {
-  background-color: var(--color-coraldark, #54346f) !important;
-}
-
-.rs-btn-subtle {
-  color: var(--color-coral, #69418b) !important;
-}
-.rs-btn-subtle:hover,
-.rs-btn-subtle:focus {
-  background-color: rgba(105, 65, 139, 0.1) !important; /* coral/10 */
-  color: var(--color-coraldark, #54346f) !important;
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background-color: var(--color-line, #eae2d6);
+    border-radius: 4px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: var(--color-muted, #7c7267);
+  }
 }
 
 /* Fix table action buttons alignment */
-.rs-table-cell-content:has(.rs-btn) {
+.rs-table-cell-content {
   display: flex !important;
   align-items: center !important;
-  justify-content: flex-start !important;
+}
+
+/* Input and Select styling */
+input,
+select,
+textarea {
+  font-family: inherit !important;
+}
+
+/* Focus styles */
+*:focus-visible {
+  outline: 2px var(--color-coral) solid;
+  outline-offset: 2px;
+}
+
+/* ----------------------------------------------------------------
+   Legacy component styles recovered from the deleted public/css/style.css
+   (scoped to the new theme tokens). These back the class names still
+   referenced by several admin pages/forms.
+   ---------------------------------------------------------------- */
+
+/* Page / section headers */
+.breadcrumb_content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+.breadcrumb_title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-ink);
+  line-height: 1.2;
+}
+.breadcrumb_content.style2 {
+  margin-bottom: 1.5rem;
+}
+
+/* Generic vertical rhythm helpers */
+.mb10 {
+  margin-bottom: 10px;
+}
+
+/* Image uploader zone */
+.customUploader {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 160px;
+  padding: 1.5rem;
+  border: 1.5px dashed var(--color-line);
+  border-radius: 0.75rem;
+  background-color: color-mix(in srgb, var(--color-section) 60%, #fff);
+  cursor: pointer;
+  transition:
+    border-color 0.15s ease,
+    background-color 0.15s ease;
+  text-align: center;
+  color: var(--color-muted);
+}
+.customUploader:hover {
+  border-color: var(--color-coral);
+  background-color: var(--color-peach);
+}
+
+/* Preview image wrapper */
+.previewImage {
+  position: relative;
+  overflow: hidden;
+  border-radius: 0.75rem;
+  border: 1px solid var(--color-line);
+  background-color: var(--color-paper);
+}
+
+/* Remove button floating over a preview */
+.cancelButton {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  width: 1.75rem;
+  height: 1.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  background-color: rgba(24, 20, 15, 0.6);
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
+  line-height: 1;
+  transition: background-color 0.15s ease;
+}
+.cancelButton:hover {
+  background-color: var(--color-coraldark);
+}
+
+/* Multi-image uploader grid */
+.upload-img-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 0.75rem;
+}
+.upload-img-preview-box {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  border-radius: 0.75rem;
+  border: 1px solid var(--color-line);
+  background-color: var(--color-paper);
+}
+.upload-img-preview-box img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.main-image-border {
+  border-color: var(--color-coral);
+}
+.upload-img-uploader-label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  min-height: 120px;
+  cursor: pointer;
+  color: var(--color-muted);
+  font-size: 0.8rem;
+  border: 1.5px dashed var(--color-line);
+  border-radius: 0.75rem;
+  transition:
+    border-color 0.15s ease,
+    color 0.15s ease;
+}
+.upload-img-uploader-label:hover {
+  border-color: var(--color-coral);
+  color: var(--color-coral);
+}
+
+/* Password show/hide toggle */
+.custom-eye {
+  position: absolute;
+  top: 50%;
+  right: 0.75rem;
+  transform: translateY(-50%);
+  cursor: pointer;
+  color: var(--color-muted);
+  display: inline-flex;
+  align-items: center;
+}
+.custom-eye:hover {
+  color: var(--color-coral);
+}
+
+/* Spinner */
+.loader {
+  display: inline-block;
+  width: 2.5rem;
+  height: 2.5rem;
+  border: 3px solid color-mix(in srgb, var(--color-coral) 25%, transparent);
+  border-top-color: var(--color-coral);
+  border-radius: 9999px;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ----------------------------------------------------------------
+   RSuite component theming (Table + Input) so every admin page
+   inherits the coral / ink design system.
+   ---------------------------------------------------------------- */
+
+/* Table */
+.rs-table {
+  border-color: var(--color-line);
+  font-size: 0.875rem;
+}
+.rs-table-cell-header,
+.rs-table-row-header .rs-table-cell-content {
+  background-color: color-mix(in srgb, var(--color-line) 40%, #fff);
+  color: var(--color-ink);
+  font-weight: 600;
+}
+.rs-table-cell-content {
+  color: var(--color-ink);
+  border-color: var(--color-line);
+  padding: 0 12px;
+}
+.rs-table-hoverable .rs-table-row:hover .rs-table-cell-content {
+  background-color: color-mix(in srgb, var(--color-coral) 8%, #fff);
+}
+
+/* Inputs */
+.rs-input,
+.rs-input-group {
+  border-color: var(--color-line);
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+.rs-input:focus,
+.rs-input-group.rs-input-group-focus,
+.rs-input-group.rs-input-group-focus .rs-input {
+  border-color: var(--color-coral) !important;
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-coral) 25%, transparent) !important;
+}
+.rs-input::placeholder {
+  color: var(--color-muted);
+  opacity: 0.7;
+}
+/* New UI enhancements */
+
+/* Glassmorphism card style */
+.glass-card {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(12px);
+  border-radius: 0.75rem;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  padding: 1rem;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+.glass-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+}
+
+/* Blog grid layout */
+.blog-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1.5rem;
+}
+
+/* Form section styling */
+.form-section {
+  background: var(--color-section);
+  padding: 1.5rem;
+  border-radius: 0.75rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  margin-bottom: 1.5rem;
+}
+
+/* Image carousel container */
+.image-carousel {
+  display: flex;
+  overflow-x: auto;
+  gap: 0.75rem;
+  padding-bottom: 0.5rem;
+}
+.image-carousel::-webkit-scrollbar {
+  height: 6px;
+}
+.image-carousel::-webkit-scrollbar-thumb {
+  background: var(--color-line);
+  border-radius: 3px;
+}
+.carousel-image {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  border: 1px solid var(--color-line);
+}
+.carousel-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.carousel-image .remove-btn {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  background: rgba(0, 0, 0, 0.6);
+  color: #fff;
+  border: none;
+  border-radius: 9999px;
+  width: 1.5rem;
+  height: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.rs-picker-toggle.rs-btn {
+  width: 100% !important;
 }

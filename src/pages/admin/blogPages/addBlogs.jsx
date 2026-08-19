@@ -65,118 +65,113 @@ function AddBlogs() {
   return (
     <div className="w-full">
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold text-gray-900 m-0">Add New Blog</h2>
+        <h2 className="text-2xl font-bold text-ink m-0">Add New Blog</h2>
       </div>
 
-      <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+      <div className="bg-white p-6 rounded-xl shadow-sm border border-line">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           <div className="col-span-1 lg:col-span-4">
-        <Form.Group>
-          <Form.ControlLabel>Blog Image</Form.ControlLabel>
-          <label htmlFor="customFileInput" className="customUploader">
-            {image ? (
-              <div className="previewImage">
-                <img
-                  src={URL.createObjectURL(image)}
-                  alt="Preview"
-                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                />
-                <button
-                  type="button"
-                  className="cancelButton"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    setImage(null);
-                  }}
-                >
-                  ×
-                </button>
-              </div>
-            ) : (
-              <span>Click to upload</span>
-            )}
-          </label>
+            <div className="flex flex-col gap-2">
+              <label className="font-semibold text-sm text-ink">Blog Image</label>
+              <label htmlFor="customFileInput" className="customUploader m-0">
+                {image ? (
+                  <div className="previewImage">
+                    <img
+                      src={URL.createObjectURL(image)}
+                      alt="Preview"
+                      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                    />
+                    <button
+                      type="button"
+                      className="cancelButton"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        setImage(null);
+                      }}
+                    >
+                      ×
+                    </button>
+                  </div>
+                ) : (
+                  <span>Click to upload</span>
+                )}
+              </label>
 
-          <input
-            id="customFileInput"
-            type="file"
-            accept="image/*"
-            onChange={(e) => setImage(e.target.files?.[0] || null)}
-            style={{ display: 'none' }}
-          />
-        </Form.Group>
+              <input
+                id="customFileInput"
+                type="file"
+                accept="image/*"
+                onChange={(e) => setImage(e.target.files?.[0] || null)}
+                style={{ display: 'none' }}
+              />
+            </div>
           </div>
 
           <div className="col-span-1 lg:col-span-8 flex flex-col gap-6">
-            <div>
-            <Form.Group>
-              <Form.ControlLabel>Blog Title</Form.ControlLabel>
+            <div className="flex flex-col gap-2">
+              <label className="font-semibold text-sm text-ink">Blog Title</label>
               <Input
                 value={title}
                 onChange={setTitle}
                 placeholder="Blog Title"
               />
-            </Form.Group>
             </div>
 
-            <div>
-            <Form.Group>
-              <Form.ControlLabel>Blog Description</Form.ControlLabel>
+            <div className="flex flex-col gap-2">
+              <label className="font-semibold text-sm text-ink">Blog Description</label>
               <QuillEditorWrapper
                 value={description}
                 onChange={setDescription}
               />
-            </Form.Group>
             </div>
           </div>
 
           <div className="col-span-1 lg:col-span-6">
-        <Form.Group>
-          <Form.ControlLabel>Meta Title</Form.ControlLabel>
-          <Input
-            value={metaTitle}
-            onChange={setMetaTitle}
-            placeholder="Meta Title"
-          />
-        </Form.Group>
-      </div>
+            <div className="flex flex-col gap-2">
+              <label className="font-semibold text-sm text-ink">Meta Title</label>
+              <Input
+                value={metaTitle}
+                onChange={setMetaTitle}
+                placeholder="Meta Title"
+              />
+            </div>
+          </div>
 
           <div className="col-span-1 lg:col-span-6">
-        <Form.Group>
-          <Form.ControlLabel>Meta Keywords</Form.ControlLabel>
-          <br />
-          <TagInput
-            value={metaKeywords}
-            onChange={(value) => setMetaKeywords(value)}
-            placeholder="Meta Keywords"
-            style={{ width: '100%' }}
-            trigger={['Enter', 'Space', 'Comma']}
-          />
-        </Form.Group>
+            <div className="flex flex-col gap-2">
+              <label className="font-semibold text-sm text-ink">Meta Keywords</label>
+              <TagInput
+                value={metaKeywords}
+                onChange={(value) => setMetaKeywords(value)}
+                placeholder="Meta Keywords"
+                style={{ width: '100%' }}
+                trigger={['Enter', 'Space', 'Comma']}
+              />
+            </div>
           </div>
 
           <div className="col-span-1 lg:col-span-12">
-        <Form.Group>
-          <Form.ControlLabel>Meta Description</Form.ControlLabel>
-          <Input
-            as="textarea"
-            rows={3}
-            value={metaDescription}
-            onChange={setMetaDescription}
-            placeholder="Meta Description"
-          />
-        </Form.Group>
+            <div className="flex flex-col gap-2">
+              <label className="font-semibold text-sm text-ink">Meta Description</label>
+              <Input
+                as="textarea"
+                rows={3}
+                value={metaDescription}
+                onChange={setMetaDescription}
+                placeholder="Meta Description"
+              />
+            </div>
           </div>
 
           <div className="col-span-1 lg:col-span-12 flex justify-end mt-4">
-        <Button
-           appearance="primary"
-          onClick={handleSubmit}
-          disabled={loading}
-        >
-          {loading ? 'Submitting...' : 'Submit Blog'}
-        </Button>
+            <Button
+              appearance="primary"
+              onClick={handleSubmit}
+              disabled={loading}
+            >
+              {loading ? 'Submitting...' : 'Submit Blog'}
+            </Button>
           </div>
         </div>
       </div>

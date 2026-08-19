@@ -1,10 +1,8 @@
-// layouts/AdminLayout.jsx
 import { useEffect, useState } from 'react';
-import { Outlet, useNavigate, useLocation } from 'react-router';
+import { Outlet, useLocation, useNavigate } from 'react-router';
+import AdminSidebar from '../../src/components/layoutComponents/AdminSidebar';
+import AdminTopbar from '../../src/components/layoutComponents/AdminTopbar';
 import { AuthContext } from '../AuthContextProvider';
-import AdminFooter from '../components/layoutComponents/AdminFooter';
-import AdminSidebar from '../components/layoutComponents/AdminSidebar';
-import AdminTopbar from '../components/layoutComponents/AdminTopbar';
 import { apiUrl } from '../envConfig';
 
 export function meta() {
@@ -75,7 +73,7 @@ export default function AdminLayout() {
 
   if (loader) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="min-h-screen flex items-center justify-center bg-section">
         <div className="loader" />
       </div>
     );
@@ -92,25 +90,21 @@ export default function AdminLayout() {
         loader: loader,
       }}
     >
-      <div className="flex h-screen bg-section font-body text-left text-ink">
-        <aside className="w-64 flex-shrink-0 bg-paper border-r border-line shadow-sm overflow-y-auto">
+      <div className="flex min-h-screen bg-section font-body text-left text-ink">
+        <aside className="fixed left-0 top-0 w-64 h-screen bg-white border-r border-border shadow-sm overflow-y-auto">
           <AdminSidebar />
         </aside>
-        
-        <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-          <header className="bg-paper border-b border-line shadow-sm z-10">
+
+        <div className="flex-1 flex flex-col min-w-0 overflow-hidden ml-64">
+          <header className="h-16 border-b border-border shadow-sm z-10">
             <AdminTopbar />
           </header>
-          
-          <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 bg-section">
+
+          <main className="flex-1 overflow-y-auto p-6 sm:p-8 lg:p-12 bg-section">
             <div className="max-w-7xl mx-auto w-full">
               <Outlet />
             </div>
           </main>
-          
-          <footer className="bg-paper border-t border-line p-4 shrink-0 text-center text-sm text-muted">
-            <AdminFooter />
-          </footer>
         </div>
       </div>
     </AuthContext.Provider>

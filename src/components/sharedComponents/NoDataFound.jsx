@@ -3,23 +3,19 @@ import Button from '../ui/Button';
 
 function NoDataFound(props) {
   return (
-    <div
-      style={{
-        position: 'fixed',
-        inset: 0,
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        flexDirection: 'column',
-        marginLeft: '250px',
-      }}
-    >
-      <h4>{props.message}</h4>
-      {props.showButton && (
-        <Button  appearance="primary" className="mt-3" onClick={props.handleClick}>
-          Add {props.name}
-        </Button>
-      )}
+    <div className="min-h-screen flex items-center justify-center p-6 text-muted">
+      <div className="text-center">
+        <h4>{props.message}</h4>
+        {props.showButton && (
+          <Button
+            appearance="primary"
+            className="mt-4"
+            onClick={props.handleClick}
+          >
+            Add {props.name}
+          </Button>
+        )}
+      </div>
     </div>
   );
 }

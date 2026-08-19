@@ -124,7 +124,7 @@ function NearbyLocationsModal({
       <Modal.Body className="pb-4">
         <Form fluid>
           <Form.Group controlId="name">
-            <Form.ControlLabel>Nearby Facility Name</Form.ControlLabel>
+            <Form.Label>Nearby Facility Name</Form.Label>
             <Input
               placeholder="Enter Nearby Facility name"
               value={nearbyLocationName}
@@ -136,13 +136,12 @@ function NearbyLocationsModal({
 
       <Modal.Footer>
         <div
-          className={`flex items-center w-full ${
-            edit ? 'justify-between' : 'justify-end'
-          }`}
+          className={`flex items-center w-full ${edit ? 'justify-between' : 'justify-end'
+            }`}
         >
           {edit && (
             <Button
-               appearance="primary" color="red"
+              appearance="primary" color="red"
               onClick={handleDelete}
               disabled={loading}
             >
@@ -150,7 +149,7 @@ function NearbyLocationsModal({
             </Button>
           )}
           <Button
-             appearance="primary"
+            appearance="primary"
             onClick={handleSave}
             disabled={loading}
           >

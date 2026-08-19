@@ -102,7 +102,7 @@ function PropertyTypesModal({
       <Modal.Body className="pb-4">
         <Form fluid>
           <Form.Group controlId="name">
-            <Form.ControlLabel>Property Type Name</Form.ControlLabel>
+            <Form.Label>Property Type Name</Form.Label>
             <Input
               placeholder="Enter Property Type name"
               value={propertyTypeName}
@@ -113,13 +113,12 @@ function PropertyTypesModal({
       </Modal.Body>
       <Modal.Footer>
         <div
-          className={`flex items-center w-full ${
-            edit ? 'justify-between' : 'justify-end'
-          }`}
+          className={`flex items-center w-full ${edit ? 'justify-between' : 'justify-end'
+            }`}
         >
           {edit && (
             <Button
-               appearance="primary" color="red"
+              appearance="primary" color="red"
               onClick={handleDelete}
               disabled={loading}
               type="button"
@@ -128,7 +127,7 @@ function PropertyTypesModal({
             </Button>
           )}
           <Button
-             appearance="primary"
+            appearance="primary"
             onClick={handleSave}
             disabled={loading}
             type="button"

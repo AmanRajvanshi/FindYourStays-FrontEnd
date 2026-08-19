@@ -154,33 +154,75 @@ function Properties() {
     return <DataLoader />;
   }
 
+  const hasActiveFilters = !!(searchInput || selectedStatus || selectedCity || selectedType || selectedPriceRange);
+
+  const handleClearFilters = () => {
+    setSearchInput('');
+    setSearch('');
+    setSelectedStatus(undefined);
+    setSelectedCity(undefined);
+    setSelectedType(undefined);
+    setSelectedPriceRange(undefined);
+    setPaginationMeta((prev) => ({ ...prev, current_page: 1 }));
+  };
+
   return (
-    <>
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="mb-0 text-lg font-semibold">Properties</h2>
+    <div className="space-y-6">
+      {/* Premium Header */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-line/40 pb-5">
+        <div>
+          <div className="flex items-center gap-3">
+            <h2 className="mb-0 text-2xl font-bold tracking-tight text-ink">Properties</h2>
+            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-coral/10 text-coral">
+              {paginationMeta.total} {paginationMeta.total === 1 ? 'Property' : 'Properties'}
+            </span>
+          </div>
+          <p className="text-sm text-muted mt-1">Manage, filter, and track your property listings.</p>
+        </div>
         <Button
-           appearance="primary"
+          appearance="primary"
           type="button"
           onClick={() => {
             navigate('/admin/add-property');
           }}
+          className="shadow-sm hover:shadow-md transition-all duration-200"
         >
           + Add New Property
         </Button>
       </div>
-      <div className="flex flex-col gap-4">
-        <div className="flex flex-col lg:flex-row justify-between mb-4 gap-4">
-          <div className="flex justify-start w-full lg:w-1/3">
+
+      {/* Styled Filters Container */}
+      <div className="bg-white rounded-2xl border border-line/50 p-5 shadow-sm space-y-4">
+        <div className="flex justify-between items-center">
+          <span className="text-xs font-bold uppercase tracking-wider text-muted/80">Search & Filters</span>
+          {hasActiveFilters && (
+            <button
+              onClick={handleClearFilters}
+              className="text-xs font-semibold text-coral hover:text-coraldark! transition-colors flex items-center gap-1.5 cursor-pointer"
+            >
+              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+              Clear Filters
+            </button>
+          )}
+        </div>
+
+        <div className="flex flex-col lg:flex-row gap-4">
+          {/* Search Box */}
+          <div className="w-full lg:w-1/3 relative">
             <Input
               type="text"
-              placeholder="Search Properties"
+              placeholder="Search by title, address..."
               style={{ width: '100%' }}
               value={searchInput}
               onChange={setSearchInput}
               cleanable
             />
           </div>
-          <div className="flex flex-wrap justify-end gap-2 w-full lg:w-2/3">
+
+          {/* Select Pickers */}
+          <div className="flex flex-wrap items-center gap-3 w-full lg:w-2/3 lg:justify-end">
             <SelectPicker
               data={[
                 { label: 'Active', value: 'active' },
@@ -189,7 +231,7 @@ function Properties() {
                 { label: 'Deleted', value: 'deleted' },
               ]}
               placeholder="Status"
-              style={{ minWidth: 160 }}
+              style={{ width: 140 }}
               placement="auto"
               searchable={false}
               cleanable
@@ -202,7 +244,7 @@ function Properties() {
             <SelectPicker
               data={cities}
               placeholder="City"
-              style={{ minWidth: 160 }}
+              style={{ width: 150 }}
               placement="auto"
               cleanable
               value={selectedCity}
@@ -214,7 +256,7 @@ function Properties() {
             <SelectPicker
               data={propertyTypesList}
               placeholder="Property Type"
-              style={{ minWidth: 160 }}
+              style={{ width: 160 }}
               placement="auto"
               searchable={false}
               cleanable
@@ -227,7 +269,7 @@ function Properties() {
             <SelectPicker
               data={pricingRangeOptions}
               placeholder="Price Range"
-              style={{ minWidth: 160 }}
+              style={{ width: 160 }}
               placement="auto"
               searchable={false}
               cleanable
@@ -239,11 +281,15 @@ function Properties() {
             />
           </div>
         </div>
+      </div>
+
+      {/* Properties Directory */}
+      <div className="flex flex-col gap-6">
         {properties.length > 0 ? (
           <>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {properties.map((property) => (
-                <div key={property.id}>
+                <div key={property.id} className="h-full">
                   <SinglePropertyCardAdmin
                     property={property}
                     fetchProperties={() =>
@@ -256,7 +302,9 @@ function Properties() {
                 </div>
               ))}
             </div>
-            <div className="w-full flex justify-center mt-3">
+
+            {/* Pagination Controls */}
+            <div className="w-full flex justify-center mt-6 pt-4 border-t border-line/30">
               <Pagination
                 prev
                 last
@@ -274,12 +322,21 @@ function Properties() {
             </div>
           </>
         ) : (
-          <div className="w-full flex justify-center">
-            <h3 className="fw-semibold">No Properties Found</h3>
+          <div className="w-full flex flex-col items-center justify-center py-16 bg-white rounded-2xl border border-line/40 shadow-sm text-center">
+            <svg className="w-12 h-12 text-muted/40 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+            </svg>
+            <h3 className="text-lg font-bold text-ink mb-1">No Properties Found</h3>
+            <p className="text-sm text-muted max-w-sm mb-4">We couldn't find any properties matching your current criteria. Try adjusting or resetting your search filters.</p>
+            {hasActiveFilters && (
+              <Button appearance="ghost" onClick={handleClearFilters}>
+                Reset Search Filters
+              </Button>
+            )}
           </div>
         )}
       </div>
-    </>
+    </div>
   );
 }
 

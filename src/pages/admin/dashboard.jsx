@@ -93,37 +93,37 @@ function Dashboard() {
         </div>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
-        <div className="bg-white p-6 rounded-lg shadow border border-gray-100 flex items-center justify-between">
+        <div className="bg-white p-6 rounded-lg shadow border border-line flex items-center justify-between">
           <div>
-            <div className="text-3xl font-bold text-gray-800">{stats.properties}</div>
-            <p className="text-gray-500 mt-1">All Properties</p>
+            <div className="text-3xl font-bold text-ink">{stats.properties}</div>
+            <p className="text-muted mt-1">All Properties</p>
           </div>
           <div className="text-coral! text-4xl">
             <FontAwesomeIcon icon={faHouse} />
           </div>
         </div>
-        <div className="bg-white p-6 rounded-lg shadow border border-gray-100 flex items-center justify-between">
+        <div className="bg-white p-6 rounded-lg shadow border border-line flex items-center justify-between">
           <div>
-            <div className="text-3xl font-bold text-gray-800">{stats.views}</div>
-            <p className="text-gray-500 mt-1">Total Views</p>
+            <div className="text-3xl font-bold text-ink">{stats.views}</div>
+            <p className="text-muted mt-1">Total Views</p>
           </div>
           <div className="text-blue-500 text-4xl">
             <FontAwesomeIcon icon={faEye} />
           </div>
         </div>
-        <div className="bg-white p-6 rounded-lg shadow border border-gray-100 flex items-center justify-between">
+        <div className="bg-white p-6 rounded-lg shadow border border-line flex items-center justify-between">
           <div>
-            <div className="text-3xl font-bold text-gray-800">{stats.enquiries}</div>
-            <p className="text-gray-500 mt-1">New Enquiries</p>
+            <div className="text-3xl font-bold text-ink">{stats.enquiries}</div>
+            <p className="text-muted mt-1">New Enquiries</p>
           </div>
           <div className="text-green-500 text-4xl">
             <FontAwesomeIcon icon={faComments} />
           </div>
         </div>
-        <div className="bg-white p-6 rounded-lg shadow border border-gray-100 flex items-center justify-between">
+        <div className="bg-white p-6 rounded-lg shadow border border-line flex items-center justify-between">
           <div>
-            <div className="text-3xl font-bold text-gray-800">{stats.contactEnquiries}</div>
-            <p className="text-gray-500 mt-1">Contact Enquiries</p>
+            <div className="text-3xl font-bold text-ink">{stats.contactEnquiries}</div>
+            <p className="text-muted mt-1">Contact Enquiries</p>
           </div>
           <div className="text-orange-500 text-4xl">
             <FontAwesomeIcon icon={faEnvelope} />
@@ -131,8 +131,8 @@ function Dashboard() {
         </div>
       </div>
       <div className="mt-6">
-        <div className="bg-white p-6 rounded-lg shadow border border-gray-100">
-          <h4 className="text-xl font-semibold mb-4 text-gray-800">View Statistics</h4>
+        <div className="bg-white p-6 rounded-lg shadow border border-line">
+          <h4 className="text-xl font-semibold mb-4 text-ink">View Statistics</h4>
           <HighchartsComponent highcharts={Highcharts} options={options} />
         </div>
       </div>

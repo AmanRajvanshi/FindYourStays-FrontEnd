@@ -85,25 +85,21 @@ function PropertyTypes() {
                 + Add New Property Type
               </Button>
             </div>
-            <div className="flex flex-wrap">
-              <div className="col-lg-12">
-                <div className="flex flex-wrap gap-3">
-                  {propertyTypes.map((propertyType, index) => (
-                    <button
-                      key={index}
-                      type="button"
-                      className="px-4 py-2 !bg-slate-100 !text-slate-700 border !border-slate-200 font-medium !rounded-full hover:!bg-blue-600 hover:!text-white hover:!border-blue-600 transition-all text-sm shadow-sm"
-                      onClick={() => {
-                        setOpenPropertyTypesModal(true);
-                        setEdit(true);
-                        setSelectedPropertyType(propertyType);
-                      }}
-                    >
-                      {propertyType.name}
-                    </button>
-                  ))}
-                </div>
-              </div>
+            <div className="flex flex-wrap gap-3">
+              {propertyTypes.map((propertyType, index) => (
+                <button
+                  key={index}
+                  type="button"
+                  className="px-4 py-2 !bg-slate-100 !text-slate-700 border !border-slate-200 font-medium !rounded-full hover:!bg-blue-600 hover:!text-white hover:!border-blue-600 transition-all text-sm shadow-sm"
+                  onClick={() => {
+                    setOpenPropertyTypesModal(true);
+                    setEdit(true);
+                    setSelectedPropertyType(propertyType);
+                  }}
+                >
+                  {propertyType.name}
+                </button>
+              ))}
             </div>
           </>
         )}

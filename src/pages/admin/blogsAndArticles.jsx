@@ -8,7 +8,7 @@ import NoDataFound from '../../components/sharedComponents/NoDataFound';
 import { Pagination } from 'rsuite';
 import Button from '../../components/ui/Button';
 
-function contactQueries() {
+function BlogsAndArticles() {
   const { authData } = useContext(AuthContext);
   const navigate = useNavigate();
   const [blogs, setBlogs] = useState([]);
@@ -80,7 +80,7 @@ function contactQueries() {
   ) : (
     <div className="w-full">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
-        <h2 className="text-2xl font-bold text-gray-900 m-0">Blogs And Articles</h2>
+        <h2 className="text-2xl font-bold text-ink m-0">Blogs And Articles</h2>
         <Button
           appearance="primary"
           type="button"
@@ -117,4 +117,4 @@ function contactQueries() {
   );
 }
 
-export default contactQueries;
+export default BlogsAndArticles;

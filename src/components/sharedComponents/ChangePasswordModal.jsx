@@ -57,7 +57,7 @@ function ChangePasswordModal({ userId, open, onClose, onSuccess }) {
         <div className="container mx-auto">
           <Form fluid className="grid grid-cols-1 gap-4">
             <Form.Group className="mb-2">
-              <Form.ControlLabel>New Password</Form.ControlLabel>
+              <Form.Label>New Password</Form.Label>
               <Form.Control
                 type="password"
                 name="newPassword"
@@ -66,7 +66,7 @@ function ChangePasswordModal({ userId, open, onClose, onSuccess }) {
               />
             </Form.Group>
             <Form.Group className="mb-2">
-              <Form.ControlLabel>Confirm New Password</Form.ControlLabel>
+              <Form.Label>Confirm New Password</Form.Label>
               <Form.Control
                 type="password"
                 name="confirmPassword"
@@ -79,7 +79,7 @@ function ChangePasswordModal({ userId, open, onClose, onSuccess }) {
       </Modal.Body>
       <Modal.Footer>
         <Button
-           appearance="primary"
+          appearance="primary"
           onClick={handleSave}
           disabled={saveLoading}
         >

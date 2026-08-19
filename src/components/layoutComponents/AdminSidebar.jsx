@@ -1,21 +1,19 @@
+import {
+  faBuilding,
+  faComments,
+  faEnvelope,
+  faFileLines,
+  faHeart,
+  faHouse,
+  faMapLocationDot,
+  faPenToSquare,
+  faQuoteLeft,
+  faUser
+} from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useContext } from 'react';
-import toast from 'react-hot-toast';
 import { NavLink } from 'react-router';
 import { AuthContext } from '../../AuthContextProvider';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { 
-  faHouse, 
-  faMapLocationDot, 
-  faHeart, 
-  faBuilding, 
-  faComments, 
-  faEnvelope, 
-  faFileLines, 
-  faQuoteLeft, 
-  faPenToSquare, 
-  faUser,
-  faRightFromBracket 
-} from '@fortawesome/free-solid-svg-icons';
 
 function AdminSidebar() {
   const { logout, authData } = useContext(AuthContext);
@@ -80,7 +78,7 @@ function AdminSidebar() {
       path: '/admin/contact-queries',
       label: 'Contact Enqueries',
       icon: faEnvelope,
-      key: 'contact-enqueries',
+      key: 'contact-enquiries',
     },
     {
       path: '/admin/user-listings-enquiries',
@@ -127,32 +125,36 @@ function AdminSidebar() {
   };
 
   return (
-    <div className="flex flex-col h-full bg-white text-gray-800">
+    <div className="flex flex-col h-full bg-white">
       {/* Brand Logo Area */}
-      <div className="flex items-center justify-center h-12 border-b border-gray-100 shrink-0">
-        <p className="text-lg font-bold text-gray-900 tracking-tight">Costahq Admin</p>
+      <div className="flex items-center justify-center h-16 border-b border-border shrink-0 px-6">
+        <p className="text-xl font-bold tracking-tight bg-linear-to-r from-coral to-coraldark bg-clip-text text-transparent">
+          Costahq Admin
+        </p>
       </div>
 
       {/* Navigation Links */}
-      <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-1">
+      <nav className="flex-1 py-4 px-4 space-y-1.5 overflow-y-auto">
         {sidebarRoutes.map(({ path, label, icon, key }) =>
           hasAccess(key) ? (
             <NavLink
               key={key}
               to={path}
               className={({ isActive }) =>
-                `flex items-center px-3 py-2 rounded-full text-sm font-medium transition-colors duration-200 group ${isActive
-                  ? 'bg-[var(--color-coral-light)]! text-coraldark! shadow-sm font-bold'
-                  : 'text-muted hover:bg-gray-50 hover:text-ink'
+                `relative flex items-center px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200 group ${isActive
+                  ? 'bg-coral-light! text-coraldark! shadow-xs'
+                  : 'text-muted hover:bg-coral/5! hover:text-coraldark!'
                 }`
               }
             >
               {({ isActive }) => (
                 <>
+                  {isActive && (
+                    <span className="absolute left-0 top-1/4 bottom-1/4 w-1.5 bg-coral rounded-r-md" />
+                  )}
                   <FontAwesomeIcon
                     icon={icon}
-                    className={`mr-3 text-lg ${isActive ? 'text-coral!' : 'text-gray-400 group-hover:text-muted'
-                      }`}
+                    className={`mr-3 text-base transition-transform duration-200 group-hover:scale-110 ${isActive ? 'text-coraldark!' : 'text-muted group-hover:text-coraldark!'}`}
                   />
                   <span>{label}</span>
                 </>
@@ -161,20 +163,6 @@ function AdminSidebar() {
           ) : null
         )}
       </nav>
-
-      {/* Footer Area with Logout */}
-      <div className="p-4 border-t border-gray-100 shrink-0">
-        <button
-          className="flex w-full items-center justify-center px-4 py-2 text-sm font-medium text-red-600 bg-red-50 rounded-lg hover:bg-red-100 hover:text-red-700 transition-colors"
-          type="button"
-          onClick={() => {
-            toast.success('Logout successful');
-            logout();
-          }}
-        >
-          <FontAwesomeIcon icon={faRightFromBracket} className="mr-2" /> Logout
-        </button>
-      </div>
     </div>
   );
 }

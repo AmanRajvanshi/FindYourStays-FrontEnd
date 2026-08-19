@@ -94,21 +94,20 @@ function adminProfile() {
   }
 
   return (
-    <div className="flex flex-wrap">
-      <div className="col-lg-12 mb10">
-        <div className="breadcrumb_content style2">
-          <h2 className="breadcrumb_title">My Profile</h2>
-        </div>
+    <div className="w-full">
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-2xl font-bold text-ink m-0">My Profile</h2>
       </div>
-      <div className="col-lg-12 mb10">
+
+      <div className="bg-white p-6 rounded-xl shadow-sm border border-line">
         <Form fluid>
-          <div className="flex flex-wrap">
-            <div className="col-lg-6 mb-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="col-span-1">
               <Form.Group controlId="name">
-                <Form.ControlLabel>
+                <Form.Label className="font-semibold text-ink mb-2">
                   Company Name
                   <span className="text-red-500">*</span>
-                </Form.ControlLabel>
+                </Form.Label>
                 <Form.Control
                   name="name"
                   value={companyDetails.company_name}
@@ -121,12 +120,12 @@ function adminProfile() {
                 />
               </Form.Group>
             </div>
-            <div className="col-lg-6 mb-3">
+            <div className="col-span-1">
               <Form.Group controlId="email">
-                <Form.ControlLabel>
+                <Form.Label className="font-semibold text-ink mb-2">
                   Company Email
                   <span className="text-red-500">*</span>
-                </Form.ControlLabel>
+                </Form.Label>
                 <Form.Control
                   name="email"
                   type="email"
@@ -137,11 +136,11 @@ function adminProfile() {
                 />
               </Form.Group>
             </div>
-            <div className="col-lg-6 mb-3">
+            <div className="col-span-1">
               <Form.Group controlId="phone1">
-                <Form.ControlLabel>
+                <Form.Label className="font-semibold text-ink mb-2">
                   Company Phone 1<span className="text-red-500">*</span>
-                </Form.ControlLabel>
+                </Form.Label>
                 <Form.Control
                   name="phone1"
                   value={companyDetails.company_phone1}
@@ -151,9 +150,9 @@ function adminProfile() {
                 />
               </Form.Group>
             </div>
-            <div className="col-lg-6 mb-3">
+            <div className="col-span-1">
               <Form.Group controlId="phone2">
-                <Form.ControlLabel>Company Phone 2</Form.ControlLabel>
+                <Form.Label className="font-semibold text-ink mb-2">Company Phone 2</Form.Label>
                 <Form.Control
                   name="phone2"
                   value={companyDetails.company_phone2}
@@ -163,12 +162,12 @@ function adminProfile() {
                 />
               </Form.Group>
             </div>
-            <div className="col-lg-6 mb-3">
+            <div className="col-span-1">
               <Form.Group controlId="address">
-                <Form.ControlLabel>
+                <Form.Label className="font-semibold text-ink mb-2">
                   Company Address
                   <span className="text-red-500">*</span>
-                </Form.ControlLabel>
+                </Form.Label>
                 <Form.Control
                   name="address"
                   value={companyDetails.company_address}
@@ -178,10 +177,10 @@ function adminProfile() {
                 />
               </Form.Group>
             </div>
-            <div className="col-lg-6 mb-3"></div>
-            <div className="col-lg-6 mb-3">
+            <div className="hidden md:block"></div>
+            <div className="col-span-1">
               <Form.Group controlId="facebook">
-                <Form.ControlLabel>Company Facebook</Form.ControlLabel>
+                <Form.Label className="font-semibold text-ink mb-2">Company Facebook</Form.Label>
                 <Form.Control
                   name="facebook"
                   value={companyDetails.company_facebook}
@@ -194,9 +193,9 @@ function adminProfile() {
                 />
               </Form.Group>
             </div>
-            <div className="col-lg-6 mb-3">
+            <div className="col-span-1">
               <Form.Group controlId="twitter">
-                <Form.ControlLabel>Company Twitter</Form.ControlLabel>
+                <Form.Label className="font-semibold text-ink mb-2">Company Twitter</Form.Label>
                 <Form.Control
                   name="twitter"
                   value={companyDetails.company_twitter}
@@ -206,9 +205,9 @@ function adminProfile() {
                 />
               </Form.Group>
             </div>
-            <div className="col-lg-6 mb-3">
+            <div className="col-span-1">
               <Form.Group controlId="instagram">
-                <Form.ControlLabel>Company Instagram</Form.ControlLabel>
+                <Form.Label className="font-semibold text-ink mb-2">Company Instagram</Form.Label>
                 <Form.Control
                   name="instagram"
                   value={companyDetails.company_instagram}
@@ -221,9 +220,9 @@ function adminProfile() {
                 />
               </Form.Group>
             </div>
-            <div className="col-lg-6 mb-3">
+            <div className="col-span-1">
               <Form.Group controlId="linkedin">
-                <Form.ControlLabel>Company Linkedin</Form.ControlLabel>
+                <Form.Label className="font-semibold text-ink mb-2">Company Linkedin</Form.Label>
                 <Form.Control
                   name="linkedin"
                   value={companyDetails.company_linkedin}
@@ -236,9 +235,9 @@ function adminProfile() {
                 />
               </Form.Group>
             </div>
-            <div className="col-lg-6 mb-3">
+            <div className="col-span-1">
               <Form.Group controlId="youtube">
-                <Form.ControlLabel>Company Youtube</Form.ControlLabel>
+                <Form.Label className="font-semibold text-ink mb-2">Company Youtube</Form.Label>
                 <Form.Control
                   name="youtube"
                   value={companyDetails.company_youtube}
@@ -248,9 +247,9 @@ function adminProfile() {
                 />
               </Form.Group>
             </div>
-            <div className="col-lg-6 mb-3">
+            <div className="col-span-1">
               <Form.Group controlId="google">
-                <Form.ControlLabel>Company Google</Form.ControlLabel>
+                <Form.Label className="font-semibold text-ink mb-2">Company Google</Form.Label>
                 <Form.Control
                   name="google"
                   value={companyDetails.company_google}
@@ -260,7 +259,7 @@ function adminProfile() {
                 />
               </Form.Group>
             </div>
-            <div className="col-lg-12 mt-3 flex justify-end">
+            <div className="col-span-1 md:col-span-2 flex justify-end mt-4">
               <Button
                 appearance="primary"
                 type="submit"

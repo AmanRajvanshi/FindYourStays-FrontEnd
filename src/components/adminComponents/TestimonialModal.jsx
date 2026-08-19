@@ -90,14 +90,14 @@ function TestimonialModal({
       <Modal.Body>
         <Form fluid>
           <Form.Group>
-            <Form.ControlLabel>Name</Form.ControlLabel>
+            <Form.Label>Name</Form.Label>
             <Input
               value={formData.name}
               onChange={(value) => handleInputChange(value, 'name')}
             />
           </Form.Group>
           <Form.Group>
-            <Form.ControlLabel>Description</Form.ControlLabel>
+            <Form.Label>Description</Form.Label>
             <Input
               as="textarea"
               rows={4}
@@ -106,7 +106,7 @@ function TestimonialModal({
             />
           </Form.Group>
           <Form.Group>
-            <Form.ControlLabel>Image</Form.ControlLabel>
+            <Form.Label>Image</Form.Label>
             <label htmlFor="testimonialImage" className="customUploader">
               {previewImage ? (
                 <div className="previewImage">
@@ -148,7 +148,7 @@ function TestimonialModal({
       </Modal.Body>
       <Modal.Footer>
         <Button
-           appearance="primary" size="sm"
+          appearance="primary" size="sm"
           onClick={handleSubmit}
           disabled={loading}
         >

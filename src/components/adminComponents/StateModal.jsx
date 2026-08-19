@@ -91,7 +91,7 @@ function StateModal({ openStateModal, setOpenStateModal, edit }) {
       <Modal.Body>
         <Form fluid formValue={formValue} onChange={setFormValue}>
           <Form.Group controlId="state_name">
-            <Form.ControlLabel className="mb-2">State Name</Form.ControlLabel>
+            <Form.Label className="mb-2">State Name</Form.Label>
             <Form.Control name="state_name" placeholder="Enter State name" />
           </Form.Group>
         </Form>
@@ -99,14 +99,13 @@ function StateModal({ openStateModal, setOpenStateModal, edit }) {
 
       <Modal.Footer>
         <div
-          className={`flex items-center w-full ${
-            edit.editing ? 'justify-between' : 'justify-end'
-          }`}
+          className={`flex items-center w-full ${edit.editing ? 'justify-between' : 'justify-end'
+            }`}
         >
           {edit.editing && (
             <Button
               type="button"
-               appearance="primary" color="red" className="ml-auto" size="sm"
+              appearance="primary" color="red" className="ml-auto" size="sm"
               onClick={handleDelete}
               disabled={loading}
             >
@@ -115,7 +114,7 @@ function StateModal({ openStateModal, setOpenStateModal, edit }) {
           )}
           <Button
             type="button"
-             appearance="primary" size="sm"
+            appearance="primary" size="sm"
             onClick={handleSubmit}
             disabled={loading}
           >
