@@ -12,6 +12,7 @@ const Area = React.lazy(() => import('./pages/admin/area'));
 const Amenities = React.lazy(() => import('./pages/admin/amenities'));
 const NearbyLocations = React.lazy(() => import('./pages/admin/nearbyLocations'));
 const Properties = React.lazy(() => import('./pages/admin/properties'));
+const Brands = React.lazy(() => import('./pages/admin/brands'));
 const PropertyTypes = React.lazy(() => import('./pages/admin/propertyTypes'));
 const AddProperty = React.lazy(() => import('./pages/admin/propertyPages/addProperty'));
 const EditProperty = React.lazy(() => import('./pages/admin/propertyPages/editProperty'));
@@ -26,6 +27,7 @@ const AdminProfile = React.lazy(() => import('./pages/admin/adminProfile'));
 const Testimonials = React.lazy(() => import('./pages/admin/testimonials'));
 const Counters = React.lazy(() => import('./pages/admin/counters'));
 const Users = React.lazy(() => import('./pages/admin/users'));
+const Faqs = React.lazy(() => import('./pages/admin/faqs'));
 
 const adminRoutes = [
   {
@@ -46,6 +48,7 @@ const adminRoutes = [
       { path: '/admin/amenities', element: <Suspense fallback={<div />}><Amenities /></Suspense> },
       { path: '/admin/nearbyLocations', element: <Suspense fallback={<div />}><NearbyLocations /></Suspense> },
       { path: '/admin/properties', element: <Suspense fallback={<div />}><Properties /></Suspense> },
+      { path: '/admin/brands', element: <Suspense fallback={<div />}><Brands /></Suspense> },
       { path: '/admin/propertyTypes', element: <Suspense fallback={<div />}><PropertyTypes /></Suspense> },
       { path: '/admin/add-property', element: <Suspense fallback={<div />}><AddProperty /></Suspense> },
       { path: '/admin/edit-property/:slug', element: <Suspense fallback={<div />}><EditProperty /></Suspense> },
@@ -60,6 +63,7 @@ const adminRoutes = [
       { path: '/admin/testimonials', element: <Suspense fallback={<div />}><Testimonials /></Suspense> },
       { path: '/admin/counters', element: <Suspense fallback={<div />}><Counters /></Suspense> },
       { path: '/admin/users', element: <Suspense fallback={<div />}><Users /></Suspense> },
+      { path: '/admin/faqs', element: <Suspense fallback={<div />}><Faqs /></Suspense> },
     ],
   },
 ];

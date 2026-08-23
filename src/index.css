@@ -82,33 +82,8 @@ textarea {
 }
 
 /* ----------------------------------------------------------------
-   Legacy component styles recovered from the deleted public/css/style.css
-   (scoped to the new theme tokens). These back the class names still
-   referenced by several admin pages/forms.
+   Legacy component styles (scoped to the new theme tokens).
    ---------------------------------------------------------------- */
-
-/* Page / section headers */
-.breadcrumb_content {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  margin-bottom: 1.5rem;
-}
-.breadcrumb_title {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: var(--color-ink);
-  line-height: 1.2;
-}
-.breadcrumb_content.style2 {
-  margin-bottom: 1.5rem;
-}
-
-/* Generic vertical rhythm helpers */
-.mb10 {
-  margin-bottom: 10px;
-}
 
 /* Image uploader zone */
 .customUploader {
@@ -284,84 +259,8 @@ textarea {
   color: var(--color-muted);
   opacity: 0.7;
 }
-/* New UI enhancements */
-
-/* Glassmorphism card style */
-.glass-card {
-  background: rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(12px);
-  border-radius: 0.75rem;
-  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  padding: 1rem;
-  transition:
-    transform 0.2s ease,
-    box-shadow 0.2s ease;
-}
-.glass-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
-}
-
-/* Blog grid layout */
-.blog-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  gap: 1.5rem;
-}
-
-/* Form section styling */
-.form-section {
-  background: var(--color-section);
-  padding: 1.5rem;
-  border-radius: 0.75rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-  margin-bottom: 1.5rem;
-}
-
-/* Image carousel container */
-.image-carousel {
-  display: flex;
-  overflow-x: auto;
-  gap: 0.75rem;
-  padding-bottom: 0.5rem;
-}
-.image-carousel::-webkit-scrollbar {
-  height: 6px;
-}
-.image-carousel::-webkit-scrollbar-thumb {
-  background: var(--color-line);
-  border-radius: 3px;
-}
-.carousel-image {
-  position: relative;
-  width: 120px;
-  height: 120px;
-  border-radius: 0.5rem;
-  overflow: hidden;
-  border: 1px solid var(--color-line);
-}
-.carousel-image img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-.carousel-image .remove-btn {
-  position: absolute;
-  top: 4px;
-  right: 4px;
-  background: rgba(0, 0, 0, 0.6);
-  color: #fff;
-  border: none;
-  border-radius: 9999px;
-  width: 1.5rem;
-  height: 1.5rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-}
-
 .rs-picker-toggle.rs-btn {
   width: 100% !important;
 }
+
+.rs-form-control-wrapper > .rs-input, .rs-form-control-wrapper > .rs-picker { width: 100% !important; max-width: 100% !important; }

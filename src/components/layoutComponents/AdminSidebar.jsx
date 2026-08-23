@@ -8,6 +8,7 @@ import {
   faMapLocationDot,
   faPenToSquare,
   faQuoteLeft,
+  faQuestionCircle,
   faUser
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -63,6 +64,12 @@ function AdminSidebar() {
       key: 'property-types',
     },
     {
+      path: '/admin/brands',
+      label: 'Brands',
+      icon: faBuilding,
+      key: 'brands',
+    },
+    {
       path: '/admin/properties',
       label: 'Properties',
       icon: faBuilding,
@@ -103,6 +110,12 @@ function AdminSidebar() {
       label: 'Custom Pages',
       icon: faPenToSquare,
       key: 'custom-pages',
+    },
+    {
+      path: '/admin/faqs',
+      label: 'FAQs',
+      icon: faQuestionCircle,
+      key: 'faqs',
     },
     {
       path: '/admin/counters',

@@ -1,15 +1,15 @@
 import { useContext, useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
-import { Image, Table } from 'rsuite';
+import { Image } from 'rsuite';
 import Swal from 'sweetalert2';
 import { apiUrl, imageUrl } from '../../envConfig';
 import { AuthContext } from '../../AuthContextProvider';
 import TestimonialModal from '../../components/adminComponents/TestimonialModal';
 import DataLoader from '../../components/sharedComponents/DataLoader';
 import NoDataFound from '../../components/sharedComponents/NoDataFound';
+import PageLayout from '../../components/sharedComponents/PageLayout';
+import DataTable, { Column, HeaderCell, Cell } from '../../components/sharedComponents/DataTable';
 import Button from '../../components/ui/Button';
-
-const { Column, HeaderCell, Cell } = Table;
 
 function Testimonials() {
   const { authData } = useContext(AuthContext);
@@ -19,168 +19,86 @@ function Testimonials() {
   const [loading, setLoading] = useState(true);
   const [showNoData, setShowNoData] = useState(false);
 
-  useEffect(() => {
-    get_all_testimonials();
-  }, []);
+  useEffect(() => { get_all_testimonials(); }, []);
 
   const get_all_testimonials = () => {
     fetch(apiUrl + 'admin/get-all-testimonials', {
-      headers: {
-        Authorization: authData.token,
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-      },
+      headers: { Authorization: authData.token, Accept: 'application/json', 'Content-Type': 'application/json' },
     })
       .then((res) => res.json())
-      .then((json) => {
-        if (json.status) {
-          setTestimonialsData(json.data);
-          setShowNoData(false);
-        } else {
-          setShowNoData(true);
-        }
-      })
+      .then((json) => { if (json.status) { setTestimonialsData(json.data); setShowNoData(false); } else { setShowNoData(true); } })
       .catch(() => setShowNoData(true))
       .finally(() => setLoading(false));
   };
 
-  const handleEdit = (data) => {
-    setEditData(data);
-    setOpenTestimonialModal(true);
-  };
+  const handleEdit = (data) => { setEditData(data); setOpenTestimonialModal(true); };
 
   const handleDelete = (id, name) => {
-    Swal.fire({
-      title: `Delete testimonial from ${name}?`,
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonText: 'Delete',
-    }).then((result) => {
-      if (result.isConfirmed) {
-        fetch(`${apiUrl}admin/delete-testimonial/${id}`, {
-          method: 'DELETE',
-          headers: {
-            Authorization: authData.token,
-          },
-        })
-          .then((res) => res.json())
-          .then((json) => {
-            if (json.success) {
-              toast.success('Deleted successfully!');
-              get_all_testimonials();
-            } else {
-              toast.error('Failed to delete.');
-            }
-          })
-          .catch(() => toast.error('Delete failed.'));
-      }
-    });
+    Swal.fire({ title: `Delete testimonial from ${name}?`, icon: 'warning', showCancelButton: true, confirmButtonText: 'Delete' })
+      .then((result) => {
+        if (result.isConfirmed) {
+          fetch(`${apiUrl}admin/delete-testimonial/${id}`, { method: 'DELETE', headers: { Authorization: authData.token } })
+            .then((res) => res.json())
+            .then((json) => { if (json.success) { toast.success('Deleted successfully!'); get_all_testimonials(); } else { toast.error('Failed to delete.'); } })
+            .catch(() => toast.error('Delete failed.'));
+        }
+      });
   };
 
   if (loading) return <DataLoader />;
 
-  const testimonials = testimonialsData.map((item, index) => ({
-    ...item,
-    key: index,
-  }));
+  const testimonials = testimonialsData.map((item, index) => ({ ...item, key: index }));
 
   return (
     <>
       {showNoData ? (
-        <NoDataFound
-          name="Testimonials"
-          message="No testimonials found, kindly add a new testimonial!"
-          showButton={true}
-          handleClick={() => {
-            setEditData(null);
-            setOpenTestimonialModal(true);
-          }}
-        />
+        <NoDataFound name="Testimonials" message="No testimonials found, kindly add a new testimonial!" showButton={true}
+          handleClick={() => { setEditData(null); setOpenTestimonialModal(true); }} />
       ) : (
-        <>
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="mb-0">Testimonials</h2>
-            <Button
-               appearance="primary"
-              onClick={() => {
-                setEditData(null);
-                setOpenTestimonialModal(true);
-              }}
-            >
-              + Add Testimonial
-            </Button>
-          </div>
-
-          <Table
-            data={testimonials}
-            hover
-            showHeader
-            bordered
-            cellBordered
-            autoHeight
-            rowHeight={45}
-            headerHeight={40}
-          >
-            <Column width={80} align="center">
-              <HeaderCell>S. No.</HeaderCell>
+        <PageLayout
+          title="Testimonials"
+          subtitle="Manage customer testimonials and reviews."
+          actionLabel="+ Add Testimonial"
+          actionOnClick={() => { setEditData(null); setOpenTestimonialModal(true); }}
+        >
+          <DataTable data={testimonials}>
+            <Column width={60} align="center">
+              <HeaderCell>#</HeaderCell>
               <Cell>{(_, index) => index + 1}</Cell>
             </Column>
-
             <Column flexGrow={1}>
               <HeaderCell>Feedbacker Name</HeaderCell>
               <Cell>
                 {(rowData) => (
                   <div className="flex items-center gap-2">
-                    <Image
-                      circle
-                      src={`${imageUrl}${rowData.image}`}
-                      width={30}
-                      height={30}
-                      alt={rowData.name}
-                    />
+                    <Image circle src={`${imageUrl}${rowData.image}`} width={30} height={30} alt={rowData.name} />
                     <span>{rowData.name}</span>
                   </div>
                 )}
               </Cell>
             </Column>
-
             <Column flexGrow={2}>
               <HeaderCell>Testimonial</HeaderCell>
               <Cell dataKey="description" />
             </Column>
-
-            <Column width={150}>
-              <HeaderCell>Action</HeaderCell>
+            <Column width={150} align="center">
+              <HeaderCell>Actions</HeaderCell>
               <Cell>
                 {(rowData) => (
-                  <div className="flex gap-2">
-                    <Button
-                       appearance="primary" size="sm"
-                      onClick={() => handleEdit(rowData)}
-                    >
-                      Edit
-                    </Button>
-                    <Button
-                       appearance="primary" color="red" size="sm"
-                      onClick={() => handleDelete(rowData.id, rowData.name)}
-                    >
-                      Delete
-                    </Button>
+                  <div className="flex gap-1.5 justify-center">
+                    <Button appearance="subtle" size="xs" onClick={() => handleEdit(rowData)}>Edit</Button>
+                    <Button appearance="subtle" color="red" size="xs" onClick={() => handleDelete(rowData.id, rowData.name)}>Delete</Button>
                   </div>
                 )}
               </Cell>
             </Column>
-          </Table>
-        </>
+          </DataTable>
+        </PageLayout>
       )}
       <TestimonialModal
-        open={openTestimonialModal}
-        setOpen={setOpenTestimonialModal}
-        edit={!!editData}
-        initialData={editData}
-        authToken={authData.token} // ✅ Pass token
-        onSuccess={() => get_all_testimonials()} // ✅ Refetch after save
-        onDelete={(id) => handleDelete(id, editData?.name)}
+        open={openTestimonialModal} setOpen={setOpenTestimonialModal} edit={!!editData}
+        initialData={editData} authToken={authData.token}
+        onSuccess={() => get_all_testimonials()} onDelete={(id) => handleDelete(id, editData?.name)}
       />
     </>
   );

@@ -1,13 +1,13 @@
 import { useContext, useEffect, useState } from 'react';
-import { Table, Pagination, Input } from 'rsuite';
+import { Pagination, Input } from 'rsuite';
 import { apiUrl } from '../../envConfig';
 import { AuthContext } from '../../AuthContextProvider';
 import AreaModal from '../../components/adminComponents/AreaModal';
 import DataLoader from '../../components/sharedComponents/DataLoader';
 import NoDataFound from '../../components/sharedComponents/NoDataFound';
+import PageLayout from '../../components/sharedComponents/PageLayout';
+import DataTable, { Column, HeaderCell, Cell } from '../../components/sharedComponents/DataTable';
 import Button from '../../components/ui/Button';
-
-const { Column, HeaderCell, Cell } = Table;
 
 export default function CitiesAndAreas() {
   const { authData } = useContext(AuthContext);
@@ -15,11 +15,7 @@ export default function CitiesAndAreas() {
   const [edit, setEdit] = useState({ area: false });
   const [areasData, setAreasData] = useState([]);
   const [stateList, setStateList] = useState([]);
-  const [paginationMeta, setPaginationMeta] = useState({
-    current_page: 1,
-    per_page: 20,
-    total: 0,
-  });
+  const [paginationMeta, setPaginationMeta] = useState({ current_page: 1, per_page: 20, total: 0 });
   const [loading, setLoading] = useState(true);
   const [searching, setSearching] = useState(false);
   const [showNoData, setShowNoData] = useState(false);
@@ -32,288 +28,127 @@ export default function CitiesAndAreas() {
   };
 
   useEffect(() => {
-    if (!searchTerm) {
-      get_all_areas(paginationMeta.current_page);
-    }
+    if (!searchTerm) get_all_areas(paginationMeta.current_page);
     getAllStates();
   }, [paginationMeta.current_page]);
 
-  // Search functionality with debounce
   useEffect(() => {
-    // Clear existing timeout
-    if (searchTimeout) {
-      clearTimeout(searchTimeout);
-    }
-
-    // If search term is empty, get all areas
-    if (!searchTerm.trim()) {
-      get_all_areas(1);
-      return;
-    }
-
-    // Set new timeout for search
-    const timeoutId = setTimeout(() => {
-      searchAreas(searchTerm.trim());
-    }, 3000); // 3 seconds delay
-
+    if (searchTimeout) clearTimeout(searchTimeout);
+    if (!searchTerm.trim()) { get_all_areas(1); return; }
+    const timeoutId = setTimeout(() => searchAreas(searchTerm.trim()), 3000);
     setSearchTimeout(timeoutId);
-
-    // Cleanup function
-    return () => {
-      if (timeoutId) {
-        clearTimeout(timeoutId);
-      }
-    };
+    return () => { if (timeoutId) clearTimeout(timeoutId); };
   }, [searchTerm]);
 
   const get_all_areas = (page = 1) => {
     setLoading(true);
     fetch(`${apiUrl}admin/get-all-areas?page=${page}`, {
       method: 'GET',
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-        Authorization: authData.token,
-      },
+      headers: { Accept: 'application/json', 'Content-Type': 'application/json', Authorization: authData.token },
     })
       .then((response) => response.json())
       .then((json) => {
         if (json.status) {
           setAreasData(json.data.data);
-          setPaginationMeta({
-            current_page: json.data.current_page,
-            per_page: json.data.per_page,
-            total: json.data.total,
-          });
+          setPaginationMeta({ current_page: json.data.current_page, per_page: json.data.per_page, total: json.data.total });
           setShowNoData(false);
-        } else {
-          setAreasData([]);
-          setShowNoData(true);
-        }
+        } else { setAreasData([]); setShowNoData(true); }
       })
-      .catch((error) => {
-        console.error('Error:', error);
-        setAreasData([]);
-        setShowNoData(true);
-      })
-      .finally(() => {
-        setLoading(false);
-      });
+      .catch((error) => { console.error('Error:', error); setAreasData([]); setShowNoData(true); })
+      .finally(() => setLoading(false));
   };
 
   const searchAreas = async (searchValue) => {
     setSearching(true);
     try {
-      const response = await fetch(
-        `${apiUrl}admin/search-area?search=${encodeURIComponent(searchValue)}`,
-        {
-          headers: {
-            Accept: 'application/json',
-            'Content-Type': 'application/json',
-            Authorization: authData.token,
-          },
-        }
-      );
+      const response = await fetch(`${apiUrl}admin/search-area?search=${encodeURIComponent(searchValue)}`, {
+        headers: { Accept: 'application/json', 'Content-Type': 'application/json', Authorization: authData.token },
+      });
       const json = await response.json();
-
       if (json.status) {
         setAreasData(json.data);
-        // Reset pagination for search results
-        setPaginationMeta({
-          current_page: 1,
-          total: json.data.length,
-          per_page: json.data.length,
-        });
+        setPaginationMeta({ current_page: 1, total: json.data.length, per_page: json.data.length });
         setShowNoData(false);
-      } else {
-        setAreasData([]);
-        setPaginationMeta({
-          current_page: 1,
-          total: 0,
-          per_page: 20,
-        });
-        setShowNoData(true);
-      }
-    } catch (error) {
-      console.error('Error searching areas:', error);
-      setAreasData([]);
-      setShowNoData(true);
-    } finally {
-      setSearching(false);
-    }
+      } else { setAreasData([]); setPaginationMeta({ current_page: 1, total: 0, per_page: 20 }); setShowNoData(true); }
+    } catch (error) { console.error('Error searching areas:', error); setAreasData([]); setShowNoData(true); }
+    finally { setSearching(false); }
   };
 
   const getAllStates = () => {
     fetch(`${apiUrl}admin/get-all-states`, {
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-        Authorization: authData.token,
-      },
+      headers: { Accept: 'application/json', 'Content-Type': 'application/json', Authorization: authData.token },
     })
       .then((res) => res.json())
-      .then((json) => {
-        if (json.status) {
-          const options = json.data.data.map((s) => ({
-            label: s.state_name,
-            value: s.id,
-          }));
-          setStateList(options);
-        }
-      });
+      .then((json) => { if (json.status) setStateList(json.data.data.map((s) => ({ label: s.state_name, value: s.id }))); });
   };
 
-  const handleSearchChange = (value) => {
-    setSearchTerm(value);
-    // Show searching indicator when user is typing
-    if (value.trim()) {
-      setSearching(true);
-    }
-  };
+  const handleSearchChange = (value) => { setSearchTerm(value); if (value.trim()) setSearching(true); };
+  const clearSearch = () => { setSearchTerm(''); if (searchTimeout) clearTimeout(searchTimeout); get_all_areas(1); };
 
-  const clearSearch = () => {
-    setSearchTerm('');
-    if (searchTimeout) {
-      clearTimeout(searchTimeout);
-    }
-    get_all_areas(1);
-  };
-
-  // For edit flex flex-wrap
   const handleOpenEditArea = (areaData) => {
     setOpenModal((prev) => ({ ...prev, area: true }));
-    setEdit((prev) => ({
-      ...prev,
-      area: { editing: true, data: areaData },
-    }));
+    setEdit((prev) => ({ ...prev, area: { editing: true, data: areaData } }));
   };
 
-  // For add new area
   const handleAddArea = () => {
     setOpenModal((prev) => ({ ...prev, area: true }));
-    setEdit((prev) => ({
-      ...prev,
-      area: { editing: false, data: null },
-    }));
+    setEdit((prev) => ({ ...prev, area: { editing: false, data: null } }));
   };
 
-  if (loading) {
-    return <DataLoader />;
-  }
+  if (loading) return <DataLoader />;
 
   const areas = areasData.map((item) => ({
-    id: item.id,
-    area_name: item.area_name,
+    id: item.id, area_name: item.area_name,
     city_name: item.city?.city_name || 'N/A',
     state_name: item.state?.state_name || item.city?.state?.state_name || 'N/A',
-    state_id: item.state?.id || item.city?.state?.id || null,
-    city_id: item.city?.id || null,
   }));
 
   return (
     <>
       {showNoData && !searchTerm ? (
-        <NoDataFound
-          name="Area"
-          message="No area found, kindly add a new area!"
-          showButton={true}
-          handleClick={handleAddArea}
-        />
+        <NoDataFound name="Area" message="No area found, kindly add a new area!" showButton={true} handleClick={handleAddArea} />
       ) : (
-        <>
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="mb-0 text-lg font-semibold">Areas</h2>
-            <div className="flex gap-2">
-              <Button
-                appearance="primary"
-                type="button"
-                onClick={handleAddArea}
-              >
-                + Add New Area
-              </Button>
-            </div>
-          </div>
-
-          {/* Search Input with Clear Button */}
-          <div className="relative mb-3">
-            <Input
-              type="text"
-              placeholder="Search by area name..."
-              value={searchTerm}
-              onChange={handleSearchChange}
-              style={{ paddingRight: searchTerm ? '40px' : '12px' }}
-            />
+        <PageLayout
+          title="Areas"
+          subtitle="Manage and organize your areas database."
+          actionLabel="+ Add New Area"
+          actionOnClick={handleAddArea}
+        >
+          <div className="relative mb-4">
+            <Input type="text" placeholder="Search by area name..." value={searchTerm} onChange={handleSearchChange}
+              style={{ paddingRight: searchTerm ? '40px' : '12px' }} />
             {searchTerm && (
-              <Button
-                appearance="primary" className="absolute" size="sm"
-                style={{
-                  right: '8px',
-                  top: '50%',
-                  transform: 'translateY(-50%)',
-                  border: 'none',
-                  background: 'transparent',
-                  padding: '0',
-                  width: '20px',
-                  height: '20px',
-                }}
-                onClick={clearSearch}
-                title="Clear search"
-              >
-                ×
-              </Button>
+              <button onClick={clearSearch} className="absolute right-2 top-1/2 -translate-y-1/2 text-muted hover:text-ink transition-colors" title="Clear search">×</button>
             )}
             {searching && (
               <small className="text-muted block mt-1">
-                <span className="loader !w-3.5 !h-3.5 !border-2 align-middle"></span>
-                Searching...
+                <span className="loader !w-3.5 !h-3.5 !border-2 align-middle"></span> Searching...
               </small>
             )}
           </div>
 
-          {/* Search Results Info */}
           {searchTerm && !searching && (
             <div className="mb-3">
               <small className="text-muted">
-                {areasData.length > 0
-                  ? `Found ${areasData.length} result(s) for "${searchTerm}"`
-                  : `No results found for "${searchTerm}"`}
-                <Button
-                  appearance="link" className="ms-2" size="sm"
-                  onClick={clearSearch}
-                >
-                  Show all areas
-                </Button>
+                {areasData.length > 0 ? `Found ${areasData.length} result(s) for "${searchTerm}"` : `No results found for "${searchTerm}"`}
+                <Button appearance="link" className="ms-2" size="sm" onClick={clearSearch}>Show all areas</Button>
               </small>
             </div>
           )}
 
-          {/* No Search Results */}
           {showNoData && searchTerm && !searching ? (
             <div className="text-center py-12">
-              <div className="mb-3">
-                <svg className="w-12 h-12 text-muted mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-4.35-4.35M11 19a8 8 0 100-16 8 8 0 000 16z"/></svg>
-              </div>
-              <h5>No areas found</h5>
-              <p className="text-muted">
-                No areas match your search for "{searchTerm}"
-              </p>
-              <Button appearance="ghost" color="blue" onClick={clearSearch}>
-                Show all areas
-              </Button>
+              <svg className="w-12 h-12 text-muted mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-4.35-4.35M11 19a8 8 0 100-16 8 8 0 000 16z" />
+              </svg>
+              <h5 className="text-ink font-semibold mb-1">No areas found</h5>
+              <p className="text-muted text-sm">No areas match your search for "{searchTerm}"</p>
+              <Button appearance="ghost" onClick={clearSearch} className="mt-3">Show all areas</Button>
             </div>
           ) : (
             <>
-              <Table
-                data={areas}
-                hover
-                showHeader
-                bordered
-                cellBordered
-                autoHeight
-                rowHeight={45}
-                headerHeight={40}
-              >
-                <Column width={100}>
+              <DataTable data={areas}>
+                <Column width={80} align="center">
                   <HeaderCell>ID</HeaderCell>
                   <Cell dataKey="id" />
                 </Column>
@@ -325,71 +160,40 @@ export default function CitiesAndAreas() {
                   <HeaderCell>City</HeaderCell>
                   <Cell dataKey="city_name" />
                 </Column>
-                <Column flexGrow={3}>
+                <Column flexGrow={2}>
                   <HeaderCell>Area Name</HeaderCell>
                   <Cell dataKey="area_name">
                     {(rowData) => (
-                      <Button
-                        appearance="link" className="text-left" size="sm"
-                        onClick={() => handleOpenEditArea(rowData)}
-                        style={{ textDecoration: 'none' }}
-                      >
+                      <Button appearance="link" className="text-left" onClick={() => handleOpenEditArea(rowData)} style={{ textDecoration: 'none' }}>
                         {rowData.area_name}
                       </Button>
                     )}
                   </Cell>
                 </Column>
-                <Column width={120}>
+                <Column width={100} align="center">
                   <HeaderCell>Actions</HeaderCell>
                   <Cell>
                     {(rowData) => (
-                      <Button
-                        appearance="ghost" color="blue" size="xs"
-                        onClick={() => handleOpenEditArea(rowData)}
-                      >
-                        Edit
-                      </Button>
+                      <Button appearance="subtle" size="xs" onClick={() => handleOpenEditArea(rowData)}>Edit</Button>
                     )}
                   </Cell>
                 </Column>
-              </Table>
+              </DataTable>
 
-              {/* Pagination - Only show for regular results, not search results */}
               {!searchTerm && (
-                <div className="flex justify-end mt-3">
-                  <Pagination
-                    prev
-                    last
-                    next
-                    first
-                    size="sm"
-                    ellipsis="true"
-                    total={paginationMeta.total}
-                    limit={paginationMeta.per_page}
-                    activePage={paginationMeta.current_page}
-                    onChangePage={(page) =>
-                      setPaginationMeta((prev) => ({
-                        ...prev,
-                        current_page: page,
-                      }))
-                    }
+                <div className="flex justify-end mt-4 pt-4 border-t border-line/30">
+                  <Pagination prev last next first size="sm" ellipsis="true"
+                    total={paginationMeta.total} limit={paginationMeta.per_page} activePage={paginationMeta.current_page}
+                    onChangePage={(page) => setPaginationMeta((prev) => ({ ...prev, current_page: page }))}
                   />
                 </div>
               )}
             </>
           )}
-        </>
+        </PageLayout>
       )}
 
-      {/* Modals */}
-      <AreaModal
-        openAreaModal={openModal.area}
-        setOpenAreaModal={() => handleClose('area')}
-        edit={edit.area}
-        setAreaData={setAreasData}
-        token={authData.token}
-        stateList={stateList}
-      />
+      <AreaModal openAreaModal={openModal.area} setOpenAreaModal={() => handleClose('area')} edit={edit.area} setAreaData={setAreasData} token={authData.token} stateList={stateList} />
     </>
   );
 }

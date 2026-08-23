@@ -31,6 +31,16 @@ function AddProperty() {
   // Form State
   const [formValue, setFormValue] = useState({
     property_name: '',
+    brand_id: null,
+    alt_name: '',
+    space_category: '',
+    line_1: '',
+    line_2: '',
+    pincode: '',
+    landmark: '',
+    longitude: '',
+    latitude: '',
+    extra_details: {},
     state_id: null,
     city_id: null,
     area_id: null,
@@ -48,6 +58,8 @@ function AddProperty() {
     status: '', // e.g., 'active', 'inactive'
     is_property_favourite: false, // boolean
     has_multiple_pricing: false, // New field
+    average_rating: '', // Public average rating
+    review_count: '', // Number of reviews
     amenities: [], // array of selected amenity IDs, e.g. [1,3,5]
     nearby_locations: [], // array of selected nearby location IDs, e.g. [2,4]
     property_image: [], // array of File objects from <input type="file" multiple/>
@@ -59,14 +71,15 @@ function AddProperty() {
   // Multiple pricing state
   const [multiplePricings, setMultiplePricings] = useState([
     {
-      property_rent: '',
-      property_rent_frequency: '',
-      sharing_type: '',
-      occupancy_type: '',
+      seat_category: '',
+      duration: '',
+      amount: '',
+      marked_amount: '',
     },
   ]);
 
   // Select Data
+  const [brandsList, setBrandsList] = useState([]);
   const [stateList, setStateList] = useState([]);
   const [cityList, setCityList] = useState([]);
   const [areaList, setAreaList] = useState([]);
@@ -117,6 +130,45 @@ function AddProperty() {
     }
   };
 
+
+  const getSeatCategoryOptions = () => {
+    const selectedTypeName = propertyTypesList.find(pt => pt.value === formValue.property_type_id)?.label?.toLowerCase() || '';
+    if (selectedTypeName.includes('coworking')) {
+      return [
+        { label: 'Managed Spaces', value: 'Managed Spaces' },
+        { label: 'Dedicated Desk', value: 'Dedicated Desk' },
+        { label: 'Hot Desk', value: 'Hot Desk' },
+        { label: 'Private Office', value: 'Private Office' },
+        { label: 'Meeting Room', value: 'Meeting Room' },
+      ];
+    }
+    if (selectedTypeName.includes('managed')) {
+      return [
+        { label: 'Managed Office', value: 'Managed Office' },
+        { label: 'Custom Build', value: 'Custom Build' },
+        { label: 'Enterprise Suite', value: 'Enterprise Suite' },
+      ];
+    }
+    if (selectedTypeName.includes('coliving') || selectedTypeName.includes('co-living')) {
+      return [
+        { label: 'Single Occupancy', value: 'Single Occupancy' },
+        { label: 'Double Occupancy', value: 'Double Occupancy' },
+        { label: 'Triple Occupancy', value: 'Triple Occupancy' },
+      ];
+    }
+    if (selectedTypeName.includes('virtual')) {
+      return [
+        { label: 'Virtual Office', value: 'Virtual Office' },
+        { label: 'Business Address', value: 'Business Address' },
+        { label: 'Mail Handling', value: 'Mail Handling' },
+        { label: 'Meeting Room', value: 'Meeting Room' },
+      ];
+    }
+    return [
+      { label: 'Standard', value: 'Standard' }
+    ];
+  };
+
   const handleMultiplePricingChange = (index, field, value) => {
     const updated = multiplePricings.map((pricing, i) =>
       i === index ? { ...pricing, [field]: value } : pricing
@@ -140,6 +192,7 @@ function AddProperty() {
 
   useEffect(() => {
     if (authData?.token) {
+      get_all_brands();
       fetchStates();
     } else if (authData && !authData.token) {
       setLoading(false);
@@ -170,6 +223,15 @@ function AddProperty() {
   }, [formValue.city_id]);
 
   // API: All States
+  const get_all_brands = () => {
+    fetch(apiUrl + 'admin/get-all-brands', {
+      method: 'GET',
+      headers: { Accept: 'application/json', 'Content-Type': 'application/json', Authorization: authData.token },
+    }).then(r => r.json()).then(json => {
+      if (json.success) setBrandsList(json.data.map(b => ({ value: b.id, label: b.operator_brand_name })));
+    }).catch(err => console.log(err));
+  };
+
   const fetchStates = () => {
     fetch(`${apiUrl}admin/get-all-states`, {
       headers: {
@@ -321,6 +383,17 @@ function AddProperty() {
     setEdit((prev) => ({ ...prev, [type]: isEdit }));
   };
 
+
+  const handleExtraDetailChange = (key, value) => {
+    setFormValue((prev) => ({
+      ...prev,
+      extra_details: {
+        ...(prev.extra_details || {}),
+        [key]: value
+      }
+    }));
+  };
+
   const handleImageChange = (e) => {
     const files = Array.from(e.target.files);
     // Combine previous and new uploads, limit to 5
@@ -367,6 +440,17 @@ function AddProperty() {
     formData.append('city_id', formValue.city_id);
     formData.append('area_id', formValue.area_id);
     formData.append('property_type', formValue.property_type_id);
+    if (formValue.brand_id) formData.append('brand_id', formValue.brand_id);
+    formData.append('alt_name', formValue.alt_name || '');
+    formData.append('space_category', formValue.space_category || '');
+    formData.append('line_1', formValue.line_1 || '');
+    formData.append('line_2', formValue.line_2 || '');
+    formData.append('pincode', formValue.pincode || '');
+    formData.append('landmark', formValue.landmark || '');
+    formData.append('longitude', formValue.longitude || '');
+    formData.append('latitude', formValue.latitude || '');
+    formData.append('extra_details', JSON.stringify(formValue.extra_details));
+
 
     // Handle multiple pricing
     formData.append(
@@ -377,22 +461,10 @@ function AddProperty() {
     if (formValue.has_multiple_pricing) {
       // Add multiple pricing data
       multiplePricings.forEach((pricing, index) => {
-        formData.append(
-          `multiple_pricings[${index}][property_rent]`,
-          pricing.property_rent
-        );
-        formData.append(
-          `multiple_pricings[${index}][property_rent_frequency]`,
-          pricing.property_rent_frequency
-        );
-        formData.append(
-          `multiple_pricings[${index}][sharing_type]`,
-          pricing.sharing_type
-        );
-        formData.append(
-          `multiple_pricings[${index}][occupancy_type]`,
-          pricing.occupancy_type
-        );
+        formData.append(`multiple_pricings[${index}][seat_category]`, pricing.seat_category);
+        formData.append(`multiple_pricings[${index}][duration]`, pricing.duration);
+        formData.append(`multiple_pricings[${index}][amount]`, pricing.amount);
+        formData.append(`multiple_pricings[${index}][marked_amount]`, pricing.marked_amount);
       });
     }
     formData.append('property_rent', formValue.property_price);
@@ -412,6 +484,8 @@ function AddProperty() {
       'is_property_favourite',
       formValue.is_property_favourite ? 1 : 0
     );
+    formData.append('average_rating', formValue.average_rating ?? '');
+    formData.append('review_count', formValue.review_count ?? '');
     formData.append('is_main', mainImageIndex);
     formData.append('meta_title', formValue.meta_title);
     formData.append('meta_description', formValue.meta_description);
@@ -513,7 +587,7 @@ function AddProperty() {
     <>
       <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
         <div className="col-span-1 md:col-span-12 flex items-center justify-between mb-4">
-          <h2 className="breadcrumb_title">Add New Property</h2>
+          <h2 className="mb-0 text-2xl font-bold tracking-tight text-ink">Add New Property</h2>
           <Button
             type="submit"
             appearance="primary"
@@ -534,10 +608,28 @@ function AddProperty() {
         </div>
       </div>
       <div className="bg-white p-6 md:p-8 rounded-xl shadow-sm mb-6">
-        <Form fluid>
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+        <Form fluid className="w-full">
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-6 w-full">
             <div className="col-span-1 md:col-span-12">
               <h5 className="text-lg font-semibold text-ink border-b pb-3 mb-2">Basic Information</h5>
+            </div>
+            <div className="col-span-1 md:col-span-6">
+              <Form.Group controlId="brandId">
+                <Form.Label>Brand</Form.Label>
+                <SelectPicker
+                  data={[{ value: null, label: 'None' }, ...brandsList]}
+                  placeholder="Select Brand"
+                  block searchable cleanable
+                  value={formValue.brand_id}
+                  onChange={(val) => setFormValue(prev => ({ ...prev, brand_id: val }))}
+                />
+              </Form.Group>
+            </div>
+            <div className="col-span-1 md:col-span-6">
+              <Form.Group controlId="altName">
+                <Form.Label>Alt Name</Form.Label>
+                <Input placeholder="Alt Name" value={formValue.alt_name} onChange={e => setFormValue(prev => ({ ...prev, alt_name: e }))} />
+              </Form.Group>
             </div>
             <div className="col-span-1 md:col-span-12">
               <Form.Group controlId="propertyTitle">
@@ -591,6 +683,42 @@ function AddProperty() {
                     setFormValue((prev) => ({ ...prev, property_address: e }))
                   }
                 />
+              </Form.Group>
+            </div>
+            <div className="col-span-1 md:col-span-6">
+              <Form.Group controlId="line_1">
+                <Form.Label>Line 1</Form.Label>
+                <Input placeholder="Enter Line 1" value={formValue.line_1} onChange={(e) => setFormValue(prev => ({ ...prev, line_1: e }))} />
+              </Form.Group>
+            </div>
+            <div className="col-span-1 md:col-span-6">
+              <Form.Group controlId="line_2">
+                <Form.Label>Line 2</Form.Label>
+                <Input placeholder="Enter Line 2" value={formValue.line_2} onChange={(e) => setFormValue(prev => ({ ...prev, line_2: e }))} />
+              </Form.Group>
+            </div>
+            <div className="col-span-1 md:col-span-4">
+              <Form.Group controlId="pincode">
+                <Form.Label>Pincode</Form.Label>
+                <Input placeholder="Enter Pincode" value={formValue.pincode} onChange={(e) => setFormValue(prev => ({ ...prev, pincode: e }))} />
+              </Form.Group>
+            </div>
+            <div className="col-span-1 md:col-span-4">
+              <Form.Group controlId="landmark">
+                <Form.Label>Landmark</Form.Label>
+                <Input placeholder="Enter Landmark" value={formValue.landmark} onChange={(e) => setFormValue(prev => ({ ...prev, landmark: e }))} />
+              </Form.Group>
+            </div>
+            <div className="col-span-1 md:col-span-4">
+              <Form.Group controlId="longitude">
+                <Form.Label>Longitude</Form.Label>
+                <Input placeholder="Enter Longitude" value={formValue.longitude} onChange={(e) => setFormValue(prev => ({ ...prev, longitude: e }))} />
+              </Form.Group>
+            </div>
+            <div className="col-span-1 md:col-span-4">
+              <Form.Group controlId="latitude">
+                <Form.Label>Latitude</Form.Label>
+                <Input placeholder="Enter Latitude" value={formValue.latitude} onChange={(e) => setFormValue(prev => ({ ...prev, latitude: e }))} />
               </Form.Group>
             </div>
             <div className="col-span-1 md:col-span-12">
@@ -775,6 +903,90 @@ function AddProperty() {
                 />
               </Form.Group>
             </div>
+            <div className="col-span-1 md:col-span-3">
+              <Form.Group controlId="averageRating">
+                <Form.Label>Average Rating</Form.Label>
+                <Input
+                  type="number"
+                  step="0.1"
+                  min="0"
+                  max="5"
+                  placeholder="e.g. 4.5"
+                  value={formValue.average_rating}
+                  onChange={(val) =>
+                    setFormValue((fv) => ({ ...fv, average_rating: val }))
+                  }
+                />
+              </Form.Group>
+            </div>
+            <div className="col-span-1 md:col-span-3">
+              <Form.Group controlId="reviewCount">
+                <Form.Label>Review Count</Form.Label>
+                <Input
+                  type="number"
+                  min="0"
+                  placeholder="e.g. 120"
+                  value={formValue.review_count}
+                  onChange={(val) =>
+                    setFormValue((fv) => ({ ...fv, review_count: val }))
+                  }
+                />
+              </Form.Group>
+            </div>
+            <div className="col-span-1 md:col-span-12">
+              {(() => {
+                const selectedTypeName = propertyTypesList.find(pt => pt.value === formValue.property_type_id)?.label?.toLowerCase() || '';
+                const isCoworking = selectedTypeName.includes('coworking');
+                const isVirtual = selectedTypeName.includes('virtual');
+                const isManaged = selectedTypeName.includes('managed');
+
+                return (
+                  <div className="grid grid-cols-1 md:grid-cols-12 gap-6 w-full mt-4">
+                    {isCoworking && (
+                      <>
+                        <div className="col-span-1 md:col-span-12"><h5 className="text-lg font-semibold text-ink border-b pb-3 mb-2">Coworking Details</h5></div>
+                        <div className="col-span-1 md:col-span-4"><Form.Group><Form.Label>Working People</Form.Label><Input value={formValue.extra_details?.working_people || ''} onChange={v => handleExtraDetailChange('working_people', v)} /></Form.Group></div>
+                        <div className="col-span-1 md:col-span-4"><Form.Group><Form.Label>Day Pass Value</Form.Label><Input value={formValue.extra_details?.day_pass_value || ''} onChange={v => handleExtraDetailChange('day_pass_value', v)} /></Form.Group></div>
+                        <div className="col-span-1 md:col-span-4"><Form.Group><Form.Label>Open Desk Monthly</Form.Label><Input value={formValue.extra_details?.open_desk_monthly || ''} onChange={v => handleExtraDetailChange('open_desk_monthly', v)} /></Form.Group></div>
+                        <div className="col-span-1 md:col-span-6"><Form.Group><Form.Label>Open Time</Form.Label><Input type="time" value={formValue.extra_details?.open_time || ''} onChange={v => handleExtraDetailChange('open_time', v)} /></Form.Group></div>
+                        <div className="col-span-1 md:col-span-6"><Form.Group><Form.Label>Close Time</Form.Label><Input type="time" value={formValue.extra_details?.close_time || ''} onChange={v => handleExtraDetailChange('close_time', v)} /></Form.Group></div>
+                      </>
+                    )}
+                    {isVirtual && (
+                      <>
+                        <div className="col-span-1 md:col-span-12"><h5 className="text-lg font-semibold text-ink border-b pb-3 mb-2">Virtual Office Details</h5></div>
+                        <div className="col-span-1 md:col-span-4"><Form.Group><Form.Label>VO Category</Form.Label><Input value={formValue.extra_details?.vo_category || ''} onChange={v => handleExtraDetailChange('vo_category', v)} /></Form.Group></div>
+                        <div className="col-span-1 md:col-span-4"><Form.Group><Form.Label>Tenure (Months)</Form.Label><Input type="number" value={formValue.extra_details?.tenure_months || ''} onChange={v => handleExtraDetailChange('tenure_months', v)} /></Form.Group></div>
+                        <div className="col-span-1 md:col-span-4"><Form.Group><Form.Label>Total Price Amount</Form.Label><Input type="number" value={formValue.extra_details?.total_price_amount || ''} onChange={v => handleExtraDetailChange('total_price_amount', v)} /></Form.Group></div>
+                      </>
+                    )}
+                    {isManaged && (
+                      <>
+                        <div className="col-span-1 md:col-span-12"><h5 className="text-lg font-semibold text-ink border-b pb-3 mb-2">Managed Office Details</h5></div>
+                        <div className="col-span-1 md:col-span-4"><Form.Group><Form.Label>Contacted Person</Form.Label><Input value={formValue.extra_details?.contacted_person || ''} onChange={v => handleExtraDetailChange('contacted_person', v)} /></Form.Group></div>
+                        <div className="col-span-1 md:col-span-4"><Form.Group><Form.Label>Contact No</Form.Label><Input value={formValue.extra_details?.contact_no || ''} onChange={v => handleExtraDetailChange('contact_no', v)} /></Form.Group></div>
+                        <div className="col-span-1 md:col-span-4"><Form.Group><Form.Label>Inventory Type</Form.Label><Input value={formValue.extra_details?.inventory_type || ''} onChange={v => handleExtraDetailChange('inventory_type', v)} /></Form.Group></div>
+                        <div className="col-span-1 md:col-span-4"><Form.Group><Form.Label>Furnished</Form.Label><Input value={formValue.extra_details?.furnished || ''} onChange={v => handleExtraDetailChange('furnished', v)} /></Form.Group></div>
+                        <div className="col-span-1 md:col-span-4"><Form.Group><Form.Label>Building Developer</Form.Label><Input value={formValue.extra_details?.building_developer || ''} onChange={v => handleExtraDetailChange('building_developer', v)} /></Form.Group></div>
+                        <div className="col-span-1 md:col-span-4"><Form.Group><Form.Label>Rating</Form.Label><Input value={formValue.extra_details?.rating || ''} onChange={v => handleExtraDetailChange('rating', v)} /></Form.Group></div>
+                        <div className="col-span-1 md:col-span-4"><Form.Group><Form.Label>Super Area</Form.Label><Input value={formValue.extra_details?.super_area || ''} onChange={v => handleExtraDetailChange('super_area', v)} /></Form.Group></div>
+                        <div className="col-span-1 md:col-span-4"><Form.Group><Form.Label>Carpet Area</Form.Label><Input value={formValue.extra_details?.carpet_area || ''} onChange={v => handleExtraDetailChange('carpet_area', v)} /></Form.Group></div>
+                        <div className="col-span-1 md:col-span-4"><Form.Group><Form.Label>Building Area</Form.Label><Input value={formValue.extra_details?.building_area || ''} onChange={v => handleExtraDetailChange('building_area', v)} /></Form.Group></div>
+                        <div className="col-span-1 md:col-span-4"><Form.Group><Form.Label>Number of Floor</Form.Label><Input value={formValue.extra_details?.number_of_floor || ''} onChange={v => handleExtraDetailChange('number_of_floor', v)} /></Form.Group></div>
+                        <div className="col-span-1 md:col-span-4"><Form.Group><Form.Label>Seating Capacity</Form.Label><Input value={formValue.extra_details?.seating_capacity || ''} onChange={v => handleExtraDetailChange('seating_capacity', v)} /></Form.Group></div>
+                        <div className="col-span-1 md:col-span-4"><Form.Group><Form.Label>Available From</Form.Label><Input type="date" value={formValue.extra_details?.available_from || ''} onChange={v => handleExtraDetailChange('available_from', v)} /></Form.Group></div>
+                        <div className="col-span-1 md:col-span-4"><Form.Group><Form.Label>Ready to deliver in (Months)</Form.Label><Input value={formValue.extra_details?.ready_to_deliver_in || ''} onChange={v => handleExtraDetailChange('ready_to_deliver_in', v)} /></Form.Group></div>
+                        <div className="col-span-1 md:col-span-4"><Form.Group><Form.Label>Lock-in Period</Form.Label><Input value={formValue.extra_details?.lock_in_period || ''} onChange={v => handleExtraDetailChange('lock_in_period', v)} /></Form.Group></div>
+                        <div className="col-span-1 md:col-span-12 mt-2">
+                          <Toggle checked={formValue.extra_details?.is_popular || false} onChange={v => handleExtraDetailChange('is_popular', v)} /> <span className="ml-2">Is Popular</span>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                );
+              })()}
+            </div>
+
             {/* <div className="col-span-1 md:col-span-4">
               <Form.Group controlId="rooms">
                 <Form.Label>No. of Rooms</Form.Label>
@@ -905,113 +1117,61 @@ function AddProperty() {
                     {multiplePricings.map((pricing, index) => (
                       <div
                         key={index}
-                        className="pricing-option-card p-5 mb-5 border rounded-xl bg-slate-50/50 shadow-sm"
+                        className="grid grid-cols-1 md:grid-cols-12 gap-6 items-end border p-4 rounded-md mb-4 relative"
                       >
-                        <div className="flex justify-between items-center mb-4">
-                          <h6 className="font-medium text-slate-800">Pricing Option {index + 1}</h6>
-                          {multiplePricings.length > 1 && (
+                        {multiplePricings.length > 1 && (
+                          <div className="absolute top-2 right-2">
                             <Button
                               type="button"
-                              appearance="primary" color="red" size="sm"
+                              appearance="link"
+                              className="!text-red-500 !p-0"
                               onClick={() => removeMultiplePricing(index)}
                             >
-                              Remove
+                              ✕ Remove
                             </Button>
-                          )}
+                          </div>
+                        )}
+                        <div className="col-span-1 md:col-span-3">
+                          <Form.Group>
+                            <Form.Label>Seat Category</Form.Label>
+                            <SelectPicker
+                              data={getSeatCategoryOptions()}
+                              placeholder="Select Category"
+                              block
+                              value={pricing.seat_category}
+                              onChange={(val) => handleMultiplePricingChange(index, 'seat_category', val)}
+                            />
+                          </Form.Group>
                         </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
-                          <div className="col-span-1 md:col-span-6">
-                            <Form.Group controlId="rentalAmount">
-                              <Form.Label>
-                                Rental Amount
-                                <span className="text-red-500">*</span>
-                              </Form.Label>
-                              <Input
-                                placeholder="Rental Amount"
-                                type="number"
-                                name="rentalAmount"
-                                value={pricing.property_rent}
-                                onChange={(value) =>
-                                  handleMultiplePricingChange(
-                                    index,
-                                    'property_rent',
-                                    value
-                                  )
-                                }
-                              />
-                            </Form.Group>
-                          </div>
-                          <div className="col-span-1 md:col-span-6">
-                            <Form.Group controlId="rentalFrequency">
-                              <Form.Label>
-                                Rental Frequency
-                                <span className="text-red-500">*</span>
-                              </Form.Label>
-
-                              <SelectPicker
-                                data={rentFrequencyOptions}
-                                placeholder="Frequency"
-                                block
-                                searchable={false}
-                                cleanable
-                                name="rentalFrequency"
-                                value={pricing.property_rent_frequency}
-                                onChange={(value) =>
-                                  handleMultiplePricingChange(
-                                    index,
-                                    'property_rent_frequency',
-                                    value
-                                  )
-                                }
-                              />
-                            </Form.Group>
-                          </div>
-                          <div className="col-span-1 md:col-span-6">
-                            <Form.Group controlId="sharingType">
-                              <Form.Label>
-                                Sharing Type
-                                <span className="text-red-500">*</span>
-                              </Form.Label>
-                              <SelectPicker
-                                data={sharingTypeOptions} block
-                                value={pricing.sharing_type}
-                                onChange={(value) =>
-                                  handleMultiplePricingChange(
-                                    index,
-                                    'sharing_type',
-                                    value
-                                  )
-                                }
-                                name="sharingType"
-                                placeholder="Select sharing type"
-                                style={{ width: '100%' }}
-                              />
-                            </Form.Group>
-                          </div>
-                          <div className="col-span-1 md:col-span-6">
-                            <Form.Group controlId="occupancyType">
-                              <Form.Label>
-                                Occupancy Type
-                                <span className="text-red-500">*</span>
-                              </Form.Label>
-
-                              <SelectPicker
-                                data={occupancyTypeOptions} block
-                                value={pricing.occupancy_type}
-                                onChange={(value) =>
-                                  handleMultiplePricingChange(
-                                    index,
-                                    'occupancy_type',
-                                    value
-                                  )
-                                }
-                                name="occupancyType"
-                                placeholder="Select occupancy type"
-                                style={{ width: '100%' }}
-                              />
-                            </Form.Group>
-                          </div>
+                        <div className="col-span-1 md:col-span-3">
+                          <Form.Group>
+                            <Form.Label>Duration</Form.Label>
+                            <Input
+                              placeholder="e.g. Monthly, Daily"
+                              value={pricing.duration}
+                              onChange={(val) => handleMultiplePricingChange(index, 'duration', val)}
+                            />
+                          </Form.Group>
+                        </div>
+                        <div className="col-span-1 md:col-span-3">
+                          <Form.Group>
+                            <Form.Label>Amount</Form.Label>
+                            <Input
+                              placeholder="Amount"
+                              value={pricing.amount}
+                              onChange={(val) => handleMultiplePricingChange(index, 'amount', val)}
+                            />
+                          </Form.Group>
+                        </div>
+                        <div className="col-span-1 md:col-span-3">
+                          <Form.Group>
+                            <Form.Label>Marked Amount</Form.Label>
+                            <Input
+                              placeholder="Marked Amount (Optional)"
+                              value={pricing.marked_amount}
+                              onChange={(val) => handleMultiplePricingChange(index, 'marked_amount', val)}
+                            />
+                          </Form.Group>
                         </div>
                       </div>
                     ))}
@@ -1045,6 +1205,11 @@ function AddProperty() {
                   onChange={handleAmenityChange}
                 >
                   {amenities.name}
+                  {amenities.icon && (
+                    <span className="text-[10px] text-gray-400 ml-1 font-mono">
+                      [{amenities.icon}]
+                    </span>
+                  )}
                 </Checkbox>
               </div>
             ))}

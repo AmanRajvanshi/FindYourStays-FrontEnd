@@ -1,13 +1,13 @@
 import { useContext, useEffect, useState } from 'react';
-import { Pagination, Table, Input } from 'rsuite';
+import { Pagination, Input } from 'rsuite';
 import { apiUrl } from '../../envConfig';
 import { AuthContext } from '../../AuthContextProvider';
 import StateModal from '../../components/adminComponents/StateModal';
 import DataLoader from '../../components/sharedComponents/DataLoader';
 import NoDataFound from '../../components/sharedComponents/NoDataFound';
+import PageLayout from '../../components/sharedComponents/PageLayout';
+import DataTable, { Column, HeaderCell, Cell } from '../../components/sharedComponents/DataTable';
 import Button from '../../components/ui/Button';
-
-const { Column, HeaderCell, Cell } = Table;
 
 export default function States() {
   const { authData } = useContext(AuthContext);
@@ -41,32 +41,15 @@ export default function States() {
     }
   }, [paginationMeta.current_page]);
 
-  // Search functionality with debounce
   useEffect(() => {
-    // Clear existing timeout
-    if (searchTimeout) {
-      clearTimeout(searchTimeout);
-    }
-
-    // If search term is empty, get all states
+    if (searchTimeout) clearTimeout(searchTimeout);
     if (!searchTerm.trim()) {
       get_all_states(1);
       return;
     }
-
-    // Set new timeout for search
-    const timeoutId = setTimeout(() => {
-      searchStates(searchTerm.trim());
-    }, 3000); // 3 seconds delay
-
+    const timeoutId = setTimeout(() => searchStates(searchTerm.trim()), 3000);
     setSearchTimeout(timeoutId);
-
-    // Cleanup function
-    return () => {
-      if (timeoutId) {
-        clearTimeout(timeoutId);
-      }
-    };
+    return () => { if (timeoutId) clearTimeout(timeoutId); };
   }, [searchTerm]);
 
   const get_all_states = (page = 1) => {
@@ -99,9 +82,7 @@ export default function States() {
         setStatesData([]);
         setShowNoData(true);
       })
-      .finally(() => {
-        setLoading(false);
-      });
+      .finally(() => setLoading(false));
   };
 
   const searchStates = async (searchValue) => {
@@ -109,32 +90,16 @@ export default function States() {
     try {
       const response = await fetch(
         `${apiUrl}admin/search-state?search=${encodeURIComponent(searchValue)}`,
-        {
-          headers: {
-            Accept: 'application/json',
-            'Content-Type': 'application/json',
-            Authorization: authData.token,
-          },
-        }
+        { headers: { Accept: 'application/json', 'Content-Type': 'application/json', Authorization: authData.token } }
       );
       const json = await response.json();
-
       if (json.status) {
         setStatesData(json.data);
-        // Reset pagination for search results
-        setPaginationMeta({
-          current_page: 1,
-          total: json.data.length,
-          per_page: json.data.length,
-        });
+        setPaginationMeta({ current_page: 1, total: json.data.length, per_page: json.data.length });
         setShowNoData(false);
       } else {
         setStatesData([]);
-        setPaginationMeta({
-          current_page: 1,
-          total: 0,
-          per_page: 20,
-        });
+        setPaginationMeta({ current_page: 1, total: 0, per_page: 20 });
         setShowNoData(true);
       }
     } catch (error) {
@@ -148,27 +113,18 @@ export default function States() {
 
   const handleSearchChange = (value) => {
     setSearchTerm(value);
-    // Show searching indicator when user is typing
-    if (value.trim()) {
-      setSearching(true);
-    }
+    if (value.trim()) setSearching(true);
   };
 
   const clearSearch = () => {
     setSearchTerm('');
-    if (searchTimeout) {
-      clearTimeout(searchTimeout);
-    }
+    if (searchTimeout) clearTimeout(searchTimeout);
     get_all_states(1);
   };
 
-  if (loading) {
-    return <DataLoader />;
-  }
+  if (loading) return <DataLoader />;
 
-  const states = [
-    ...new Map(statesData.map((item) => [item.state_name, item])).values(),
-  ];
+  const states = [...new Map(statesData.map((item) => [item.state_name, item])).values()];
 
   return (
     <>
@@ -177,27 +133,16 @@ export default function States() {
           name="State"
           message="No state found, kindly add a new state!"
           showButton={true}
-          handleClick={() => {
-            handleOpen('state');
-          }}
+          handleClick={() => handleOpen('state')}
         />
       ) : (
-        <>
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="mb-0 text-lg font-semibold">States</h2>
-            <div className="flex gap-2">
-              <Button
-                 appearance="primary"
-                type="button"
-                onClick={() => handleOpen('state')}
-              >
-                + Add New State
-              </Button>
-            </div>
-          </div>
-
-          {/* Search Input with Clear Button */}
-          <div className="relative mb-3">
+        <PageLayout
+          title="States"
+          actionLabel="+ Add New State"
+          actionOnClick={() => handleOpen('state')}
+        >
+          {/* Search */}
+          <div className="relative mb-4">
             <Input
               type="text"
               placeholder="Search by state name..."
@@ -206,23 +151,13 @@ export default function States() {
               style={{ paddingRight: searchTerm ? '40px' : '12px' }}
             />
             {searchTerm && (
-              <Button
-                 appearance="primary" className="absolute" size="sm"
-                style={{
-                  right: '8px',
-                  top: '50%',
-                  transform: 'translateY(-50%)',
-                  border: 'none',
-                  background: 'transparent',
-                  padding: '0',
-                  width: '20px',
-                  height: '20px',
-                }}
+              <button
                 onClick={clearSearch}
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-muted hover:text-ink transition-colors"
                 title="Clear search"
               >
                 ×
-              </Button>
+              </button>
             )}
             {searching && (
               <small className="text-muted block mt-1">
@@ -232,50 +167,32 @@ export default function States() {
             )}
           </div>
 
-          {/* Search Results Info */}
           {searchTerm && !searching && (
             <div className="mb-3">
               <small className="text-muted">
                 {statesData.length > 0
                   ? `Found ${statesData.length} result(s) for "${searchTerm}"`
                   : `No results found for "${searchTerm}"`}
-                <Button
-                   appearance="link" className="ms-2" size="sm"
-                  onClick={clearSearch}
-                >
+                <Button appearance="link" className="ms-2" size="sm" onClick={clearSearch}>
                   Show all states
                 </Button>
               </small>
             </div>
           )}
 
-          {/* No Search Results */}
           {showNoData && searchTerm && !searching ? (
             <div className="text-center py-12">
-              <div className="mb-3">
-                <svg className="w-12 h-12 text-muted mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-4.35-4.35M11 19a8 8 0 100-16 8 8 0 000 16z"/></svg>
-              </div>
-              <h5>No states found</h5>
-              <p className="text-muted">
-                No states match your search for "{searchTerm}"
-              </p>
-              <Button  appearance="ghost" color="blue" onClick={clearSearch}>
-                Show all states
-              </Button>
+              <svg className="w-12 h-12 text-muted mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-4.35-4.35M11 19a8 8 0 100-16 8 8 0 000 16z" />
+              </svg>
+              <h5 className="text-ink font-semibold mb-1">No states found</h5>
+              <p className="text-muted text-sm">No states match your search for "{searchTerm}"</p>
+              <Button appearance="ghost" onClick={clearSearch} className="mt-3">Show all states</Button>
             </div>
           ) : (
             <>
-              <Table
-                data={states}
-                hover
-                showHeader
-                bordered
-                cellBordered
-                autoHeight
-                rowHeight={45}
-                headerHeight={40}
-              >
-                <Column width={100}>
+              <DataTable data={states}>
+                <Column width={80} align="center">
                   <HeaderCell>ID</HeaderCell>
                   <Cell dataKey="id" />
                 </Column>
@@ -284,10 +201,9 @@ export default function States() {
                   <Cell dataKey="state_name">
                     {(rowData) => (
                       <Button
-                         appearance="link" className="text-left"
-                        onClick={() => {
-                          handleOpen('state', true, rowData);
-                        }}
+                        appearance="link"
+                        className="text-left"
+                        onClick={() => handleOpen('state', true, rowData)}
                         style={{ textDecoration: 'none' }}
                       >
                         {rowData.state_name}
@@ -295,49 +211,34 @@ export default function States() {
                     )}
                   </Cell>
                 </Column>
-                <Column width={120}>
+                <Column width={100} align="center">
                   <HeaderCell>Actions</HeaderCell>
                   <Cell>
                     {(rowData) => (
-                      <Button
-                         appearance="ghost" color="blue" size="xs"
-                        onClick={() => handleOpen('state', true, rowData)}
-                      >
+                      <Button appearance="subtle" size="xs" onClick={() => handleOpen('state', true, rowData)}>
                         Edit
                       </Button>
                     )}
                   </Cell>
                 </Column>
-              </Table>
+              </DataTable>
 
-              {/* Pagination - Only show for regular results, not search results */}
               {!searchTerm && (
-                <div className="flex justify-end mt-3">
+                <div className="flex justify-end mt-4 pt-4 border-t border-line/30">
                   <Pagination
-                    prev
-                    last
-                    next
-                    first
-                    size="sm"
-                    ellipsis="true"
+                    prev last next first size="sm" ellipsis="true"
                     total={paginationMeta.total}
                     limit={paginationMeta.per_page}
                     activePage={paginationMeta.current_page}
-                    onChangePage={(page) =>
-                      setPaginationMeta((prev) => ({
-                        ...prev,
-                        current_page: page,
-                      }))
-                    }
+                    onChangePage={(page) => setPaginationMeta((prev) => ({ ...prev, current_page: page }))}
                   />
                 </div>
               )}
             </>
           )}
-        </>
+        </PageLayout>
       )}
 
-      {/* Modals */}
       <StateModal
         openStateModal={openModal.state}
         setOpenStateModal={() => handleClose('state')}
