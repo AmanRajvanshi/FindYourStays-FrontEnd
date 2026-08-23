@@ -1,19 +1,23 @@
-import { useContext, useEffect, useState } from 'react';
-import toast from 'react-hot-toast';
-import { Form, Input, SelectPicker } from 'rsuite';
-import Swal from 'sweetalert2';
-import { AuthContext } from '../../AuthContextProvider';
-import DataLoader from '../../components/sharedComponents/DataLoader';
-import DataTable, { Cell, Column, HeaderCell } from '../../components/sharedComponents/DataTable';
-import NoDataFound from '../../components/sharedComponents/NoDataFound';
-import PageLayout from '../../components/sharedComponents/PageLayout';
-import Button from '../../components/ui/Button';
-import { apiUrl } from '../../envConfig';
+import { useContext, useEffect, useState } from "react";
+import toast from "react-hot-toast";
+import { Form, Input, SelectPicker } from "rsuite";
+import Swal from "sweetalert2";
+import { AuthContext } from "../../AuthContextProvider";
+import DataLoader from "../../components/sharedComponents/DataLoader";
+import DataTable, {
+  Cell,
+  Column,
+  HeaderCell,
+} from "../../components/sharedComponents/DataTable";
+import NoDataFound from "../../components/sharedComponents/NoDataFound";
+import PageLayout from "../../components/sharedComponents/PageLayout";
+import Button from "../../components/ui/Button";
+import { apiUrl } from "../../envConfig";
 
 const FAQ_CATEGORIES = [
-  { label: 'Home Page', value: 'Home Page' },
-  { label: 'Property Page', value: 'Property Page' },
-  { label: 'Property Type Page', value: 'Property Type Page' },
+  { label: "Home Page", value: "Home Page" },
+  { label: "Property Page", value: "Property Page" },
+  { label: "Property Type Page", value: "Property Type Page" },
 ];
 
 function Faqs() {
@@ -23,24 +27,26 @@ function Faqs() {
   const [showNoData, setShowNoData] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
-  const [filterCategory, setFilterCategory] = useState('All');
+  const [filterCategory, setFilterCategory] = useState("All");
   const [formData, setFormData] = useState({
-    question: '',
-    answer: '',
-    category: 'Home Page',
+    question: "",
+    answer: "",
+    category: "Home Page",
   });
   const [saving, setSaving] = useState(false);
 
-  useEffect(() => { loadFaqs(); }, []);
+  useEffect(() => {
+    loadFaqs();
+  }, []);
 
   const loadFaqs = () => {
     setLoading(true);
     fetch(`${apiUrl}admin/get-all-faqs`, {
-      headers: { Accept: 'application/json', Authorization: authData.token },
+      headers: { Accept: "application/json", Authorization: authData.token },
     })
       .then((r) => r.json())
       .then((json) => {
-        if (json.success) {
+        if (json.status) {
           setFaqs(json.data || []);
           setShowNoData(false);
         } else {
@@ -48,7 +54,7 @@ function Faqs() {
         }
       })
       .catch(() => {
-        toast.error('Failed to load FAQs');
+        toast.error("Failed to load FAQs");
         setShowNoData(true);
       })
       .finally(() => setLoading(false));
@@ -56,18 +62,20 @@ function Faqs() {
 
   const handleSubmit = () => {
     if (!formData.question.trim() || !formData.answer.trim()) {
-      toast.error('Please fill in all fields');
+      toast.error("Please fill in all fields");
       return;
     }
     setSaving(true);
-    const url = editingId ? `${apiUrl}admin/update-faq/${editingId}` : `${apiUrl}admin/add-faq`;
-    const method = editingId ? 'PUT' : 'POST';
+    const url = editingId
+      ? `${apiUrl}admin/update-faq/${editingId}`
+      : `${apiUrl}admin/add-faq`;
+    const method = editingId ? "PUT" : "POST";
 
     fetch(url, {
       method,
       headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
+        Accept: "application/json",
+        "Content-Type": "application/json",
         Authorization: authData.token,
       },
       body: JSON.stringify(formData),
@@ -75,14 +83,14 @@ function Faqs() {
       .then((r) => r.json())
       .then((json) => {
         if (json.status) {
-          toast.success(editingId ? 'FAQ updated' : 'FAQ created');
+          toast.success(editingId ? "FAQ updated" : "FAQ created");
           resetForm();
           loadFaqs();
         } else {
-          toast.error(json.message || 'Operation failed');
+          toast.error(json.message || "Operation failed");
         }
       })
-      .catch(() => toast.error('Request failed'))
+      .catch(() => toast.error("Request failed"))
       .finally(() => setSaving(false));
   };
 
@@ -90,7 +98,7 @@ function Faqs() {
     setFormData({
       question: faq.question,
       answer: faq.answer,
-      category: faq.category || 'Home Page',
+      category: faq.category || "Home Page",
     });
     setEditingId(faq.id);
     setShowForm(true);
@@ -98,41 +106,44 @@ function Faqs() {
 
   const handleDelete = (id, question) => {
     Swal.fire({
-      title: 'Delete FAQ?',
+      title: "Delete FAQ?",
       text: `"${question.substring(0, 60)}..."`,
-      icon: 'warning',
+      icon: "warning",
       showCancelButton: true,
-      confirmButtonText: 'Delete',
+      confirmButtonText: "Delete",
     }).then((result) => {
       if (result.isConfirmed) {
         fetch(`${apiUrl}admin/delete-faq/${id}`, {
-          method: 'DELETE',
-          headers: { Accept: 'application/json', Authorization: authData.token },
+          method: "DELETE",
+          headers: {
+            Accept: "application/json",
+            Authorization: authData.token,
+          },
         })
           .then((r) => r.json())
           .then((json) => {
             if (json.status) {
-              toast.success('FAQ deleted');
+              toast.success("FAQ deleted");
               loadFaqs();
             } else {
-              toast.error(json.message || 'Delete failed');
+              toast.error(json.message || "Delete failed");
             }
           })
-          .catch(() => toast.error('Request failed'));
+          .catch(() => toast.error("Request failed"));
       }
     });
   };
 
   const resetForm = () => {
-    setFormData({ question: '', answer: '', category: 'Home Page' });
+    setFormData({ question: "", answer: "", category: "Home Page" });
     setEditingId(null);
     setShowForm(false);
   };
 
   const filteredFaqs = faqs.filter((faq) => {
     const matchesCategory =
-      filterCategory === 'All' ||
-      (faq.category || '').toLowerCase() === filterCategory.toLowerCase();
+      filterCategory === "All" ||
+      (faq.category || "").toLowerCase() === filterCategory.toLowerCase();
     return matchesCategory;
   });
 
@@ -144,7 +155,11 @@ function Faqs() {
         name="FAQ"
         message="No FAQs found, add your first FAQ!"
         showButton={true}
-        handleClick={() => { setEditingId(null); setShowForm(true); setShowNoData(false); }}
+        handleClick={() => {
+          setEditingId(null);
+          setShowForm(true);
+          setShowNoData(false);
+        }}
       />
     );
   }
@@ -154,7 +169,15 @@ function Faqs() {
       title="FAQ Management"
       subtitle="Manage frequently asked questions shown on the website."
       actionLabel={showForm ? undefined : "+ Add FAQ"}
-      actionOnClick={showForm ? undefined : () => { setEditingId(null); setFormData({ question: '', answer: '', category: 'Home Page' }); setShowForm(true); }}
+      actionOnClick={
+        showForm
+          ? undefined
+          : () => {
+              setEditingId(null);
+              setFormData({ question: "", answer: "", category: "Home Page" });
+              setShowForm(true);
+            }
+      }
       flush={true}
     >
       <div className="space-y-6">
@@ -162,7 +185,7 @@ function Faqs() {
           <div className="bg-section rounded-xl border border-line/50 p-6">
             <div className="flex items-center justify-between mb-5">
               <h3 className="text-lg font-bold text-ink">
-                {editingId ? 'Edit FAQ' : 'New FAQ'}
+                {editingId ? "Edit FAQ" : "New FAQ"}
               </h3>
               <Button appearance="subtle" size="sm" onClick={resetForm}>
                 Cancel
@@ -179,7 +202,9 @@ function Faqs() {
                     block
                     cleanable={false}
                     value={formData.category}
-                    onChange={(val) => setFormData({ ...formData, category: val })}
+                    onChange={(val) =>
+                      setFormData({ ...formData, category: val })
+                    }
                   />
                 </div>
                 <div className="md:col-span-2">
@@ -189,7 +214,9 @@ function Faqs() {
                   <Input
                     placeholder="Enter question"
                     value={formData.question}
-                    onChange={(val) => setFormData({ ...formData, question: val })}
+                    onChange={(val) =>
+                      setFormData({ ...formData, question: val })
+                    }
                   />
                 </div>
               </div>
@@ -202,7 +229,7 @@ function Faqs() {
                   rows={4}
                   placeholder="Enter answer"
                   className="resize-none"
-                  style={{ width: '100%' }}
+                  style={{ width: "100%" }}
                   value={formData.answer}
                   onChange={(val) => setFormData({ ...formData, answer: val })}
                 />
@@ -214,7 +241,7 @@ function Faqs() {
                   loading={saving}
                   disabled={saving}
                 >
-                  {editingId ? 'Update FAQ' : 'Create FAQ'}
+                  {editingId ? "Update FAQ" : "Create FAQ"}
                 </Button>
                 <Button appearance="subtle" onClick={resetForm}>
                   Cancel
@@ -226,15 +253,17 @@ function Faqs() {
 
         <div className="bg-white rounded-xl border border-line/50 shadow-sm p-6 space-y-6">
           <div className="flex flex-wrap gap-2">
-            {['All', 'Home Page', 'Property Page', 'Property Type Page'].map((cat) => (
-              <Button
-                appearance={filterCategory === cat ? "primary" : "subtle"}
-                onClick={() => setFilterCategory(cat)}
-                key={cat}
-              >
-                {cat}
-              </Button>
-            ))}
+            {["All", "Home Page", "Property Page", "Property Type Page"].map(
+              (cat) => (
+                <Button
+                  appearance={filterCategory === cat ? "primary" : "subtle"}
+                  onClick={() => setFilterCategory(cat)}
+                  key={cat}
+                >
+                  {cat}
+                </Button>
+              ),
+            )}
           </div>
 
           {filteredFaqs.length === 0 ? (
@@ -265,7 +294,9 @@ function Faqs() {
                 <HeaderCell>Answer</HeaderCell>
                 <Cell>
                   {(rowData) => (
-                    <span className="line-clamp-1 text-muted">{rowData.answer}</span>
+                    <span className="line-clamp-1 text-muted">
+                      {rowData.answer}
+                    </span>
                   )}
                 </Cell>
               </Column>
@@ -274,10 +305,21 @@ function Faqs() {
                 <Cell>
                   {(rowData) => (
                     <div className="flex gap-1.5 justify-center">
-                      <Button appearance="subtle" size="xs" onClick={() => handleEdit(rowData)}>
+                      <Button
+                        appearance="subtle"
+                        size="xs"
+                        onClick={() => handleEdit(rowData)}
+                      >
                         Edit
                       </Button>
-                      <Button appearance="subtle" color="red" size="xs" onClick={() => handleDelete(rowData.id, rowData.question)}>
+                      <Button
+                        appearance="subtle"
+                        color="red"
+                        size="xs"
+                        onClick={() =>
+                          handleDelete(rowData.id, rowData.question)
+                        }
+                      >
                         Delete
                       </Button>
                     </div>

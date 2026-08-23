@@ -10,6 +10,7 @@ import NoDataFound from '../../components/sharedComponents/NoDataFound';
 import PageLayout from '../../components/sharedComponents/PageLayout';
 import DataTable, { Column, HeaderCell, Cell } from '../../components/sharedComponents/DataTable';
 import Button from '../../components/ui/Button';
+import { FaStar } from 'react-icons/fa';
 
 function Testimonials() {
   const { authData } = useContext(AuthContext);
@@ -77,9 +78,20 @@ function Testimonials() {
                 )}
               </Cell>
             </Column>
-            <Column flexGrow={2}>
-              <HeaderCell>Testimonial</HeaderCell>
-              <Cell dataKey="description" />
+            <Column width={100} align="center">
+              <HeaderCell>Rating</HeaderCell>
+              <Cell>
+                {(rowData) => (
+                  <div className="flex">
+                    {[...Array(5)].map((_, i) => (
+                      <FaStar
+                        key={i}
+                        color={i < (rowData.rating || 0) ? '#f5c518' : '#ddd'}
+                      />
+                    ))}
+                  </div>
+                )}
+              </Cell>
             </Column>
             <Column width={150} align="center">
               <HeaderCell>Actions</HeaderCell>

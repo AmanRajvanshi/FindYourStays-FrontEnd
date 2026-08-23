@@ -16,6 +16,7 @@ function TestimonialModal({
     name: '',
     description: '',
     image: null,
+    rating: '',
   });
   const [previewImage, setPreviewImage] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -25,11 +26,12 @@ function TestimonialModal({
       setFormData({
         name: initialData.name || '',
         description: initialData.description || '',
+        rating: initialData.rating || '',
         image: null,
       });
       setPreviewImage(initialData.image ? imageUrl + initialData.image : null);
     } else {
-      setFormData({ name: '', description: '', image: null });
+      setFormData({ name: '', description: '', rating: '', image: null });
       setPreviewImage(null);
     }
   }, [initialData, edit]);
@@ -51,6 +53,7 @@ function TestimonialModal({
     const data = new FormData();
     data.append('name', formData.name);
     data.append('description', formData.description);
+    data.append('rating', formData.rating);
     if (formData.image && formData.image instanceof File) {
       data.append('image', formData.image);
     }
@@ -103,6 +106,16 @@ function TestimonialModal({
               rows={4}
               value={formData.description}
               onChange={(value) => handleInputChange(value, 'description')}
+            />
+          </Form.Group>
+          <Form.Group>
+            <Form.Label>Rating (1‑5)</Form.Label>
+            <Input
+              type="number"
+              min={1}
+              max={5}
+              value={formData.rating}
+              onChange={(value) => handleInputChange(value, 'rating')}
             />
           </Form.Group>
           <Form.Group>
