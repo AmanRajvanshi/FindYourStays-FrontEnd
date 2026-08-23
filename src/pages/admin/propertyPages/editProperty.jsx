@@ -132,23 +132,22 @@ function EditProperty() {
 
   const getSeatCategoryOptions = () => {
     const selectedTypeName = propertyTypesList.find(pt => pt.value === formValue.property_type_id)?.label?.toLowerCase() || '';
-    if (selectedTypeName.includes('coworking')) {
+    if (selectedTypeName.includes('coworking') || selectedTypeName.includes('co-working')) {
       return [
-        { label: 'Managed Spaces', value: 'Managed Spaces' },
-        { label: 'Dedicated Desk', value: 'Dedicated Desk' },
-        { label: 'Hot Desk', value: 'Hot Desk' },
-        { label: 'Private Office', value: 'Private Office' },
+        { label: 'Day Pass', value: 'Day Pass' },
         { label: 'Meeting Room', value: 'Meeting Room' },
+        { label: 'Flexi Desk', value: 'Flexi Desk' },
+        { label: 'Dedicated Seat', value: 'Dedicated Seat' },
+        { label: 'Private Cabins', value: 'Private Cabins' },
       ];
     }
     if (selectedTypeName.includes('managed')) {
       return [
-        { label: 'Managed Office', value: 'Managed Office' },
-        { label: 'Custom Build', value: 'Custom Build' },
-        { label: 'Enterprise Suite', value: 'Enterprise Suite' },
+        { label: 'Per Seat Price', value: 'Per Seat Price' },
+        { label: 'Square Ft.', value: 'Square Ft.' },
       ];
     }
-    if (selectedTypeName.includes('coliving') || selectedTypeName.includes('co-living')) {
+    if (selectedTypeName.includes('coliving') || selectedTypeName.includes('co-living') || selectedTypeName.includes('co living')) {
       return [
         { label: 'Single Occupancy', value: 'Single Occupancy' },
         { label: 'Double Occupancy', value: 'Double Occupancy' },
@@ -350,10 +349,10 @@ function EditProperty() {
         if (p.multiple_pricings && p.multiple_pricings.length > 0) {
           setMultiplePricings(
             p.multiple_pricings.map((mp) => ({
-              property_rent: mp.property_rent,
-              property_rent_frequency: mp.property_rent_frequency,
-              sharing_type: mp.sharing_type,
-              occupancy_type: mp.occupancy_type,
+              seat_category: mp.seat_category || '',
+              duration: mp.duration || '',
+              amount: mp.amount || '',
+              marked_amount: mp.marked_amount || '',
             }))
           );
         }
@@ -577,7 +576,80 @@ function EditProperty() {
     else if (mainImageIndex > idx) setMainImageIndex((prev) => prev - 1);
   };
 
+  const validateForm = () => {
+    const errs = [];
+
+    if (!formValue.property_name?.trim()) errs.push('Property Title is required');
+    if (!formValue.property_description?.trim()) errs.push('Property Description is required');
+    if (!formValue.state_id) errs.push('State is required');
+    if (!formValue.city_id) errs.push('City is required');
+    if (!formValue.area_id) errs.push('Area is required');
+    if (!formValue.property_type_id) errs.push('Property Type is required');
+    if (!formValue.status) errs.push('Status is required');
+
+    const selectedTypeName = propertyTypesList.find(pt => pt.value === formValue.property_type_id)?.label?.toLowerCase() || '';
+    const isCoworking = selectedTypeName.includes('coworking') || selectedTypeName.includes('co-working');
+    const isVirtual = selectedTypeName.includes('virtual');
+    const isManaged = selectedTypeName.includes('managed') || selectedTypeName.includes('managed spaces');
+    const isSinglePricingRemoved = isCoworking || isManaged || isVirtual;
+
+    if (!isSinglePricingRemoved) {
+      if (!formValue.property_price) errs.push('Rental Amount is required');
+      if (!formValue.property_rent_frequency) errs.push('Rental Frequency is required');
+      if (!formValue.sharing_type) errs.push('Sharing Type is required');
+      if (!formValue.occupancy_type) errs.push('Occupancy Type is required');
+    }
+
+    if (isSinglePricingRemoved || formValue.has_multiple_pricing) {
+      if (!multiplePricings || multiplePricings.length === 0) {
+        errs.push('At least one Multiple Pricing option is required');
+      } else {
+        multiplePricings.forEach((pricing, index) => {
+          if (!pricing.seat_category) {
+            errs.push(`Pricing Option ${index + 1}: Seat Category is required`);
+          }
+          if (!pricing.duration) {
+            errs.push(`Pricing Option ${index + 1}: Duration is required`);
+          }
+        });
+      }
+    }
+
+    if (formValue.average_rating !== '' && formValue.average_rating !== undefined && formValue.average_rating !== null) {
+      const rating = parseFloat(formValue.average_rating);
+      if (isNaN(rating) || rating < 0 || rating > 5) {
+        errs.push('Average Rating must be a number between 0 and 5');
+      }
+    }
+    if (formValue.review_count !== '' && formValue.review_count !== undefined && formValue.review_count !== null) {
+      const count = parseInt(formValue.review_count, 10);
+      if (isNaN(count) || count < 0) {
+        errs.push('Review Count must be a non-negative integer');
+      }
+    }
+
+    if (!formValue.meta_title?.trim()) errs.push('Meta Title is required');
+    if (!formValue.meta_keywords || formValue.meta_keywords.length === 0) errs.push('At least one Meta Keyword is required');
+    if (!formValue.meta_description?.trim()) errs.push('Meta Description is required');
+
+    return errs;
+  };
+
   const updateProperty = async () => {
+    const validationErrors = validateForm();
+    if (validationErrors.length > 0) {
+      toast.error(
+        <div>
+          <strong style={{ display: 'block', marginBottom: '4px' }}>Please fix the following validation errors:</strong>
+          <ul style={{ paddingLeft: '20px', listStyleType: 'disc', fontSize: '13px', margin: 0 }}>
+            {validationErrors.map((err, i) => <li key={i}>{err}</li>)}
+          </ul>
+        </div>,
+        { duration: 5000 }
+      );
+      return;
+    }
+
     const formData = new FormData();
     // Scalar fields
     formData.append('property_title', formValue.property_name);
@@ -600,16 +672,22 @@ function EditProperty() {
     formData.append('longitude', formValue.longitude || '');
     formData.append('latitude', formValue.latitude || '');
     formData.append('extra_details', JSON.stringify(formValue.extra_details));
-    formData.append('property_rent', formValue.property_price);
+    const selectedTypeName = propertyTypesList.find(pt => pt.value === formValue.property_type_id)?.label?.toLowerCase() || '';
+    const isCoworking = selectedTypeName.includes('coworking') || selectedTypeName.includes('co-working');
+    const isVirtual = selectedTypeName.includes('virtual');
+    const isManaged = selectedTypeName.includes('managed') || selectedTypeName.includes('managed spaces');
+    const isSinglePricingRemoved = isCoworking || isManaged || isVirtual;
+
+    formData.append('property_rent', isSinglePricingRemoved ? '' : (formValue.property_price || ''));
     formData.append(
       'property_rent_frequency',
-      formValue.property_rent_frequency ?? 'daily'
+      isSinglePricingRemoved ? '' : (formValue.property_rent_frequency ?? 'daily')
     );
-    formData.append('sharing_type', formValue.sharing_type ?? '');
-    formData.append('occupancy_type', formValue.occupancy_type ?? '');
+    formData.append('sharing_type', isSinglePricingRemoved ? '' : (formValue.sharing_type ?? ''));
+    formData.append('occupancy_type', isSinglePricingRemoved ? '' : (formValue.occupancy_type ?? ''));
     formData.append('no_of_rooms', formValue.no_of_rooms ?? 1);
     formData.append('no_of_bathrooms', formValue.no_of_bathrooms ?? 1);
-    formData.append('year_built', formValue.year_built ?? 2000);
+    formData.append('year_built', isSinglePricingRemoved ? '' : (formValue.year_built ?? ''));
     formData.append('map', formValue.map_link);
     formData.append('status', formValue.status ?? 'active');
     formData.append(
@@ -620,10 +698,10 @@ function EditProperty() {
     formData.append('review_count', formValue.review_count ?? '');
     formData.append(
       'has_multiple_pricing',
-      formValue.has_multiple_pricing ? '1' : '0'
+      (isSinglePricingRemoved || formValue.has_multiple_pricing) ? '1' : '0'
     );
 
-    if (formValue.has_multiple_pricing) {
+    if (isSinglePricingRemoved || formValue.has_multiple_pricing) {
       // Add multiple pricing data
       multiplePricings.forEach((pricing, index) => {
         formData.append(`multiple_pricings[${index}][seat_category]`, pricing.seat_category || '');
@@ -978,80 +1056,8 @@ function EditProperty() {
             <div className="col-span-1 md:col-span-12">
               <h5 className="text-lg font-semibold text-ink border-b pb-3 mb-2">Property Details</h5>
             </div>
-            <div className="col-span-1 md:col-span-6">
-              <Form.Group controlId="rental">
-                <Form.Label className="flex items-center justify-between">
-                  <span>
-                    Rental
-                    <span className="text-red-500">*</span>
-                  </span>
-                  <Button
-                    type="button"
-                    appearance="link" size="sm"
-                    style={{ visibility: 'hidden' }}
-                  >
-                    Add Property Type
-                  </Button>
-                </Form.Label>
-                <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
-                  <div className="col-span-1 md:col-span-7">
-                    <Input
-                      placeholder="Amount"
-                      value={formValue.property_price}
-                      onChange={(val) =>
-                        setFormValue((fv) => ({ ...fv, property_price: val }))
-                      }
-                    />
-                  </div>
-                  <div className="col-span-1 md:col-span-5">
-                    <SelectPicker
-                      data={rentFrequencyOptions}
-                      placeholder="Frequency"
-                      block
-                      searchable={false}
-                      cleanable
-                      value={formValue.property_rent_frequency}
-                      onChange={(val) =>
-                        setFormValue((fv) => ({
-                          ...fv,
-                          property_rent_frequency: val,
-                        }))
-                      }
-                    />
-                  </div>
-                </div>
-              </Form.Group>
-            </div>
-            <div className="col-span-1 md:col-span-6">
-              <Form.Group controlId="propertyType">
-                <Form.Label className="flex items-center justify-between">
-                  <span>
-                    Property Type
-                    <span className="text-red-500">*</span>
-                  </span>
-                  <Button
-                    type="button"
-                    appearance="link" size="sm"
-                    onClick={() => {
-                      handleOpen('propertyType');
-                    }}
-                  >
-                    Add Property Type
-                  </Button>
-                </Form.Label>
-                <SelectPicker
-                  data={propertyTypesList}
-                  placeholder="Select Type"
-                  block
-                  searchable
-                  cleanable
-                  value={formValue.property_type_id}
-                  onChange={(val) =>
-                    setFormValue((fv) => ({ ...fv, property_type_id: val }))
-                  }
-                />
-              </Form.Group>
-            </div>
+            
+            {/* Row 1: Average Rating, Review Count, Property Type */}
             <div className="col-span-1 md:col-span-3">
               <Form.Group controlId="averageRating">
                 <Form.Label>Average Rating</Form.Label>
@@ -1082,170 +1088,244 @@ function EditProperty() {
                 />
               </Form.Group>
             </div>
-
-            <div className="col-span-1 md:col-span-12">
-              {(() => {
-                const selectedTypeName = propertyTypesList.find(pt => pt.value === formValue.property_type_id)?.label?.toLowerCase() || '';
-                const isCoworking = selectedTypeName.includes('coworking');
-                const isVirtual = selectedTypeName.includes('virtual');
-                const isManaged = selectedTypeName.includes('managed');
-
-                return (
-                  <div className="grid grid-cols-1 md:grid-cols-12 gap-6 w-full mt-4">
-                    {isCoworking && (
-                      <>
-                        <div className="col-span-1 md:col-span-12"><h5 className="text-lg font-semibold text-ink border-b pb-3 mb-2">Coworking Details</h5></div>
-                        <div className="col-span-1 md:col-span-4"><Form.Group><Form.Label>Working People</Form.Label><Input value={formValue.extra_details?.working_people || ''} onChange={v => handleExtraDetailChange('working_people', v)} /></Form.Group></div>
-                        <div className="col-span-1 md:col-span-4"><Form.Group><Form.Label>Day Pass Value</Form.Label><Input value={formValue.extra_details?.day_pass_value || ''} onChange={v => handleExtraDetailChange('day_pass_value', v)} /></Form.Group></div>
-                        <div className="col-span-1 md:col-span-4"><Form.Group><Form.Label>Open Desk Monthly</Form.Label><Input value={formValue.extra_details?.open_desk_monthly || ''} onChange={v => handleExtraDetailChange('open_desk_monthly', v)} /></Form.Group></div>
-                        <div className="col-span-1 md:col-span-6"><Form.Group><Form.Label>Open Time</Form.Label><Input type="time" value={formValue.extra_details?.open_time || ''} onChange={v => handleExtraDetailChange('open_time', v)} /></Form.Group></div>
-                        <div className="col-span-1 md:col-span-6"><Form.Group><Form.Label>Close Time</Form.Label><Input type="time" value={formValue.extra_details?.close_time || ''} onChange={v => handleExtraDetailChange('close_time', v)} /></Form.Group></div>
-                      </>
-                    )}
-                    {isVirtual && (
-                      <>
-                        <div className="col-span-1 md:col-span-12"><h5 className="text-lg font-semibold text-ink border-b pb-3 mb-2">Virtual Office Details</h5></div>
-                        <div className="col-span-1 md:col-span-4"><Form.Group><Form.Label>VO Category</Form.Label><Input value={formValue.extra_details?.vo_category || ''} onChange={v => handleExtraDetailChange('vo_category', v)} /></Form.Group></div>
-                        <div className="col-span-1 md:col-span-4"><Form.Group><Form.Label>Tenure (Months)</Form.Label><Input type="number" value={formValue.extra_details?.tenure_months || ''} onChange={v => handleExtraDetailChange('tenure_months', v)} /></Form.Group></div>
-                        <div className="col-span-1 md:col-span-4"><Form.Group><Form.Label>Total Price Amount</Form.Label><Input type="number" value={formValue.extra_details?.total_price_amount || ''} onChange={v => handleExtraDetailChange('total_price_amount', v)} /></Form.Group></div>
-                      </>
-                    )}
-                    {isManaged && (
-                      <>
-                        <div className="col-span-1 md:col-span-12"><h5 className="text-lg font-semibold text-ink border-b pb-3 mb-2">Managed Office Details</h5></div>
-                        <div className="col-span-1 md:col-span-4"><Form.Group><Form.Label>Contacted Person</Form.Label><Input value={formValue.extra_details?.contacted_person || ''} onChange={v => handleExtraDetailChange('contacted_person', v)} /></Form.Group></div>
-                        <div className="col-span-1 md:col-span-4"><Form.Group><Form.Label>Contact No</Form.Label><Input value={formValue.extra_details?.contact_no || ''} onChange={v => handleExtraDetailChange('contact_no', v)} /></Form.Group></div>
-                        <div className="col-span-1 md:col-span-4"><Form.Group><Form.Label>Inventory Type</Form.Label><Input value={formValue.extra_details?.inventory_type || ''} onChange={v => handleExtraDetailChange('inventory_type', v)} /></Form.Group></div>
-                        <div className="col-span-1 md:col-span-4"><Form.Group><Form.Label>Furnished</Form.Label><Input value={formValue.extra_details?.furnished || ''} onChange={v => handleExtraDetailChange('furnished', v)} /></Form.Group></div>
-                        <div className="col-span-1 md:col-span-4"><Form.Group><Form.Label>Building Developer</Form.Label><Input value={formValue.extra_details?.building_developer || ''} onChange={v => handleExtraDetailChange('building_developer', v)} /></Form.Group></div>
-                        <div className="col-span-1 md:col-span-4"><Form.Group><Form.Label>Rating</Form.Label><Input value={formValue.extra_details?.rating || ''} onChange={v => handleExtraDetailChange('rating', v)} /></Form.Group></div>
-                        <div className="col-span-1 md:col-span-4"><Form.Group><Form.Label>Super Area</Form.Label><Input value={formValue.extra_details?.super_area || ''} onChange={v => handleExtraDetailChange('super_area', v)} /></Form.Group></div>
-                        <div className="col-span-1 md:col-span-4"><Form.Group><Form.Label>Carpet Area</Form.Label><Input value={formValue.extra_details?.carpet_area || ''} onChange={v => handleExtraDetailChange('carpet_area', v)} /></Form.Group></div>
-                        <div className="col-span-1 md:col-span-4"><Form.Group><Form.Label>Building Area</Form.Label><Input value={formValue.extra_details?.building_area || ''} onChange={v => handleExtraDetailChange('building_area', v)} /></Form.Group></div>
-                        <div className="col-span-1 md:col-span-4"><Form.Group><Form.Label>Number of Floor</Form.Label><Input value={formValue.extra_details?.number_of_floor || ''} onChange={v => handleExtraDetailChange('number_of_floor', v)} /></Form.Group></div>
-                        <div className="col-span-1 md:col-span-4"><Form.Group><Form.Label>Seating Capacity</Form.Label><Input value={formValue.extra_details?.seating_capacity || ''} onChange={v => handleExtraDetailChange('seating_capacity', v)} /></Form.Group></div>
-                        <div className="col-span-1 md:col-span-4"><Form.Group><Form.Label>Available From</Form.Label><Input type="date" value={formValue.extra_details?.available_from || ''} onChange={v => handleExtraDetailChange('available_from', v)} /></Form.Group></div>
-                        <div className="col-span-1 md:col-span-4"><Form.Group><Form.Label>Ready to deliver in (Months)</Form.Label><Input value={formValue.extra_details?.ready_to_deliver_in || ''} onChange={v => handleExtraDetailChange('ready_to_deliver_in', v)} /></Form.Group></div>
-                        <div className="col-span-1 md:col-span-4"><Form.Group><Form.Label>Lock-in Period</Form.Label><Input value={formValue.extra_details?.lock_in_period || ''} onChange={v => handleExtraDetailChange('lock_in_period', v)} /></Form.Group></div>
-                        <div className="col-span-1 md:col-span-12 mt-2">
-                          <Toggle checked={formValue.extra_details?.is_popular || false} onChange={v => handleExtraDetailChange('is_popular', v)} /> <span className="ml-2">Is Popular</span>
-                        </div>
-                      </>
-                    )}
-                  </div>
-                );
-              })()}
-            </div>
-
-            {/* <div className="col-span-1 md:col-span-4">
-              <Form.Group controlId="rooms">
-                <Form.Label>No. of Rooms</Form.Label>
-                <Input
-                  placeholder="Enter Number of Rooms"
-                  value={formValue.no_of_rooms}
-                  onChange={(val) =>
-                    setFormValue((fv) => ({ ...fv, no_of_rooms: val }))
-                  }
-                />
-              </Form.Group>
-            </div>
-            <div className="col-span-1 md:col-span-4">
-              <Form.Group controlId="bathrooms">
-                <Form.Label>No. of Bathrooms</Form.Label>
-                <Input
-                  placeholder="Enter Number of Bathrooms"
-                  value={formValue.no_of_bathrooms}
-                  onChange={(val) =>
-                    setFormValue((fv) => ({ ...fv, no_of_bathrooms: val }))
-                  }
-                />
-              </Form.Group>
-            </div> */}
-            <div className="col-span-1 md:col-span-3">
-              <Form.Group controlId="sharingType">
-                <Form.Label>
-                  Sharing Type
-                  <span className="text-red-500">*</span>
+            <div className="col-span-1 md:col-span-6">
+              <Form.Group controlId="propertyType">
+                <Form.Label className="flex items-center justify-between">
+                  <span>
+                    Property Type
+                    <span className="text-red-500">*</span>
+                  </span>
+                  <Button
+                    type="button"
+                    appearance="link" size="sm"
+                    onClick={() => {
+                      handleOpen('propertyType');
+                    }}
+                  >
+                    Add Property Type
+                  </Button>
                 </Form.Label>
                 <SelectPicker
-                  data={sharingTypeOptions} block
-                  value={formValue.sharing_type}
-                  onChange={(value) =>
-                    setFormValue((fv) => ({ ...fv, sharing_type: value }))
-                  }
-                  placeholder="Select sharing type"
-                  style={{ width: '100%' }}
-                />
-              </Form.Group>
-            </div>
-            <div className="col-span-1 md:col-span-3">
-              <Form.Group controlId="occupancyType">
-                <Form.Label>
-                  Occupancy Type
-                  <span className="text-red-500">*</span>
-                </Form.Label>
-                <SelectPicker
-                  data={occupancyTypeOptions} block
-                  value={formValue.occupancy_type}
-                  onChange={(val) =>
-                    setFormValue((fv) => ({ ...fv, occupancy_type: val }))
-                  }
-                  placeholder="Select occupancy type"
-                  style={{ width: '100%' }}
-                />
-              </Form.Group>
-            </div>
-            <div className="col-span-1 md:col-span-3">
-              <Form.Group controlId="status">
-                <Form.Label>
-                  Status
-                  <span className="text-red-500">*</span>
-                </Form.Label>{' '}
-                <SelectPicker
-                  data={
-                    [
-                      { label: 'Active', value: 'active' },
-                      { label: 'Inactive', value: 'inactive' },
-                      { label: 'Draft', value: 'draft' },
-                    ] || []
-                  }
-                  placeholder="Select Status"
+                  data={propertyTypesList}
+                  placeholder="Select Type"
                   block
-                  searchable={false}
+                  searchable
                   cleanable
-                  value={formValue.status}
-                  onChange={(val) =>
-                    setFormValue((fv) => ({ ...fv, status: val }))
-                  }
+                  value={formValue.property_type_id}
+                  onChange={(val) => {
+                    const selName = propertyTypesList.find(pt => pt.value === val)?.label?.toLowerCase() || '';
+                    const isCow = selName.includes('coworking') || selName.includes('co-working');
+                    const isMan = selName.includes('managed');
+                    const isVir = selName.includes('virtual');
+                    
+                    setFormValue((fv) => {
+                      const updated = { ...fv, property_type_id: val };
+                      if (isCow || isMan || isVir) {
+                        updated.has_multiple_pricing = true;
+                      }
+                      return updated;
+                    });
+                  }}
                 />
               </Form.Group>
             </div>
-            <div className="col-span-1 md:col-span-3">
-              <Form.Group controlId="year">
-                <Form.Label>Year Build</Form.Label>
-                <Input
-                  placeholder="Enter Year Build"
-                  value={formValue.year_built}
-                  onChange={(val) =>
-                    setFormValue((fv) => ({ ...fv, year_built: val }))
-                  }
-                />
-              </Form.Group>
-            </div>
-            <div className="col-span-1 md:col-span-3">
-              <Form.Group controlId="status">
-                <Form.Label>
-                  Pricing Options
-                  <span className="text-red-500">*</span>
-                </Form.Label>{' '}
-                <Toggle
-                  checked={formValue.has_multiple_pricing}
-                  onChange={handleToggleMultiplePricing}
-                >
-                  Has Multiple Pricing
-                </Toggle>
-              </Form.Group>
-            </div>
+
+            {/* Row 2: Rental & Pricing Options (Only if single pricing is NOT removed) */}
+            {(() => {
+              const selectedTypeName = propertyTypesList.find(pt => pt.value === formValue.property_type_id)?.label?.toLowerCase() || '';
+              const isCoworking = selectedTypeName.includes('coworking') || selectedTypeName.includes('co-working');
+              const isVirtual = selectedTypeName.includes('virtual');
+              const isManaged = selectedTypeName.includes('managed') || selectedTypeName.includes('managed spaces');
+              const isSinglePricingRemoved = isCoworking || isManaged || isVirtual;
+
+              return (
+                <>
+                  {!isSinglePricingRemoved && (
+                    <>
+                      <div className="col-span-1 md:col-span-6">
+                        <Form.Group controlId="rental">
+                          <Form.Label className="flex items-center justify-between">
+                            <span>
+                              Rental
+                              <span className="text-red-500">*</span>
+                            </span>
+                          </Form.Label>
+                          <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+                            <div className="col-span-1 md:col-span-7">
+                              <Input
+                                placeholder="Amount"
+                                value={formValue.property_price}
+                                onChange={(val) =>
+                                  setFormValue((fv) => ({ ...fv, property_price: val }))
+                                }
+                              />
+                            </div>
+                            <div className="col-span-1 md:col-span-5">
+                              <SelectPicker
+                                data={rentFrequencyOptions}
+                                placeholder="Frequency"
+                                block
+                                searchable={false}
+                                cleanable
+                                value={formValue.property_rent_frequency}
+                                onChange={(val) =>
+                                  setFormValue((fv) => ({
+                                    ...fv,
+                                    property_rent_frequency: val,
+                                  }))
+                                }
+                              />
+                            </div>
+                          </div>
+                        </Form.Group>
+                      </div>
+
+                      <div className="col-span-1 md:col-span-6">
+                        <Form.Group controlId="pricingOptions">
+                          <Form.Label>
+                            Pricing Options
+                            <span className="text-red-500">*</span>
+                          </Form.Label>{' '}
+                          <Toggle
+                            checked={formValue.has_multiple_pricing}
+                            onChange={handleToggleMultiplePricing}
+                          >
+                            Has Multiple Pricing
+                          </Toggle>
+                        </Form.Group>
+                      </div>
+                    </>
+                  )}
+
+                  {/* Row 3: Type-specific Details */}
+                  <div className="col-span-1 md:col-span-12">
+                    <div className="grid grid-cols-1 md:grid-cols-12 gap-6 w-full mt-4">
+                      {isCoworking && (
+                        <>
+                          <div className="col-span-1 md:col-span-12"><h5 className="text-lg font-semibold text-ink border-b pb-3 mb-2">Coworking Details</h5></div>
+                          <div className="col-span-1 md:col-span-4"><Form.Group><Form.Label>Working People</Form.Label><Input value={formValue.extra_details?.working_people || ''} onChange={v => handleExtraDetailChange('working_people', v)} /></Form.Group></div>
+                          <div className="col-span-1 md:col-span-4"><Form.Group><Form.Label>Day Pass Value</Form.Label><Input value={formValue.extra_details?.day_pass_value || ''} onChange={v => handleExtraDetailChange('day_pass_value', v)} /></Form.Group></div>
+                          <div className="col-span-1 md:col-span-4"><Form.Group><Form.Label>Open Desk Monthly</Form.Label><Input value={formValue.extra_details?.open_desk_monthly || ''} onChange={v => handleExtraDetailChange('open_desk_monthly', v)} /></Form.Group></div>
+                          <div className="col-span-1 md:col-span-6"><Form.Group><Form.Label>Open Time</Form.Label><Input type="time" value={formValue.extra_details?.open_time || ''} onChange={v => handleExtraDetailChange('open_time', v)} /></Form.Group></div>
+                          <div className="col-span-1 md:col-span-6"><Form.Group><Form.Label>Close Time</Form.Label><Input type="time" value={formValue.extra_details?.close_time || ''} onChange={v => handleExtraDetailChange('close_time', v)} /></Form.Group></div>
+                        </>
+                      )}
+                      {isVirtual && (
+                        <>
+                          <div className="col-span-1 md:col-span-12"><h5 className="text-lg font-semibold text-ink border-b pb-3 mb-2">Virtual Office Details</h5></div>
+                          <div className="col-span-1 md:col-span-4"><Form.Group><Form.Label>VO Category</Form.Label><Input value={formValue.extra_details?.vo_category || ''} onChange={v => handleExtraDetailChange('vo_category', v)} /></Form.Group></div>
+                          <div className="col-span-1 md:col-span-4"><Form.Group><Form.Label>Tenure (Months)</Form.Label><Input type="number" value={formValue.extra_details?.tenure_months || ''} onChange={v => handleExtraDetailChange('tenure_months', v)} /></Form.Group></div>
+                          <div className="col-span-1 md:col-span-4"><Form.Group><Form.Label>Total Price Amount</Form.Label><Input type="number" value={formValue.extra_details?.total_price_amount || ''} onChange={v => handleExtraDetailChange('total_price_amount', v)} /></Form.Group></div>
+                        </>
+                      )}
+                      {isManaged && (
+                        <>
+                          <div className="col-span-1 md:col-span-12"><h5 className="text-lg font-semibold text-ink border-b pb-3 mb-2">Managed Office Details</h5></div>
+                          <div className="col-span-1 md:col-span-4"><Form.Group><Form.Label>Contacted Person</Form.Label><Input value={formValue.extra_details?.contacted_person || ''} onChange={v => handleExtraDetailChange('contacted_person', v)} /></Form.Group></div>
+                          <div className="col-span-1 md:col-span-4"><Form.Group><Form.Label>Contact No</Form.Label><Input value={formValue.extra_details?.contact_no || ''} onChange={v => handleExtraDetailChange('contact_no', v)} /></Form.Group></div>
+                          <div className="col-span-1 md:col-span-4"><Form.Group><Form.Label>Inventory Type</Form.Label><Input value={formValue.extra_details?.inventory_type || ''} onChange={v => handleExtraDetailChange('inventory_type', v)} /></Form.Group></div>
+                          <div className="col-span-1 md:col-span-4"><Form.Group><Form.Label>Furnished</Form.Label><Input value={formValue.extra_details?.furnished || ''} onChange={v => handleExtraDetailChange('furnished', v)} /></Form.Group></div>
+                          <div className="col-span-1 md:col-span-4"><Form.Group><Form.Label>Building Developer</Form.Label><Input value={formValue.extra_details?.building_developer || ''} onChange={v => handleExtraDetailChange('building_developer', v)} /></Form.Group></div>
+                          <div className="col-span-1 md:col-span-4"><Form.Group><Form.Label>Rating</Form.Label><Input value={formValue.extra_details?.rating || ''} onChange={v => handleExtraDetailChange('rating', v)} /></Form.Group></div>
+                          <div className="col-span-1 md:col-span-4"><Form.Group><Form.Label>Super Area</Form.Label><Input value={formValue.extra_details?.super_area || ''} onChange={v => handleExtraDetailChange('super_area', v)} /></Form.Group></div>
+                          <div className="col-span-1 md:col-span-4"><Form.Group><Form.Label>Carpet Area</Form.Label><Input value={formValue.extra_details?.carpet_area || ''} onChange={v => handleExtraDetailChange('carpet_area', v)} /></Form.Group></div>
+                          <div className="col-span-1 md:col-span-4"><Form.Group><Form.Label>Building Area</Form.Label><Input value={formValue.extra_details?.building_area || ''} onChange={v => handleExtraDetailChange('building_area', v)} /></Form.Group></div>
+                          <div className="col-span-1 md:col-span-4"><Form.Group><Form.Label>Number of Floor</Form.Label><Input value={formValue.extra_details?.number_of_floor || ''} onChange={v => handleExtraDetailChange('number_of_floor', v)} /></Form.Group></div>
+                          <div className="col-span-1 md:col-span-4"><Form.Group><Form.Label>Seating Capacity</Form.Label><Input value={formValue.extra_details?.seating_capacity || ''} onChange={v => handleExtraDetailChange('seating_capacity', v)} /></Form.Group></div>
+                          <div className="col-span-1 md:col-span-4"><Form.Group><Form.Label>Available From</Form.Label><Input type="date" value={formValue.extra_details?.available_from || ''} onChange={v => handleExtraDetailChange('available_from', v)} /></Form.Group></div>
+                          <div className="col-span-1 md:col-span-4"><Form.Group><Form.Label>Ready to deliver in (Months)</Form.Label><Input value={formValue.extra_details?.ready_to_deliver_in || ''} onChange={v => handleExtraDetailChange('ready_to_deliver_in', v)} /></Form.Group></div>
+                          <div className="col-span-1 md:col-span-4"><Form.Group><Form.Label>Lock-in Period</Form.Label><Input value={formValue.extra_details?.lock_in_period || ''} onChange={v => handleExtraDetailChange('lock_in_period', v)} /></Form.Group></div>
+                          <div className="col-span-1 md:col-span-12 mt-2">
+                            <Toggle checked={formValue.extra_details?.is_popular || false} onChange={v => handleExtraDetailChange('is_popular', v)} /> <span className="ml-2">Is Popular</span>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Row 4: Sharing Type, Occupancy Type, Status, Year Build */}
+                  {!isSinglePricingRemoved && (
+                    <>
+                      <div className="col-span-1 md:col-span-3">
+                        <Form.Group controlId="sharingType">
+                          <Form.Label>
+                            Sharing Type
+                            <span className="text-red-500">*</span>
+                          </Form.Label>
+                          <SelectPicker
+                            data={sharingTypeOptions} block
+                            value={formValue.sharing_type}
+                            onChange={(value) =>
+                              setFormValue((fv) => ({ ...fv, sharing_type: value }))
+                            }
+                            placeholder="Select sharing type"
+                            style={{ width: '100%' }}
+                          />
+                        </Form.Group>
+                      </div>
+                      <div className="col-span-1 md:col-span-3">
+                        <Form.Group controlId="occupancyType">
+                          <Form.Label>
+                            Occupancy Type
+                            <span className="text-red-500">*</span>
+                          </Form.Label>
+                          <SelectPicker
+                            data={occupancyTypeOptions} block
+                            value={formValue.occupancy_type}
+                            onChange={(val) =>
+                              setFormValue((fv) => ({ ...fv, occupancy_type: val }))
+                            }
+                            placeholder="Select occupancy type"
+                            style={{ width: '100%' }}
+                          />
+                        </Form.Group>
+                      </div>
+                    </>
+                  )}
+
+                  <div className="col-span-1 md:col-span-3">
+                    <Form.Group controlId="status">
+                      <Form.Label>
+                        Status
+                        <span className="text-red-500">*</span>
+                      </Form.Label>{' '}
+                      <SelectPicker
+                        data={
+                          [
+                            { label: 'Active', value: 'active' },
+                            { label: 'Inactive', value: 'inactive' },
+                            { label: 'Draft', value: 'draft' },
+                          ] || []
+                        }
+                        placeholder="Select Status"
+                        block
+                        searchable={false}
+                        cleanable
+                        value={formValue.status}
+                        onChange={(val) =>
+                          setFormValue((fv) => ({ ...fv, status: val }))
+                        }
+                      />
+                    </Form.Group>
+                  </div>
+
+                  {!isSinglePricingRemoved && (
+                    <div className="col-span-1 md:col-span-3">
+                      <Form.Group controlId="year">
+                        <Form.Label>Year Build</Form.Label>
+                        <Input
+                          placeholder="Enter Year Build"
+                          value={formValue.year_built}
+                          onChange={(val) =>
+                            setFormValue((fv) => ({ ...fv, year_built: val }))
+                          }
+                        />
+                      </Form.Group>
+                    </div>
+                  )}
+                </>
+              );
+            })()}
             {formValue.has_multiple_pricing && (
               <>
 

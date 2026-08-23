@@ -1,5 +1,5 @@
-import { useContext, useEffect, useState } from 'react';
-import toast from 'react-hot-toast';
+import { useContext, useEffect, useState } from "react";
+import toast from "react-hot-toast";
 import {
   Checkbox,
   Form,
@@ -8,73 +8,73 @@ import {
   SelectPicker,
   TagInput,
   Toggle,
-} from 'rsuite';
-import { apiUrl } from '../../../envConfig';
-import { AuthContext } from '../../../AuthContextProvider';
-import AmenitiesModal from '../../../components/adminComponents/AmenitiesModal';
-import AreaModal from '../../../components/adminComponents/AreaModal';
-import CityModal from '../../../components/adminComponents/CityModal';
-import NearbyLocationsModal from '../../../components/adminComponents/NearbyLocationsModal';
-import PropertyTypesModal from '../../../components/adminComponents/PropertyTypesModal';
-import StateModal from '../../../components/adminComponents/StateModal';
-import DataLoader from '../../../components/sharedComponents/DataLoader';
-import Button from '../../../components/ui/Button';
+} from "rsuite";
+import { apiUrl } from "../../../envConfig";
+import { AuthContext } from "../../../AuthContextProvider";
+import AmenitiesModal from "../../../components/adminComponents/AmenitiesModal";
+import AreaModal from "../../../components/adminComponents/AreaModal";
+import CityModal from "../../../components/adminComponents/CityModal";
+import NearbyLocationsModal from "../../../components/adminComponents/NearbyLocationsModal";
+import PropertyTypesModal from "../../../components/adminComponents/PropertyTypesModal";
+import StateModal from "../../../components/adminComponents/StateModal";
+import DataLoader from "../../../components/sharedComponents/DataLoader";
+import Button from "../../../components/ui/Button";
 import {
   occupancyTypeOptions,
   rentFrequencyOptions,
   sharingTypeOptions,
-} from '../../../consonants/propertyOptions';
+} from "../../../consonants/propertyOptions";
 
 function AddProperty() {
   const { authData } = useContext(AuthContext);
 
   // Form State
   const [formValue, setFormValue] = useState({
-    property_name: '',
+    property_name: "",
     brand_id: null,
-    alt_name: '',
-    space_category: '',
-    line_1: '',
-    line_2: '',
-    pincode: '',
-    landmark: '',
-    longitude: '',
-    latitude: '',
+    alt_name: "",
+    space_category: "",
+    line_1: "",
+    line_2: "",
+    pincode: "",
+    landmark: "",
+    longitude: "",
+    latitude: "",
     extra_details: {},
     state_id: null,
     city_id: null,
     area_id: null,
     property_type_id: null,
-    property_description: '',
-    property_price: '',
-    property_address: '',
-    property_rent_frequency: '', // e.g., 'daily', 'monthly', etc.
-    sharing_type: '',
-    occupancy_type: '',
-    no_of_rooms: '', // or number
-    no_of_bathrooms: '', // or number
-    year_built: '', // or number (year)
-    map_link: '', //string map link
-    status: '', // e.g., 'active', 'inactive'
+    property_description: "",
+    property_price: "",
+    property_address: "",
+    property_rent_frequency: "", // e.g., 'daily', 'monthly', etc.
+    sharing_type: "",
+    occupancy_type: "",
+    no_of_rooms: "", // or number
+    no_of_bathrooms: "", // or number
+    year_built: "", // or number (year)
+    map_link: "", //string map link
+    status: "", // e.g., 'active', 'inactive'
     is_property_favourite: false, // boolean
     has_multiple_pricing: false, // New field
-    average_rating: '', // Public average rating
-    review_count: '', // Number of reviews
+    average_rating: "", // Public average rating
+    review_count: "", // Number of reviews
     amenities: [], // array of selected amenity IDs, e.g. [1,3,5]
     nearby_locations: [], // array of selected nearby location IDs, e.g. [2,4]
     property_image: [], // array of File objects from <input type="file" multiple/>
-    meta_title: '',
-    meta_description: '',
+    meta_title: "",
+    meta_description: "",
     meta_keywords: [],
   });
 
   // Multiple pricing state
   const [multiplePricings, setMultiplePricings] = useState([
     {
-      seat_category: '',
-      duration: '',
-      amount: '',
-      marked_amount: '',
+      seat_category: "",
+      duration: "",
+      amount: "",
+      marked_amount: "",
     },
   ]);
 
@@ -116,10 +116,10 @@ function AddProperty() {
     setMultiplePricings([
       ...multiplePricings,
       {
-        property_rent: '',
-        property_rent_frequency: '',
-        sharing_type: '',
-        occupancy_type: '',
+        property_rent: "",
+        property_rent_frequency: "",
+        sharing_type: "",
+        occupancy_type: "",
       },
     ]);
   };
@@ -130,48 +130,54 @@ function AddProperty() {
     }
   };
 
-
   const getSeatCategoryOptions = () => {
-    const selectedTypeName = propertyTypesList.find(pt => pt.value === formValue.property_type_id)?.label?.toLowerCase() || '';
-    if (selectedTypeName.includes('coworking')) {
+    const selectedTypeName =
+      propertyTypesList
+        .find((pt) => pt.value === formValue.property_type_id)
+        ?.label?.toLowerCase() || "";
+    if (
+      selectedTypeName.includes("coworking") ||
+      selectedTypeName.includes("co-working")
+    ) {
       return [
-        { label: 'Managed Spaces', value: 'Managed Spaces' },
-        { label: 'Dedicated Desk', value: 'Dedicated Desk' },
-        { label: 'Hot Desk', value: 'Hot Desk' },
-        { label: 'Private Office', value: 'Private Office' },
-        { label: 'Meeting Room', value: 'Meeting Room' },
+        { label: "Day Pass", value: "Day Pass" },
+        { label: "Meeting Room", value: "Meeting Room" },
+        { label: "Flexi Desk", value: "Flexi Desk" },
+        { label: "Dedicated Seat", value: "Dedicated Seat" },
+        { label: "Private Cabins", value: "Private Cabins" },
       ];
     }
-    if (selectedTypeName.includes('managed')) {
+    if (selectedTypeName.includes("managed")) {
       return [
-        { label: 'Managed Office', value: 'Managed Office' },
-        { label: 'Custom Build', value: 'Custom Build' },
-        { label: 'Enterprise Suite', value: 'Enterprise Suite' },
+        { label: "Per Seat Price", value: "Per Seat Price" },
+        { label: "Square Ft.", value: "Square Ft." },
       ];
     }
-    if (selectedTypeName.includes('coliving') || selectedTypeName.includes('co-living')) {
+    if (
+      selectedTypeName.includes("coliving") ||
+      selectedTypeName.includes("co-living") ||
+      selectedTypeName.includes("co living")
+    ) {
       return [
-        { label: 'Single Occupancy', value: 'Single Occupancy' },
-        { label: 'Double Occupancy', value: 'Double Occupancy' },
-        { label: 'Triple Occupancy', value: 'Triple Occupancy' },
+        { label: "Single Occupancy", value: "Single Occupancy" },
+        { label: "Double Occupancy", value: "Double Occupancy" },
+        { label: "Triple Occupancy", value: "Triple Occupancy" },
       ];
     }
-    if (selectedTypeName.includes('virtual')) {
+    if (selectedTypeName.includes("virtual")) {
       return [
-        { label: 'Virtual Office', value: 'Virtual Office' },
-        { label: 'Business Address', value: 'Business Address' },
-        { label: 'Mail Handling', value: 'Mail Handling' },
-        { label: 'Meeting Room', value: 'Meeting Room' },
+        { label: "Virtual Office", value: "Virtual Office" },
+        { label: "Business Address", value: "Business Address" },
+        { label: "Mail Handling", value: "Mail Handling" },
+        { label: "Meeting Room", value: "Meeting Room" },
       ];
     }
-    return [
-      { label: 'Standard', value: 'Standard' }
-    ];
+    return [{ label: "Standard", value: "Standard" }];
   };
 
   const handleMultiplePricingChange = (index, field, value) => {
     const updated = multiplePricings.map((pricing, i) =>
-      i === index ? { ...pricing, [field]: value } : pricing
+      i === index ? { ...pricing, [field]: value } : pricing,
     );
     setMultiplePricings(updated);
   };
@@ -181,10 +187,10 @@ function AddProperty() {
     if (checked && multiplePricings.length === 0) {
       setMultiplePricings([
         {
-          property_rent: '',
-          property_rent_frequency: '',
-          sharing_type: '',
-          occupancy_type: '',
+          property_rent: "",
+          property_rent_frequency: "",
+          sharing_type: "",
+          occupancy_type: "",
         },
       ]);
     }
@@ -224,18 +230,31 @@ function AddProperty() {
 
   // API: All States
   const get_all_brands = () => {
-    fetch(apiUrl + 'admin/get-all-brands', {
-      method: 'GET',
-      headers: { Accept: 'application/json', 'Content-Type': 'application/json', Authorization: authData.token },
-    }).then(r => r.json()).then(json => {
-      if (json.success) setBrandsList(json.data.map(b => ({ value: b.id, label: b.operator_brand_name })));
-    }).catch(err => console.log(err));
+    fetch(apiUrl + "admin/get-all-brands", {
+      method: "GET",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+        Authorization: authData.token,
+      },
+    })
+      .then((r) => r.json())
+      .then((json) => {
+        if (json.success)
+          setBrandsList(
+            json.data.map((b) => ({
+              value: b.id,
+              label: b.operator_brand_name,
+            })),
+          );
+      })
+      .catch((err) => console.log(err));
   };
 
   const fetchStates = () => {
     fetch(`${apiUrl}admin/get-all-states`, {
       headers: {
-        Accept: 'application/json',
+        Accept: "application/json",
         Authorization: authData.token,
       },
     })
@@ -259,7 +278,7 @@ function AddProperty() {
   const fetchCities = (state_id) => {
     fetch(`${apiUrl}admin/get-city-by-state/${state_id}`, {
       headers: {
-        Accept: 'application/json',
+        Accept: "application/json",
         Authorization: authData.token,
       },
     })
@@ -279,7 +298,7 @@ function AddProperty() {
   const fetchAreas = (city_id) => {
     fetch(`${apiUrl}admin/get-area-by-city/${city_id}`, {
       headers: {
-        Accept: 'application/json',
+        Accept: "application/json",
         Authorization: authData.token,
       },
     })
@@ -297,11 +316,11 @@ function AddProperty() {
 
   // API: Property Types
   const get_all_property_types = () => {
-    fetch(apiUrl + 'admin/get-all-property-types', {
-      method: 'GET',
+    fetch(apiUrl + "admin/get-all-property-types", {
+      method: "GET",
       headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
+        Accept: "application/json",
+        "Content-Type": "application/json",
         Authorization: authData.token,
       },
     })
@@ -323,11 +342,11 @@ function AddProperty() {
 
   // API: Amenities
   const get_all_amenities = () => {
-    fetch(apiUrl + 'admin/get-all-amenities', {
-      method: 'GET',
+    fetch(apiUrl + "admin/get-all-amenities", {
+      method: "GET",
       headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
+        Accept: "application/json",
+        "Content-Type": "application/json",
         Authorization: authData.token,
       },
     })
@@ -338,7 +357,7 @@ function AddProperty() {
         }
       })
       .catch((error) => {
-        console.error('Error:', error);
+        console.error("Error:", error);
       })
       .finally(() => {
         get_all_nearby_locations();
@@ -347,11 +366,11 @@ function AddProperty() {
 
   // API: Nearby Facilities
   const get_all_nearby_locations = () => {
-    fetch(apiUrl + 'admin/get-all-nearby-locations', {
-      method: 'GET',
+    fetch(apiUrl + "admin/get-all-nearby-locations", {
+      method: "GET",
       headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
+        Accept: "application/json",
+        "Content-Type": "application/json",
         Authorization: authData.token,
       },
     })
@@ -362,7 +381,7 @@ function AddProperty() {
         }
       })
       .catch((error) => {
-        console.error('Error:', error);
+        console.error("Error:", error);
       })
       .finally(() => {
         setLoading(false);
@@ -371,9 +390,9 @@ function AddProperty() {
 
   // After modal closes, refresh lists
   const handleModalComplete = (type) => {
-    if (type === 'state') fetchStates();
-    if (type === 'city' && formValue.state_id) fetchCities(formValue.state_id);
-    if (type === 'area' && formValue.city_id) fetchAreas(formValue.city_id);
+    if (type === "state") fetchStates();
+    if (type === "city" && formValue.state_id) fetchCities(formValue.state_id);
+    if (type === "area" && formValue.city_id) fetchAreas(formValue.city_id);
     setOpenModal((prev) => ({ ...prev, [type]: false }));
     setEditModal((prev) => ({ ...prev, [type]: false }));
   };
@@ -383,14 +402,13 @@ function AddProperty() {
     setEdit((prev) => ({ ...prev, [type]: isEdit }));
   };
 
-
   const handleExtraDetailChange = (key, value) => {
     setFormValue((prev) => ({
       ...prev,
       extra_details: {
         ...(prev.extra_details || {}),
-        [key]: value
-      }
+        [key]: value,
+      },
     }));
   };
 
@@ -411,7 +429,7 @@ function AddProperty() {
           const reader = new FileReader();
           reader.onloadend = () => resolve(reader.result);
           reader.readAsDataURL(file);
-        })
+        }),
     );
     Promise.all(readers).then(setPreviews);
   };
@@ -424,101 +442,251 @@ function AddProperty() {
     setPreviews((prev) => prev.filter((_, i) => i !== idx));
   };
 
+  const validateForm = () => {
+    const errs = [];
+
+    if (!formValue.property_name?.trim())
+      errs.push("Property Title is required");
+    if (!formValue.property_description?.trim())
+      errs.push("Property Description is required");
+    if (!formValue.state_id) errs.push("State is required");
+    if (!formValue.city_id) errs.push("City is required");
+    if (!formValue.area_id) errs.push("Area is required");
+    if (!formValue.property_type_id) errs.push("Property Type is required");
+    if (!formValue.status) errs.push("Status is required");
+
+    const selectedTypeName =
+      propertyTypesList
+        .find((pt) => pt.value === formValue.property_type_id)
+        ?.label?.toLowerCase() || "";
+    const isCoworking =
+      selectedTypeName.includes("coworking") ||
+      selectedTypeName.includes("co-working");
+    const isVirtual = selectedTypeName.includes("virtual");
+    const isManaged =
+      selectedTypeName.includes("managed") ||
+      selectedTypeName.includes("managed spaces");
+    const isSinglePricingRemoved = isCoworking || isManaged || isVirtual;
+
+    if (!isSinglePricingRemoved) {
+      if (!formValue.property_price) errs.push("Rental Amount is required");
+      if (!formValue.property_rent_frequency)
+        errs.push("Rental Frequency is required");
+      if (!formValue.sharing_type) errs.push("Sharing Type is required");
+      if (!formValue.occupancy_type) errs.push("Occupancy Type is required");
+    }
+
+    if (isSinglePricingRemoved || formValue.has_multiple_pricing) {
+      if (!multiplePricings || multiplePricings.length === 0) {
+        errs.push("At least one Multiple Pricing option is required");
+      } else {
+        multiplePricings.forEach((pricing, index) => {
+          if (!pricing.seat_category) {
+            errs.push(`Pricing Option ${index + 1}: Seat Category is required`);
+          }
+          if (!pricing.duration) {
+            errs.push(`Pricing Option ${index + 1}: Duration is required`);
+          }
+        });
+      }
+    }
+
+    if (
+      formValue.average_rating !== "" &&
+      formValue.average_rating !== undefined &&
+      formValue.average_rating !== null
+    ) {
+      const rating = parseFloat(formValue.average_rating);
+      if (isNaN(rating) || rating < 0 || rating > 5) {
+        errs.push("Average Rating must be a number between 0 and 5");
+      }
+    }
+    if (
+      formValue.review_count !== "" &&
+      formValue.review_count !== undefined &&
+      formValue.review_count !== null
+    ) {
+      const count = parseInt(formValue.review_count, 10);
+      if (isNaN(count) || count < 0) {
+        errs.push("Review Count must be a non-negative integer");
+      }
+    }
+
+    if (!formValue.meta_title?.trim()) errs.push("Meta Title is required");
+    if (!formValue.meta_keywords || formValue.meta_keywords.length === 0)
+      errs.push("At least one Meta Keyword is required");
+    if (!formValue.meta_description?.trim())
+      errs.push("Meta Description is required");
+
+    return errs;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setAddLoader(true);
 
+    const validationErrors = validateForm();
+    if (validationErrors.length > 0) {
+      toast.error(
+        <div>
+          <strong style={{ display: "block", marginBottom: "4px" }}>
+            Please fix the following validation errors:
+          </strong>
+          <ul
+            style={{
+              paddingLeft: "20px",
+              listStyleType: "disc",
+              fontSize: "13px",
+              margin: 0,
+            }}
+          >
+            {validationErrors.map((err, i) => (
+              <li key={i}>{err}</li>
+            ))}
+          </ul>
+        </div>,
+        { duration: 5000 },
+      );
+      setAddLoader(false);
+      return;
+    }
+
     // Build FormData
     const formData = new FormData();
-    formData.append('property_title', formValue.property_name);
-    formData.append('property_description', formValue.property_description);
+    formData.append("property_title", formValue.property_name);
+    formData.append("property_description", formValue.property_description);
     formData.append(
-      'property_street_address',
-      formValue.property_address || ''
+      "property_street_address",
+      formValue.property_address || "",
     );
-    formData.append('state_id', formValue.state_id);
-    formData.append('city_id', formValue.city_id);
-    formData.append('area_id', formValue.area_id);
-    formData.append('property_type', formValue.property_type_id);
-    if (formValue.brand_id) formData.append('brand_id', formValue.brand_id);
-    formData.append('alt_name', formValue.alt_name || '');
-    formData.append('space_category', formValue.space_category || '');
-    formData.append('line_1', formValue.line_1 || '');
-    formData.append('line_2', formValue.line_2 || '');
-    formData.append('pincode', formValue.pincode || '');
-    formData.append('landmark', formValue.landmark || '');
-    formData.append('longitude', formValue.longitude || '');
-    formData.append('latitude', formValue.latitude || '');
-    formData.append('extra_details', JSON.stringify(formValue.extra_details));
-
+    formData.append("state_id", formValue.state_id);
+    formData.append("city_id", formValue.city_id);
+    formData.append("area_id", formValue.area_id);
+    formData.append("property_type", formValue.property_type_id);
+    if (formValue.brand_id) formData.append("brand_id", formValue.brand_id);
+    formData.append("alt_name", formValue.alt_name || "");
+    formData.append("space_category", formValue.space_category || "");
+    formData.append("line_1", formValue.line_1 || "");
+    formData.append("line_2", formValue.line_2 || "");
+    formData.append("pincode", formValue.pincode || "");
+    formData.append("landmark", formValue.landmark || "");
+    formData.append("longitude", formValue.longitude || "");
+    formData.append("latitude", formValue.latitude || "");
+    formData.append("extra_details", JSON.stringify(formValue.extra_details));
 
     // Handle multiple pricing
+    const selectedTypeName =
+      propertyTypesList
+        .find((pt) => pt.value === formValue.property_type_id)
+        ?.label?.toLowerCase() || "";
+    const isCoworking =
+      selectedTypeName.includes("coworking") ||
+      selectedTypeName.includes("co-working");
+    const isVirtual = selectedTypeName.includes("virtual");
+    const isManaged =
+      selectedTypeName.includes("managed") ||
+      selectedTypeName.includes("managed spaces");
+    const isSinglePricingRemoved = isCoworking || isManaged || isVirtual;
+
     formData.append(
-      'has_multiple_pricing',
-      formValue.has_multiple_pricing ? '1' : '0'
+      "has_multiple_pricing",
+      isSinglePricingRemoved || formValue.has_multiple_pricing ? "1" : "0",
     );
 
-    if (formValue.has_multiple_pricing) {
+    if (isSinglePricingRemoved || formValue.has_multiple_pricing) {
       // Add multiple pricing data
       multiplePricings.forEach((pricing, index) => {
-        formData.append(`multiple_pricings[${index}][seat_category]`, pricing.seat_category);
-        formData.append(`multiple_pricings[${index}][duration]`, pricing.duration);
-        formData.append(`multiple_pricings[${index}][amount]`, pricing.amount);
-        formData.append(`multiple_pricings[${index}][marked_amount]`, pricing.marked_amount);
+        formData.append(
+          `multiple_pricings[${index}][seat_category]`,
+          pricing.seat_category || "",
+        );
+        formData.append(
+          `multiple_pricings[${index}][duration]`,
+          pricing.duration || "",
+        );
+        formData.append(
+          `multiple_pricings[${index}][amount]`,
+          pricing.amount || "",
+        );
+        formData.append(
+          `multiple_pricings[${index}][marked_amount]`,
+          pricing.marked_amount || "",
+        );
       });
     }
-    formData.append('property_rent', formValue.property_price);
-    formData.append(
-      'property_rent_frequency',
-      formValue.property_rent_frequency ?? 'daily'
-    );
-    formData.append('sharing_type', formValue.sharing_type ?? '');
-    formData.append('occupancy_type', formValue.occupancy_type ?? '');
 
-    formData.append('no_of_rooms', formValue.no_of_rooms ?? 0);
-    formData.append('no_of_bathrooms', formValue.no_of_bathrooms ?? 0);
-    formData.append('year_built', formValue.year_built ?? 2000);
-    formData.append('map', formValue.map_link);
-    formData.append('status', formValue.status ?? 'active');
     formData.append(
-      'is_property_favourite',
-      formValue.is_property_favourite ? 1 : 0
+      "property_rent",
+      isSinglePricingRemoved ? "" : formValue.property_price || "",
     );
-    formData.append('average_rating', formValue.average_rating ?? '');
-    formData.append('review_count', formValue.review_count ?? '');
-    formData.append('is_main', mainImageIndex);
-    formData.append('meta_title', formValue.meta_title);
-    formData.append('meta_description', formValue.meta_description);
+    formData.append(
+      "property_rent_frequency",
+      isSinglePricingRemoved
+        ? ""
+        : (formValue.property_rent_frequency ?? "daily"),
+    );
+    formData.append(
+      "sharing_type",
+      isSinglePricingRemoved ? "" : (formValue.sharing_type ?? ""),
+    );
+    formData.append(
+      "occupancy_type",
+      isSinglePricingRemoved ? "" : (formValue.occupancy_type ?? ""),
+    );
+
+    formData.append("no_of_rooms", formValue.no_of_rooms ?? 0);
+    formData.append("no_of_bathrooms", formValue.no_of_bathrooms ?? 0);
+    formData.append(
+      "year_built",
+      isSinglePricingRemoved ? "" : (formValue.year_built ?? ""),
+    );
+    formData.append("map", formValue.map_link);
+    formData.append("status", formValue.status ?? "active");
+    formData.append(
+      "is_property_favourite",
+      formValue.is_property_favourite ? 1 : 0,
+    );
+    formData.append("average_rating", formValue.average_rating ?? "");
+    formData.append("review_count", formValue.review_count ?? "");
+    formData.append("is_main", mainImageIndex);
+    formData.append("meta_title", formValue.meta_title);
+    formData.append("meta_description", formValue.meta_description);
 
     formValue.meta_keywords.forEach((keyword) => {
-      formData.append('meta_keywords[]', keyword);
+      formData.append("meta_keywords[]", keyword);
     });
 
     // Amenities and Nearby locations as array fields
     formValue.amenities.forEach((id) => {
-      formData.append('amenities[]', id);
+      formData.append("amenities[]", id);
     });
     formValue.nearby_locations.forEach((loc, index) => {
       if (loc.nearby_location_id) {
-        formData.append(`nearby_locations[${index}][nearby_location_id]`, loc.nearby_location_id);
-        formData.append(`nearby_locations[${index}][name]`, loc.name || '');
-        formData.append(`nearby_locations[${index}][distance]`, loc.distance || '');
+        formData.append(
+          `nearby_locations[${index}][nearby_location_id]`,
+          loc.nearby_location_id,
+        );
+        formData.append(`nearby_locations[${index}][name]`, loc.name || "");
+        formData.append(
+          `nearby_locations[${index}][distance]`,
+          loc.distance || "",
+        );
       }
     });
 
     // Add images
     if (formValue.property_image.length) {
       formValue.property_image.forEach((file) => {
-        formData.append('images[]', file);
+        formData.append("images[]", file);
       });
     }
 
     try {
-      const response = await fetch(apiUrl + 'admin/add-new-property', {
-        method: 'POST',
+      const response = await fetch(apiUrl + "admin/add-new-property", {
+        method: "POST",
         headers: {
           Authorization: authData.token,
-          Accept: 'application/json',
+          Accept: "application/json",
         },
         body: formData,
       });
@@ -531,7 +699,7 @@ function AddProperty() {
         toast.error(result.message);
       }
     } catch (error) {
-      alert('Error: ' + error.message);
+      alert("Error: " + error.message);
     } finally {
       setAddLoader(false);
     }
@@ -548,8 +716,8 @@ function AddProperty() {
     // If you want to mark amenities as checked in the amenities array (optional):
     setAmenities((prev) =>
       prev.map((item) =>
-        item.id === value ? { ...item, checked: checked } : item
-      )
+        item.id === value ? { ...item, checked: checked } : item,
+      ),
     );
   };
 
@@ -558,7 +726,7 @@ function AddProperty() {
       ...prev,
       nearby_locations: [
         ...prev.nearby_locations,
-        { nearby_location_id: '', name: '', distance: '' },
+        { nearby_location_id: "", name: "", distance: "" },
       ],
     }));
   };
@@ -574,7 +742,7 @@ function AddProperty() {
     setFormValue((prev) => ({
       ...prev,
       nearby_locations: prev.nearby_locations.map((loc, i) =>
-        i === index ? { ...loc, [field]: value } : loc
+        i === index ? { ...loc, [field]: value } : loc,
       ),
     }));
   };
@@ -587,7 +755,9 @@ function AddProperty() {
     <>
       <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
         <div className="col-span-1 md:col-span-12 flex items-center justify-between mb-4">
-          <h2 className="mb-0 text-2xl font-bold tracking-tight text-ink">Add New Property</h2>
+          <h2 className="mb-0 text-2xl font-bold tracking-tight text-ink">
+            Add New Property
+          </h2>
           <Button
             type="submit"
             appearance="primary"
@@ -602,7 +772,7 @@ function AddProperty() {
                 <span className="ml-2">Adding Property...</span>
               </div>
             ) : (
-              'Add This Property'
+              "Add This Property"
             )}
           </Button>
         </div>
@@ -611,24 +781,36 @@ function AddProperty() {
         <Form fluid className="w-full">
           <div className="grid grid-cols-1 md:grid-cols-12 gap-6 w-full">
             <div className="col-span-1 md:col-span-12">
-              <h5 className="text-lg font-semibold text-ink border-b pb-3 mb-2">Basic Information</h5>
+              <h5 className="text-lg font-semibold text-ink border-b pb-3 mb-2">
+                Basic Information
+              </h5>
             </div>
             <div className="col-span-1 md:col-span-6">
               <Form.Group controlId="brandId">
                 <Form.Label>Brand</Form.Label>
                 <SelectPicker
-                  data={[{ value: null, label: 'None' }, ...brandsList]}
+                  data={[{ value: null, label: "None" }, ...brandsList]}
                   placeholder="Select Brand"
-                  block searchable cleanable
+                  block
+                  searchable
+                  cleanable
                   value={formValue.brand_id}
-                  onChange={(val) => setFormValue(prev => ({ ...prev, brand_id: val }))}
+                  onChange={(val) =>
+                    setFormValue((prev) => ({ ...prev, brand_id: val }))
+                  }
                 />
               </Form.Group>
             </div>
             <div className="col-span-1 md:col-span-6">
               <Form.Group controlId="altName">
                 <Form.Label>Alt Name</Form.Label>
-                <Input placeholder="Alt Name" value={formValue.alt_name} onChange={e => setFormValue(prev => ({ ...prev, alt_name: e }))} />
+                <Input
+                  placeholder="Alt Name"
+                  value={formValue.alt_name}
+                  onChange={(e) =>
+                    setFormValue((prev) => ({ ...prev, alt_name: e }))
+                  }
+                />
               </Form.Group>
             </div>
             <div className="col-span-1 md:col-span-12">
@@ -671,7 +853,9 @@ function AddProperty() {
             </div>
 
             <div className="col-span-1 md:col-span-12">
-              <h5 className="text-lg font-semibold text-ink border-b pb-3 mb-2">Address</h5>
+              <h5 className="text-lg font-semibold text-ink border-b pb-3 mb-2">
+                Address
+              </h5>
             </div>
             <div className="col-span-1 md:col-span-12">
               <Form.Group controlId="address">
@@ -688,37 +872,73 @@ function AddProperty() {
             <div className="col-span-1 md:col-span-6">
               <Form.Group controlId="line_1">
                 <Form.Label>Line 1</Form.Label>
-                <Input placeholder="Enter Line 1" value={formValue.line_1} onChange={(e) => setFormValue(prev => ({ ...prev, line_1: e }))} />
+                <Input
+                  placeholder="Enter Line 1"
+                  value={formValue.line_1}
+                  onChange={(e) =>
+                    setFormValue((prev) => ({ ...prev, line_1: e }))
+                  }
+                />
               </Form.Group>
             </div>
             <div className="col-span-1 md:col-span-6">
               <Form.Group controlId="line_2">
                 <Form.Label>Line 2</Form.Label>
-                <Input placeholder="Enter Line 2" value={formValue.line_2} onChange={(e) => setFormValue(prev => ({ ...prev, line_2: e }))} />
+                <Input
+                  placeholder="Enter Line 2"
+                  value={formValue.line_2}
+                  onChange={(e) =>
+                    setFormValue((prev) => ({ ...prev, line_2: e }))
+                  }
+                />
               </Form.Group>
             </div>
             <div className="col-span-1 md:col-span-4">
               <Form.Group controlId="pincode">
                 <Form.Label>Pincode</Form.Label>
-                <Input placeholder="Enter Pincode" value={formValue.pincode} onChange={(e) => setFormValue(prev => ({ ...prev, pincode: e }))} />
+                <Input
+                  placeholder="Enter Pincode"
+                  value={formValue.pincode}
+                  onChange={(e) =>
+                    setFormValue((prev) => ({ ...prev, pincode: e }))
+                  }
+                />
               </Form.Group>
             </div>
             <div className="col-span-1 md:col-span-4">
               <Form.Group controlId="landmark">
                 <Form.Label>Landmark</Form.Label>
-                <Input placeholder="Enter Landmark" value={formValue.landmark} onChange={(e) => setFormValue(prev => ({ ...prev, landmark: e }))} />
+                <Input
+                  placeholder="Enter Landmark"
+                  value={formValue.landmark}
+                  onChange={(e) =>
+                    setFormValue((prev) => ({ ...prev, landmark: e }))
+                  }
+                />
               </Form.Group>
             </div>
             <div className="col-span-1 md:col-span-4">
               <Form.Group controlId="longitude">
                 <Form.Label>Longitude</Form.Label>
-                <Input placeholder="Enter Longitude" value={formValue.longitude} onChange={(e) => setFormValue(prev => ({ ...prev, longitude: e }))} />
+                <Input
+                  placeholder="Enter Longitude"
+                  value={formValue.longitude}
+                  onChange={(e) =>
+                    setFormValue((prev) => ({ ...prev, longitude: e }))
+                  }
+                />
               </Form.Group>
             </div>
             <div className="col-span-1 md:col-span-4">
               <Form.Group controlId="latitude">
                 <Form.Label>Latitude</Form.Label>
-                <Input placeholder="Enter Latitude" value={formValue.latitude} onChange={(e) => setFormValue(prev => ({ ...prev, latitude: e }))} />
+                <Input
+                  placeholder="Enter Latitude"
+                  value={formValue.latitude}
+                  onChange={(e) =>
+                    setFormValue((prev) => ({ ...prev, latitude: e }))
+                  }
+                />
               </Form.Group>
             </div>
             <div className="col-span-1 md:col-span-12">
@@ -744,8 +964,9 @@ function AddProperty() {
                   </span>
                   <Button
                     type="button"
-                    appearance="link" size="sm"
-                    onClick={() => handleOpen('state')}
+                    appearance="link"
+                    size="sm"
+                    onClick={() => handleOpen("state")}
                   >
                     Add State
                   </Button>
@@ -773,8 +994,9 @@ function AddProperty() {
                   </span>
                   <Button
                     type="button"
-                    appearance="link" size="sm"
-                    onClick={() => handleOpen('city')}
+                    appearance="link"
+                    size="sm"
+                    onClick={() => handleOpen("city")}
                   >
                     Add City
                   </Button>
@@ -803,8 +1025,9 @@ function AddProperty() {
                   </span>
                   <Button
                     type="button"
-                    appearance="link" size="sm"
-                    onClick={() => handleOpen('area')}
+                    appearance="link"
+                    size="sm"
+                    onClick={() => handleOpen("area")}
                   >
                     Add Area
                   </Button>
@@ -826,83 +1049,12 @@ function AddProperty() {
             </div>
 
             <div className="col-span-1 md:col-span-12">
-              <h5 className="text-lg font-semibold text-ink border-b pb-3 mb-2">Property Details</h5>
+              <h5 className="text-lg font-semibold text-ink border-b pb-3 mb-2">
+                Property Details
+              </h5>
             </div>
-            <div className="col-span-1 md:col-span-6">
-              <Form.Group controlId="rental">
-                <Form.Label className="flex items-center justify-between">
-                  <span>
-                    Rental
-                    <span className="text-red-500">*</span>
-                  </span>
-                  <Button
-                    type="button"
-                    appearance="link" size="sm"
-                    style={{ visibility: 'hidden' }}
-                  >
-                    Add Property Type
-                  </Button>
-                </Form.Label>
-                <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
-                  <div className="col-span-1 md:col-span-7">
-                    <Input
-                      placeholder="Amount"
-                      value={formValue.property_price}
-                      onChange={(val) =>
-                        setFormValue((fv) => ({ ...fv, property_price: val }))
-                      }
-                    />
-                  </div>
-                  <div className="col-span-1 md:col-span-5">
-                    <SelectPicker
-                      data={rentFrequencyOptions}
-                      placeholder="Frequency"
-                      block
-                      searchable={false}
-                      cleanable
-                      value={formValue.property_rent_frequency}
-                      onChange={(val) =>
-                        setFormValue((fv) => ({
-                          ...fv,
-                          property_rent_frequency: val,
-                        }))
-                      }
-                    />
-                  </div>
-                </div>
-              </Form.Group>
-            </div>
-            <div className="col-span-1 md:col-span-6">
-              <Form.Group controlId="propertyType">
-                <Form.Label className="flex items-center justify-between">
-                  <span>
-                    Property Type
-                    <span className="text-red-500">*</span>
-                  </span>
-                  <Button
-                    type="button"
-                    appearance="link" size="sm"
-                    onClick={() => {
-                      handleOpen('propertyType');
-                      setSelectedPropertyType(null);
-                    }}
-                  >
-                    Add Property Type
-                  </Button>
-                </Form.Label>
-                <SelectPicker
-                  data={propertyTypesList}
-                  placeholder="Select Type"
-                  block
-                  searchable
-                  cleanable
-                  value={formValue.property_type_id}
-                  onChange={(val) =>
-                    setFormValue((fv) => ({ ...fv, property_type_id: val }))
-                  }
-                />
-              </Form.Group>
-            </div>
+
+            {/* Row 1: Average Rating, Review Count, Property Type */}
             <div className="col-span-1 md:col-span-3">
               <Form.Group controlId="averageRating">
                 <Form.Label>Average Rating</Form.Label>
@@ -933,181 +1085,585 @@ function AddProperty() {
                 />
               </Form.Group>
             </div>
-            <div className="col-span-1 md:col-span-12">
-              {(() => {
-                const selectedTypeName = propertyTypesList.find(pt => pt.value === formValue.property_type_id)?.label?.toLowerCase() || '';
-                const isCoworking = selectedTypeName.includes('coworking');
-                const isVirtual = selectedTypeName.includes('virtual');
-                const isManaged = selectedTypeName.includes('managed');
-
-                return (
-                  <div className="grid grid-cols-1 md:grid-cols-12 gap-6 w-full mt-4">
-                    {isCoworking && (
-                      <>
-                        <div className="col-span-1 md:col-span-12"><h5 className="text-lg font-semibold text-ink border-b pb-3 mb-2">Coworking Details</h5></div>
-                        <div className="col-span-1 md:col-span-4"><Form.Group><Form.Label>Working People</Form.Label><Input value={formValue.extra_details?.working_people || ''} onChange={v => handleExtraDetailChange('working_people', v)} /></Form.Group></div>
-                        <div className="col-span-1 md:col-span-4"><Form.Group><Form.Label>Day Pass Value</Form.Label><Input value={formValue.extra_details?.day_pass_value || ''} onChange={v => handleExtraDetailChange('day_pass_value', v)} /></Form.Group></div>
-                        <div className="col-span-1 md:col-span-4"><Form.Group><Form.Label>Open Desk Monthly</Form.Label><Input value={formValue.extra_details?.open_desk_monthly || ''} onChange={v => handleExtraDetailChange('open_desk_monthly', v)} /></Form.Group></div>
-                        <div className="col-span-1 md:col-span-6"><Form.Group><Form.Label>Open Time</Form.Label><Input type="time" value={formValue.extra_details?.open_time || ''} onChange={v => handleExtraDetailChange('open_time', v)} /></Form.Group></div>
-                        <div className="col-span-1 md:col-span-6"><Form.Group><Form.Label>Close Time</Form.Label><Input type="time" value={formValue.extra_details?.close_time || ''} onChange={v => handleExtraDetailChange('close_time', v)} /></Form.Group></div>
-                      </>
-                    )}
-                    {isVirtual && (
-                      <>
-                        <div className="col-span-1 md:col-span-12"><h5 className="text-lg font-semibold text-ink border-b pb-3 mb-2">Virtual Office Details</h5></div>
-                        <div className="col-span-1 md:col-span-4"><Form.Group><Form.Label>VO Category</Form.Label><Input value={formValue.extra_details?.vo_category || ''} onChange={v => handleExtraDetailChange('vo_category', v)} /></Form.Group></div>
-                        <div className="col-span-1 md:col-span-4"><Form.Group><Form.Label>Tenure (Months)</Form.Label><Input type="number" value={formValue.extra_details?.tenure_months || ''} onChange={v => handleExtraDetailChange('tenure_months', v)} /></Form.Group></div>
-                        <div className="col-span-1 md:col-span-4"><Form.Group><Form.Label>Total Price Amount</Form.Label><Input type="number" value={formValue.extra_details?.total_price_amount || ''} onChange={v => handleExtraDetailChange('total_price_amount', v)} /></Form.Group></div>
-                      </>
-                    )}
-                    {isManaged && (
-                      <>
-                        <div className="col-span-1 md:col-span-12"><h5 className="text-lg font-semibold text-ink border-b pb-3 mb-2">Managed Office Details</h5></div>
-                        <div className="col-span-1 md:col-span-4"><Form.Group><Form.Label>Contacted Person</Form.Label><Input value={formValue.extra_details?.contacted_person || ''} onChange={v => handleExtraDetailChange('contacted_person', v)} /></Form.Group></div>
-                        <div className="col-span-1 md:col-span-4"><Form.Group><Form.Label>Contact No</Form.Label><Input value={formValue.extra_details?.contact_no || ''} onChange={v => handleExtraDetailChange('contact_no', v)} /></Form.Group></div>
-                        <div className="col-span-1 md:col-span-4"><Form.Group><Form.Label>Inventory Type</Form.Label><Input value={formValue.extra_details?.inventory_type || ''} onChange={v => handleExtraDetailChange('inventory_type', v)} /></Form.Group></div>
-                        <div className="col-span-1 md:col-span-4"><Form.Group><Form.Label>Furnished</Form.Label><Input value={formValue.extra_details?.furnished || ''} onChange={v => handleExtraDetailChange('furnished', v)} /></Form.Group></div>
-                        <div className="col-span-1 md:col-span-4"><Form.Group><Form.Label>Building Developer</Form.Label><Input value={formValue.extra_details?.building_developer || ''} onChange={v => handleExtraDetailChange('building_developer', v)} /></Form.Group></div>
-                        <div className="col-span-1 md:col-span-4"><Form.Group><Form.Label>Rating</Form.Label><Input value={formValue.extra_details?.rating || ''} onChange={v => handleExtraDetailChange('rating', v)} /></Form.Group></div>
-                        <div className="col-span-1 md:col-span-4"><Form.Group><Form.Label>Super Area</Form.Label><Input value={formValue.extra_details?.super_area || ''} onChange={v => handleExtraDetailChange('super_area', v)} /></Form.Group></div>
-                        <div className="col-span-1 md:col-span-4"><Form.Group><Form.Label>Carpet Area</Form.Label><Input value={formValue.extra_details?.carpet_area || ''} onChange={v => handleExtraDetailChange('carpet_area', v)} /></Form.Group></div>
-                        <div className="col-span-1 md:col-span-4"><Form.Group><Form.Label>Building Area</Form.Label><Input value={formValue.extra_details?.building_area || ''} onChange={v => handleExtraDetailChange('building_area', v)} /></Form.Group></div>
-                        <div className="col-span-1 md:col-span-4"><Form.Group><Form.Label>Number of Floor</Form.Label><Input value={formValue.extra_details?.number_of_floor || ''} onChange={v => handleExtraDetailChange('number_of_floor', v)} /></Form.Group></div>
-                        <div className="col-span-1 md:col-span-4"><Form.Group><Form.Label>Seating Capacity</Form.Label><Input value={formValue.extra_details?.seating_capacity || ''} onChange={v => handleExtraDetailChange('seating_capacity', v)} /></Form.Group></div>
-                        <div className="col-span-1 md:col-span-4"><Form.Group><Form.Label>Available From</Form.Label><Input type="date" value={formValue.extra_details?.available_from || ''} onChange={v => handleExtraDetailChange('available_from', v)} /></Form.Group></div>
-                        <div className="col-span-1 md:col-span-4"><Form.Group><Form.Label>Ready to deliver in (Months)</Form.Label><Input value={formValue.extra_details?.ready_to_deliver_in || ''} onChange={v => handleExtraDetailChange('ready_to_deliver_in', v)} /></Form.Group></div>
-                        <div className="col-span-1 md:col-span-4"><Form.Group><Form.Label>Lock-in Period</Form.Label><Input value={formValue.extra_details?.lock_in_period || ''} onChange={v => handleExtraDetailChange('lock_in_period', v)} /></Form.Group></div>
-                        <div className="col-span-1 md:col-span-12 mt-2">
-                          <Toggle checked={formValue.extra_details?.is_popular || false} onChange={v => handleExtraDetailChange('is_popular', v)} /> <span className="ml-2">Is Popular</span>
-                        </div>
-                      </>
-                    )}
-                  </div>
-                );
-              })()}
-            </div>
-
-            {/* <div className="col-span-1 md:col-span-4">
-              <Form.Group controlId="rooms">
-                <Form.Label>No. of Rooms</Form.Label>
-                <Input
-                  placeholder="Enter Number of Rooms"
-                  value={formValue.no_of_rooms}
-                  onChange={(val) =>
-                    setFormValue((fv) => ({ ...fv, no_of_rooms: val }))
-                  }
-                />
-              </Form.Group>
-            </div> */}
-            {/* <div className="col-span-1 md:col-span-4">
-              <Form.Group controlId="bathrooms">
-                <Form.Label>No. of Bathrooms</Form.Label>
-                <Input
-                  placeholder="Enter Number of Bathrooms"
-                  value={formValue.no_of_bathrooms}
-                  onChange={(val) =>
-                    setFormValue((fv) => ({ ...fv, no_of_bathrooms: val }))
-                  }
-                />
-              </Form.Group>
-            </div> */}
-            <div className="col-span-1 md:col-span-3">
-              <Form.Group controlId="sharingType">
-                <Form.Label>
-                  Sharing Type
-                  <span className="text-red-500">*</span>
+            <div className="col-span-1 md:col-span-6">
+              <Form.Group controlId="propertyType">
+                <Form.Label className="flex items-center justify-between">
+                  <span>
+                    Property Type
+                    <span className="text-red-500">*</span>
+                  </span>
+                  <Button
+                    type="button"
+                    appearance="link"
+                    size="sm"
+                    onClick={() => {
+                      handleOpen("propertyType");
+                      setSelectedPropertyType(null);
+                    }}
+                  >
+                    Add Property Type
+                  </Button>
                 </Form.Label>
                 <SelectPicker
-                  data={sharingTypeOptions} block
-                  value={formValue.sharing_type}
-                  onChange={(value) =>
-                    setFormValue((fv) => ({ ...fv, sharing_type: value }))
-                  }
-                  placeholder="Select sharing type"
-                  style={{ width: '100%' }}
-                />
-              </Form.Group>
-            </div>
-            <div className="col-span-1 md:col-span-3">
-              <Form.Group controlId="occupancyType">
-                <Form.Label>
-                  Occupancy Type
-                  <span className="text-red-500">*</span>
-                </Form.Label>
-                <SelectPicker
-                  data={occupancyTypeOptions} block
-                  value={formValue.occupancy_type}
-                  onChange={(val) =>
-                    setFormValue((fv) => ({ ...fv, occupancy_type: val }))
-                  }
-                  placeholder="Select occupancy type"
-                  style={{ width: '100%' }}
-                />
-              </Form.Group>
-            </div>
-            <div className="col-span-1 md:col-span-3">
-              <Form.Group controlId="status">
-                <Form.Label>
-                  Status
-                  <span className="text-red-500">*</span>
-                </Form.Label>{' '}
-                <SelectPicker
-                  data={
-                    [
-                      { label: 'Active', value: 'active' },
-                      { label: 'Inactive', value: 'inactive' },
-                      { label: 'Draft', value: 'draft' },
-                    ] || []
-                  }
-                  placeholder="Select Status"
+                  data={propertyTypesList}
+                  placeholder="Select Type"
                   block
-                  searchable={false}
+                  searchable
                   cleanable
-                  value={formValue.status}
-                  onChange={(val) =>
-                    setFormValue((fv) => ({ ...fv, status: val }))
-                  }
-                />
-              </Form.Group>
-            </div>
-            <div className="col-span-1 md:col-span-3">
-              <Form.Group controlId="year">
-                <Form.Label>Year Build</Form.Label>
-                <Input
-                  placeholder="Enter Year Build"
-                  value={formValue.year_built}
-                  onChange={(val) =>
-                    setFormValue((fv) => ({ ...fv, year_built: val }))
-                  }
+                  value={formValue.property_type_id}
+                  onChange={(val) => {
+                    const selName =
+                      propertyTypesList
+                        .find((pt) => pt.value === val)
+                        ?.label?.toLowerCase() || "";
+                    const isCow =
+                      selName.includes("coworking") ||
+                      selName.includes("co-working");
+                    const isMan = selName.includes("managed");
+                    const isVir = selName.includes("virtual");
+
+                    setFormValue((fv) => {
+                      const updated = { ...fv, property_type_id: val };
+                      if (isCow || isMan || isVir) {
+                        updated.has_multiple_pricing = true;
+                      }
+                      return updated;
+                    });
+                  }}
                 />
               </Form.Group>
             </div>
 
-            <div className="col-span-1 md:col-span-3">
-              <Form.Group controlId="status">
-                <Form.Label>
-                  Pricing Options
-                  <span className="text-red-500">*</span>
-                </Form.Label>{' '}
-                <Toggle
-                  checked={formValue.has_multiple_pricing}
-                  onChange={handleToggleMultiplePricing}
-                >
-                  Has Multiple Pricing
-                </Toggle>
-              </Form.Group>
-            </div>
+            {/* Row 2: Rental & Pricing Options (Only if single pricing is NOT removed) */}
+            {(() => {
+              const selectedTypeName =
+                propertyTypesList
+                  .find((pt) => pt.value === formValue.property_type_id)
+                  ?.label?.toLowerCase() || "";
+              const isCoworking =
+                selectedTypeName.includes("coworking") ||
+                selectedTypeName.includes("co-working");
+              const isVirtual = selectedTypeName.includes("virtual");
+              const isManaged =
+                selectedTypeName.includes("managed") ||
+                selectedTypeName.includes("managed spaces");
+              const isSinglePricingRemoved =
+                isCoworking || isManaged || isVirtual;
+
+              return (
+                <>
+                  {!isSinglePricingRemoved && (
+                    <>
+                      <div className="col-span-1 md:col-span-6">
+                        <Form.Group controlId="rental">
+                          <Form.Label className="flex items-center justify-between">
+                            <span>
+                              Rental
+                              <span className="text-red-500">*</span>
+                            </span>
+                          </Form.Label>
+                          <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+                            <div className="col-span-1 md:col-span-7">
+                              <Input
+                                placeholder="Amount"
+                                value={formValue.property_price}
+                                onChange={(val) =>
+                                  setFormValue((fv) => ({
+                                    ...fv,
+                                    property_price: val,
+                                  }))
+                                }
+                              />
+                            </div>
+                            <div className="col-span-1 md:col-span-5">
+                              <SelectPicker
+                                data={rentFrequencyOptions}
+                                placeholder="Frequency"
+                                block
+                                searchable={false}
+                                cleanable
+                                value={formValue.property_rent_frequency}
+                                onChange={(val) =>
+                                  setFormValue((fv) => ({
+                                    ...fv,
+                                    property_rent_frequency: val,
+                                  }))
+                                }
+                              />
+                            </div>
+                          </div>
+                        </Form.Group>
+                      </div>
+
+                      <div className="col-span-1 md:col-span-6">
+                        <Form.Group controlId="pricingOptions">
+                          <Form.Label>
+                            Pricing Options
+                            <span className="text-red-500">*</span>
+                          </Form.Label>{" "}
+                          <Toggle
+                            checked={formValue.has_multiple_pricing}
+                            onChange={handleToggleMultiplePricing}
+                          >
+                            Has Multiple Pricing
+                          </Toggle>
+                        </Form.Group>
+                      </div>
+                    </>
+                  )}
+
+                  {/* Row 3: Type-specific Details */}
+                  <div className="col-span-1 md:col-span-12">
+                    <div className="grid grid-cols-1 md:grid-cols-12 gap-6 w-full mt-4">
+                      {isCoworking && (
+                        <>
+                          <div className="col-span-1 md:col-span-12">
+                            <h5 className="text-lg font-semibold text-ink border-b pb-3 mb-2">
+                              Coworking Details
+                            </h5>
+                          </div>
+                          <div className="col-span-1 md:col-span-4">
+                            <Form.Group>
+                              <Form.Label>Working People</Form.Label>
+                              <Input
+                                value={
+                                  formValue.extra_details?.working_people || ""
+                                }
+                                onChange={(v) =>
+                                  handleExtraDetailChange("working_people", v)
+                                }
+                              />
+                            </Form.Group>
+                          </div>
+                          <div className="col-span-1 md:col-span-4">
+                            <Form.Group>
+                              <Form.Label>Day Pass Value</Form.Label>
+                              <Input
+                                value={
+                                  formValue.extra_details?.day_pass_value || ""
+                                }
+                                onChange={(v) =>
+                                  handleExtraDetailChange("day_pass_value", v)
+                                }
+                              />
+                            </Form.Group>
+                          </div>
+                          <div className="col-span-1 md:col-span-4">
+                            <Form.Group>
+                              <Form.Label>Open Desk Monthly</Form.Label>
+                              <Input
+                                value={
+                                  formValue.extra_details?.open_desk_monthly ||
+                                  ""
+                                }
+                                onChange={(v) =>
+                                  handleExtraDetailChange(
+                                    "open_desk_monthly",
+                                    v,
+                                  )
+                                }
+                              />
+                            </Form.Group>
+                          </div>
+                          <div className="col-span-1 md:col-span-6">
+                            <Form.Group>
+                              <Form.Label>Open Time</Form.Label>
+                              <Input
+                                type="time"
+                                value={formValue.extra_details?.open_time || ""}
+                                onChange={(v) =>
+                                  handleExtraDetailChange("open_time", v)
+                                }
+                              />
+                            </Form.Group>
+                          </div>
+                          <div className="col-span-1 md:col-span-6">
+                            <Form.Group>
+                              <Form.Label>Close Time</Form.Label>
+                              <Input
+                                type="time"
+                                value={
+                                  formValue.extra_details?.close_time || ""
+                                }
+                                onChange={(v) =>
+                                  handleExtraDetailChange("close_time", v)
+                                }
+                              />
+                            </Form.Group>
+                          </div>
+                        </>
+                      )}
+                      {isVirtual && (
+                        <>
+                          <div className="col-span-1 md:col-span-12">
+                            <h5 className="text-lg font-semibold text-ink border-b pb-3 mb-2">
+                              Virtual Office Details
+                            </h5>
+                          </div>
+                          <div className="col-span-1 md:col-span-4">
+                            <Form.Group>
+                              <Form.Label>VO Category</Form.Label>
+                              <Input
+                                value={
+                                  formValue.extra_details?.vo_category || ""
+                                }
+                                onChange={(v) =>
+                                  handleExtraDetailChange("vo_category", v)
+                                }
+                              />
+                            </Form.Group>
+                          </div>
+                          <div className="col-span-1 md:col-span-4">
+                            <Form.Group>
+                              <Form.Label>Tenure (Months)</Form.Label>
+                              <Input
+                                type="number"
+                                value={
+                                  formValue.extra_details?.tenure_months || ""
+                                }
+                                onChange={(v) =>
+                                  handleExtraDetailChange("tenure_months", v)
+                                }
+                              />
+                            </Form.Group>
+                          </div>
+                          <div className="col-span-1 md:col-span-4">
+                            <Form.Group>
+                              <Form.Label>Total Price Amount</Form.Label>
+                              <Input
+                                type="number"
+                                value={
+                                  formValue.extra_details?.total_price_amount ||
+                                  ""
+                                }
+                                onChange={(v) =>
+                                  handleExtraDetailChange(
+                                    "total_price_amount",
+                                    v,
+                                  )
+                                }
+                              />
+                            </Form.Group>
+                          </div>
+                        </>
+                      )}
+                      {isManaged && (
+                        <>
+                          <div className="col-span-1 md:col-span-12">
+                            <h5 className="text-lg font-semibold text-ink border-b pb-3 mb-2">
+                              Managed Office Details
+                            </h5>
+                          </div>
+                          <div className="col-span-1 md:col-span-4">
+                            <Form.Group>
+                              <Form.Label>Contacted Person</Form.Label>
+                              <Input
+                                value={
+                                  formValue.extra_details?.contacted_person ||
+                                  ""
+                                }
+                                onChange={(v) =>
+                                  handleExtraDetailChange("contacted_person", v)
+                                }
+                              />
+                            </Form.Group>
+                          </div>
+                          <div className="col-span-1 md:col-span-4">
+                            <Form.Group>
+                              <Form.Label>Contact No</Form.Label>
+                              <Input
+                                value={
+                                  formValue.extra_details?.contact_no || ""
+                                }
+                                onChange={(v) =>
+                                  handleExtraDetailChange("contact_no", v)
+                                }
+                              />
+                            </Form.Group>
+                          </div>
+                          <div className="col-span-1 md:col-span-4">
+                            <Form.Group>
+                              <Form.Label>Inventory Type</Form.Label>
+                              <Input
+                                value={
+                                  formValue.extra_details?.inventory_type || ""
+                                }
+                                onChange={(v) =>
+                                  handleExtraDetailChange("inventory_type", v)
+                                }
+                              />
+                            </Form.Group>
+                          </div>
+                          <div className="col-span-1 md:col-span-4">
+                            <Form.Group>
+                              <Form.Label>Furnished</Form.Label>
+                              <Input
+                                value={formValue.extra_details?.furnished || ""}
+                                onChange={(v) =>
+                                  handleExtraDetailChange("furnished", v)
+                                }
+                              />
+                            </Form.Group>
+                          </div>
+                          <div className="col-span-1 md:col-span-4">
+                            <Form.Group>
+                              <Form.Label>Building Developer</Form.Label>
+                              <Input
+                                value={
+                                  formValue.extra_details?.building_developer ||
+                                  ""
+                                }
+                                onChange={(v) =>
+                                  handleExtraDetailChange(
+                                    "building_developer",
+                                    v,
+                                  )
+                                }
+                              />
+                            </Form.Group>
+                          </div>
+                          <div className="col-span-1 md:col-span-4">
+                            <Form.Group>
+                              <Form.Label>Rating</Form.Label>
+                              <Input
+                                value={formValue.extra_details?.rating || ""}
+                                onChange={(v) =>
+                                  handleExtraDetailChange("rating", v)
+                                }
+                              />
+                            </Form.Group>
+                          </div>
+                          <div className="col-span-1 md:col-span-4">
+                            <Form.Group>
+                              <Form.Label>Super Area</Form.Label>
+                              <Input
+                                value={
+                                  formValue.extra_details?.super_area || ""
+                                }
+                                onChange={(v) =>
+                                  handleExtraDetailChange("super_area", v)
+                                }
+                              />
+                            </Form.Group>
+                          </div>
+                          <div className="col-span-1 md:col-span-4">
+                            <Form.Group>
+                              <Form.Label>Carpet Area</Form.Label>
+                              <Input
+                                value={
+                                  formValue.extra_details?.carpet_area || ""
+                                }
+                                onChange={(v) =>
+                                  handleExtraDetailChange("carpet_area", v)
+                                }
+                              />
+                            </Form.Group>
+                          </div>
+                          <div className="col-span-1 md:col-span-4">
+                            <Form.Group>
+                              <Form.Label>Building Area</Form.Label>
+                              <Input
+                                value={
+                                  formValue.extra_details?.building_area || ""
+                                }
+                                onChange={(v) =>
+                                  handleExtraDetailChange("building_area", v)
+                                }
+                              />
+                            </Form.Group>
+                          </div>
+                          <div className="col-span-1 md:col-span-4">
+                            <Form.Group>
+                              <Form.Label>Number of Floor</Form.Label>
+                              <Input
+                                value={
+                                  formValue.extra_details?.number_of_floor || ""
+                                }
+                                onChange={(v) =>
+                                  handleExtraDetailChange("number_of_floor", v)
+                                }
+                              />
+                            </Form.Group>
+                          </div>
+                          <div className="col-span-1 md:col-span-4">
+                            <Form.Group>
+                              <Form.Label>Seating Capacity</Form.Label>
+                              <Input
+                                value={
+                                  formValue.extra_details?.seating_capacity ||
+                                  ""
+                                }
+                                onChange={(v) =>
+                                  handleExtraDetailChange("seating_capacity", v)
+                                }
+                              />
+                            </Form.Group>
+                          </div>
+                          <div className="col-span-1 md:col-span-4">
+                            <Form.Group>
+                              <Form.Label>Available From</Form.Label>
+                              <Input
+                                type="date"
+                                value={
+                                  formValue.extra_details?.available_from || ""
+                                }
+                                onChange={(v) =>
+                                  handleExtraDetailChange("available_from", v)
+                                }
+                              />
+                            </Form.Group>
+                          </div>
+                          <div className="col-span-1 md:col-span-4">
+                            <Form.Group>
+                              <Form.Label>
+                                Ready to deliver in (Months)
+                              </Form.Label>
+                              <Input
+                                value={
+                                  formValue.extra_details
+                                    ?.ready_to_deliver_in || ""
+                                }
+                                onChange={(v) =>
+                                  handleExtraDetailChange(
+                                    "ready_to_deliver_in",
+                                    v,
+                                  )
+                                }
+                              />
+                            </Form.Group>
+                          </div>
+                          <div className="col-span-1 md:col-span-4">
+                            <Form.Group>
+                              <Form.Label>Lock-in Period</Form.Label>
+                              <Input
+                                value={
+                                  formValue.extra_details?.lock_in_period || ""
+                                }
+                                onChange={(v) =>
+                                  handleExtraDetailChange("lock_in_period", v)
+                                }
+                              />
+                            </Form.Group>
+                          </div>
+                          <div className="col-span-1 md:col-span-12 mt-2">
+                            <Toggle
+                              checked={
+                                formValue.extra_details?.is_popular || false
+                              }
+                              onChange={(v) =>
+                                handleExtraDetailChange("is_popular", v)
+                              }
+                            />{" "}
+                            <span className="ml-2">Is Popular</span>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Row 4: Sharing Type, Occupancy Type, Status, Year Build */}
+                  {!isSinglePricingRemoved && (
+                    <>
+                      <div className="col-span-1 md:col-span-3">
+                        <Form.Group controlId="sharingType">
+                          <Form.Label>
+                            Sharing Type
+                            <span className="text-red-500">*</span>
+                          </Form.Label>
+                          <SelectPicker
+                            data={sharingTypeOptions}
+                            block
+                            value={formValue.sharing_type}
+                            onChange={(value) =>
+                              setFormValue((fv) => ({
+                                ...fv,
+                                sharing_type: value,
+                              }))
+                            }
+                            placeholder="Select sharing type"
+                            style={{ width: "100%" }}
+                          />
+                        </Form.Group>
+                      </div>
+                      <div className="col-span-1 md:col-span-3">
+                        <Form.Group controlId="occupancyType">
+                          <Form.Label>
+                            Occupancy Type
+                            <span className="text-red-500">*</span>
+                          </Form.Label>
+                          <SelectPicker
+                            data={occupancyTypeOptions}
+                            block
+                            value={formValue.occupancy_type}
+                            onChange={(val) =>
+                              setFormValue((fv) => ({
+                                ...fv,
+                                occupancy_type: val,
+                              }))
+                            }
+                            placeholder="Select occupancy type"
+                            style={{ width: "100%" }}
+                          />
+                        </Form.Group>
+                      </div>
+                    </>
+                  )}
+
+                  <div className="col-span-1 md:col-span-3">
+                    <Form.Group controlId="status">
+                      <Form.Label>
+                        Status
+                        <span className="text-red-500">*</span>
+                      </Form.Label>{" "}
+                      <SelectPicker
+                        data={
+                          [
+                            { label: "Active", value: "active" },
+                            { label: "Inactive", value: "inactive" },
+                            { label: "Draft", value: "draft" },
+                          ] || []
+                        }
+                        placeholder="Select Status"
+                        block
+                        searchable={false}
+                        cleanable
+                        value={formValue.status}
+                        onChange={(val) =>
+                          setFormValue((fv) => ({ ...fv, status: val }))
+                        }
+                      />
+                    </Form.Group>
+                  </div>
+
+                  {!isSinglePricingRemoved && (
+                    <div className="col-span-1 md:col-span-3">
+                      <Form.Group controlId="year">
+                        <Form.Label>Year Build</Form.Label>
+                        <Input
+                          placeholder="Enter Year Build"
+                          value={formValue.year_built}
+                          onChange={(val) =>
+                            setFormValue((fv) => ({ ...fv, year_built: val }))
+                          }
+                        />
+                      </Form.Group>
+                    </div>
+                  )}
+                </>
+              );
+            })()}
 
             {formValue.has_multiple_pricing && (
               <>
-
                 <div className="col-span-1 md:col-span-12 mt-3">
                   <div className="multiple-pricing-section">
                     <div className="flex justify-between items-center mb-3">
                       <h5>Multiple Pricing Options</h5>
                       <Button
                         type="button"
-                        appearance="primary" color="blue" size="sm"
+                        appearance="primary"
+                        color="blue"
+                        size="sm"
                         onClick={addMultiplePricing}
                       >
                         + Add Pricing Option
@@ -1139,7 +1695,13 @@ function AddProperty() {
                               placeholder="Select Category"
                               block
                               value={pricing.seat_category}
-                              onChange={(val) => handleMultiplePricingChange(index, 'seat_category', val)}
+                              onChange={(val) =>
+                                handleMultiplePricingChange(
+                                  index,
+                                  "seat_category",
+                                  val,
+                                )
+                              }
                             />
                           </Form.Group>
                         </div>
@@ -1149,7 +1711,13 @@ function AddProperty() {
                             <Input
                               placeholder="e.g. Monthly, Daily"
                               value={pricing.duration}
-                              onChange={(val) => handleMultiplePricingChange(index, 'duration', val)}
+                              onChange={(val) =>
+                                handleMultiplePricingChange(
+                                  index,
+                                  "duration",
+                                  val,
+                                )
+                              }
                             />
                           </Form.Group>
                         </div>
@@ -1159,7 +1727,13 @@ function AddProperty() {
                             <Input
                               placeholder="Amount"
                               value={pricing.amount}
-                              onChange={(val) => handleMultiplePricingChange(index, 'amount', val)}
+                              onChange={(val) =>
+                                handleMultiplePricingChange(
+                                  index,
+                                  "amount",
+                                  val,
+                                )
+                              }
                             />
                           </Form.Group>
                         </div>
@@ -1169,7 +1743,13 @@ function AddProperty() {
                             <Input
                               placeholder="Marked Amount (Optional)"
                               value={pricing.marked_amount}
-                              onChange={(val) => handleMultiplePricingChange(index, 'marked_amount', val)}
+                              onChange={(val) =>
+                                handleMultiplePricingChange(
+                                  index,
+                                  "marked_amount",
+                                  val,
+                                )
+                              }
                             />
                           </Form.Group>
                         </div>
@@ -1180,7 +1760,6 @@ function AddProperty() {
               </>
             )}
 
-
             <div className="col-span-1 md:col-span-12 flex items-center justify-between border-b pb-2 mb-3 mt-4">
               <h5 className="text-lg font-semibold text-ink m-0">
                 Amenities
@@ -1188,9 +1767,10 @@ function AddProperty() {
               </h5>
               <Button
                 type="button"
-                appearance="link" size="sm"
+                appearance="link"
+                size="sm"
                 onClick={() => {
-                  handleOpen('amenities');
+                  handleOpen("amenities");
                   setSelectedAmenity(null);
                 }}
               >
@@ -1234,7 +1814,7 @@ function AddProperty() {
                   appearance="subtle"
                   size="sm"
                   onClick={() => {
-                    handleOpen('nearbyLocations');
+                    handleOpen("nearbyLocations");
                     setSelectedNearbyLocations(null);
                   }}
                 >
@@ -1246,7 +1826,8 @@ function AddProperty() {
             <div className="col-span-1 md:col-span-12">
               {formValue.nearby_locations.length === 0 ? (
                 <div className="text-center py-8 border rounded border-dashed border-gray-300 text-gray-500 bg-gray-50/50">
-                  No nearby facilities added yet. Click "+ Add Row" to start adding facilities.
+                  No nearby facilities added yet. Click "+ Add Row" to start
+                  adding facilities.
                 </div>
               ) : (
                 <div className="border border-gray-200 rounded-lg overflow-hidden bg-white shadow-sm">
@@ -1261,15 +1842,16 @@ function AddProperty() {
                     <div className="col-span-2">
                       Distance (in km) <span className="text-red-500">*</span>
                     </div>
-                    <div className="col-span-2 text-center">
-                      Action
-                    </div>
+                    <div className="col-span-2 text-center">Action</div>
                   </div>
 
                   {/* Grid Table Body */}
                   <div className="divide-y divide-gray-100">
                     {formValue.nearby_locations.map((loc, index) => (
-                      <div className="grid grid-cols-12 gap-4 px-4 py-3.5 items-center hover:bg-slate-50/40 transition-colors duration-150" key={index}>
+                      <div
+                        className="grid grid-cols-12 gap-4 px-4 py-3.5 items-center hover:bg-slate-50/40 transition-colors duration-150"
+                        key={index}
+                      >
                         <div className="col-span-4">
                           <SelectPicker
                             data={nearbyLocations.map((item) => ({
@@ -1284,8 +1866,8 @@ function AddProperty() {
                             onChange={(value) =>
                               handleNearbyLocationRowChange(
                                 index,
-                                'nearby_location_id',
-                                value
+                                "nearby_location_id",
+                                value,
                               )
                             }
                           />
@@ -1293,12 +1875,12 @@ function AddProperty() {
                         <div className="col-span-4">
                           <Input
                             placeholder="e.g. Indira Gandhi Metro"
-                            value={loc.name || ''}
+                            value={loc.name || ""}
                             onChange={(value) =>
                               handleNearbyLocationRowChange(
                                 index,
-                                'name',
-                                value
+                                "name",
+                                value,
                               )
                             }
                           />
@@ -1306,12 +1888,12 @@ function AddProperty() {
                         <div className="col-span-2">
                           <Input
                             placeholder="e.g. 1.5"
-                            value={loc.distance || ''}
+                            value={loc.distance || ""}
                             onChange={(value) =>
                               handleNearbyLocationRowChange(
                                 index,
-                                'distance',
-                                value
+                                "distance",
+                                value,
                               )
                             }
                           />
@@ -1338,18 +1920,19 @@ function AddProperty() {
               <Form.Group controlId="propertyImages">
                 <div
                   style={{
-                    display: 'flex',
-                    alignItems: 'center',
+                    display: "flex",
+                    alignItems: "center",
                     marginBottom: 8,
                   }}
                 >
                   <Form.Label>
-                    <u>Property Media</u> <span className="text-red-500">*</span>
+                    <u>Property Media</u>{" "}
+                    <span className="text-red-500">*</span>
                   </Form.Label>
                   {/* Dropdown for selecting Main Image */}
                   {previews.length > 0 && (
                     <div style={{ marginLeft: 20 }}>
-                      <label style={{ marginRight: 6, color: '#444' }}>
+                      <label style={{ marginRight: 6, color: "#444" }}>
                         Main Image:
                       </label>
                       <select
@@ -1359,10 +1942,10 @@ function AddProperty() {
                         }
                         style={{
                           fontWeight: 600,
-                          color: '#0747a6',
-                          border: '1px solid #888',
+                          color: "#0747a6",
+                          border: "1px solid #888",
                           borderRadius: 4,
-                          padding: '2px 8px',
+                          padding: "2px 8px",
                           minWidth: 40,
                         }}
                       >
@@ -1381,14 +1964,15 @@ function AddProperty() {
                   {previews.map((src, idx) => (
                     <div
                       key={idx}
-                      className={`upload-img-preview-box ${mainImageIndex === idx ? 'main-image-border' : ''
-                        }`}
+                      className={`upload-img-preview-box ${
+                        mainImageIndex === idx ? "main-image-border" : ""
+                      }`}
                       style={{
-                        position: 'relative',
+                        position: "relative",
                         border:
                           mainImageIndex === idx
-                            ? '3px solid #0070f3'
-                            : '1px solid #eee',
+                            ? "3px solid #0070f3"
+                            : "1px solid #eee",
                       }}
                     >
                       <button
@@ -1418,7 +2002,7 @@ function AddProperty() {
                         multiple
                         accept="image/*"
                         onChange={handleImageChange}
-                        style={{ display: 'none' }}
+                        style={{ display: "none" }}
                         disabled={formValue.property_image.length >= 5}
                       />
                     </label>
@@ -1427,7 +2011,7 @@ function AddProperty() {
 
                 <small
                   className="text-muted"
-                  style={{ marginTop: 5, display: 'block' }}
+                  style={{ marginTop: 5, display: "block" }}
                 >
                   Max 5 images. Only images allowed.
                 </small>
@@ -1435,7 +2019,9 @@ function AddProperty() {
             </div>
 
             <div className="col-span-1 md:col-span-12">
-              <h5 className="text-lg font-semibold text-ink border-b pb-3 mb-2">Meta Information</h5>
+              <h5 className="text-lg font-semibold text-ink border-b pb-3 mb-2">
+                Meta Information
+              </h5>
             </div>
             <div className="col-span-1 md:col-span-12">
               <Form.Group controlId="metaTitle">
@@ -1482,9 +2068,9 @@ function AddProperty() {
                   <span className="text-red-500">*</span>
                 </Form.Label>
                 <TagInput
-                  trigger={['Enter', 'Space', 'Comma']}
+                  trigger={["Enter", "Space", "Comma"]}
                   placeholder="Meta Keywords"
-                  style={{ width: '100%' }}
+                  style={{ width: "100%" }}
                   value={formValue.meta_keywords}
                   onChange={(e) =>
                     setFormValue((prev) => ({
@@ -1511,7 +2097,7 @@ function AddProperty() {
                     <span className="ml-2">Adding Property...</span>
                   </div>
                 ) : (
-                  'Add This Property'
+                  "Add This Property"
                 )}
               </Button>
             </div>
@@ -1527,7 +2113,7 @@ function AddProperty() {
         }
         edit={{ editing: editModal.state, data: null }}
         // properties from your implementation
-        onComplete={() => handleModalComplete('state')}
+        onComplete={() => handleModalComplete("state")}
       />
 
       {/* City Modal */}
@@ -1537,7 +2123,7 @@ function AddProperty() {
         edit={{ editing: editModal.city, data: null }}
         token={authData.token}
         // pass props as per your requirements
-        onComplete={() => handleModalComplete('city')}
+        onComplete={() => handleModalComplete("city")}
         stateList={stateList}
       />
 
@@ -1548,7 +2134,7 @@ function AddProperty() {
         edit={{ editing: editModal.area, data: null }}
         token={authData.token}
         // pass props as required
-        onComplete={() => handleModalComplete('area')}
+        onComplete={() => handleModalComplete("area")}
         stateList={stateList}
       />
 
