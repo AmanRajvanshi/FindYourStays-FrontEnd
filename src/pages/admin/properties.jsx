@@ -23,8 +23,38 @@ function Properties() {
   const [properties, setProperties] = useState([]);
   const [paginationMeta, setPaginationMeta] = useState({ total: 0, per_page: 10, current_page: 1 });
   const [loading, setLoading] = useState(true);
+  const [allProperties, setAllProperties] = useState([]);
+  const [allBrands, setAllBrands] = useState([]);
 
-  useEffect(() => { if (authData?.token) { fetchCities(); get_all_property_types(); } }, [authData]);
+  useEffect(() => {
+    if (authData?.token) {
+      fetchCities();
+      get_all_property_types();
+      fetchExportData();
+    }
+  }, [authData]);
+
+  const fetchExportData = async () => {
+    try {
+      const propsRes = await fetch(apiUrl + 'admin/get-all-properties?per_page=10000', { headers: { Authorization: authData?.token || '', Accept: 'application/json' } });
+      const propsJson = await propsRes.json();
+      if (propsJson && Array.isArray(propsJson.data)) {
+        setAllProperties(propsJson.data);
+      } else if (Array.isArray(propsJson)) {
+        setAllProperties(propsJson);
+      }
+
+      const brandsRes = await fetch(apiUrl + 'admin/get-all-brands', { headers: { Authorization: authData?.token || '', Accept: 'application/json' } });
+      const brandsJson = await brandsRes.json();
+      if (brandsJson && Array.isArray(brandsJson.data)) {
+        setAllBrands(brandsJson.data);
+      } else if (Array.isArray(brandsJson)) {
+        setAllBrands(brandsJson);
+      }
+    } catch (err) {
+      console.error('Export fetch error:', err);
+    }
+  };
 
   useEffect(() => {
     const handler = setTimeout(() => { setSearch(searchInput); setPaginationMeta((prev) => ({ ...prev, current_page: 1 })); }, 700);
@@ -77,6 +107,74 @@ function Properties() {
   const hasActiveFilters = !!(searchInput || selectedStatus || selectedCity || selectedType || selectedPriceRange);
   const handleClearFilters = () => { setSearchInput(''); setSearch(''); setSelectedStatus(undefined); setSelectedCity(undefined); setSelectedType(undefined); setSelectedPriceRange(undefined); setPaginationMeta((prev) => ({ ...prev, current_page: 1 })); };
 
+  const getFilteredProperties = (typeKeyword) => {
+    const cleanKeyword = typeKeyword.toLowerCase().replace(/[-\s]/g, '');
+    const pType = propertyTypesList.find(t => t.label.toLowerCase().replace(/[-\s]/g, '').includes(cleanKeyword));
+    if (!pType) return [];
+    return allProperties.filter(p => {
+      if (String(p.property_type) === String(pType.value)) return true;
+      if (p.typeCityLinks && Array.isArray(p.typeCityLinks)) {
+        return p.typeCityLinks.some(link => String(link.property_type_id) === String(pType.value) || String(link.property_type) === String(pType.value));
+      }
+      return false;
+    });
+  };
+
+  const downloadCSV = (data, filename) => {
+    if (!data || !data.length) {
+      alert("No data available to download.");
+      return;
+    }
+
+    const formattedData = data.map(row => {
+      const newRow = { ...row };
+
+      if (newRow.property_title !== undefined) {
+        if (newRow.state) newRow.state = newRow.state.state_name || newRow.state.name;
+        if (newRow.city) newRow.city = newRow.city.city_name || newRow.city.name;
+        if (newRow.area) newRow.area = newRow.area.area_name || newRow.area.name;
+
+        const pType = propertyTypesList.find(t => String(t.value) === String(newRow.property_type));
+        if (pType) newRow.property_type = pType.label;
+
+        const brand = allBrands.find(b => String(b.id) === String(newRow.brand_id));
+        if (brand) newRow.brand = brand.operator_brand_name || brand.operator_company_name;
+
+        delete newRow.state_id;
+        delete newRow.city_id;
+        delete newRow.area_id;
+        delete newRow.brand_id;
+      }
+
+      Object.keys(newRow).forEach(k => {
+        if (typeof newRow[k] === 'object' && newRow[k] !== null) {
+          delete newRow[k];
+        }
+      });
+      return newRow;
+    });
+
+    const headers = Object.keys(formattedData[0]);
+    const csvRows = [headers.join(',')];
+    for (const row of formattedData) {
+      const values = headers.map(header => {
+        const val = row[header];
+        if (val === null || val === undefined) return '""';
+        const escaped = ('' + val).replace(/"/g, '""');
+        return `"${escaped}"`;
+      });
+      csvRows.push(values.join(','));
+    }
+    const blob = new Blob([csvRows.join('\n')], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.setAttribute('href', url);
+    a.setAttribute('download', filename);
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  };
+
   return (
     <PageLayout
       title="Properties"
@@ -114,6 +212,39 @@ function Properties() {
             <SelectPicker data={pricingRangeOptions} placeholder="Price Range" style={{ width: 160 }} placement="auto" searchable={false} cleanable value={selectedPriceRange}
               onChange={(val) => { setSelectedPriceRange(val); setPaginationMeta((prev) => ({ ...prev, current_page: 1 })); }} />
           </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
+        <div className="bg-white p-5 rounded-xl border border-line/50 shadow-sm flex flex-col items-center justify-center hover:shadow-md transition-shadow gap-2">
+          <div className="text-2xl font-bold text-ink">{allProperties.length}</div>
+          <p className="text-muted text-xs text-center font-medium">All Properties</p>
+          <Button onClick={() => downloadCSV(allProperties, 'all_properties.csv')}>Download</Button>
+        </div>
+        <div className="bg-white p-5 rounded-xl border border-line/50 shadow-sm flex flex-col items-center justify-center hover:shadow-md transition-shadow gap-2">
+          <div className="text-2xl font-bold text-ink">{getFilteredProperties('coworking').length}</div>
+          <p className="text-muted text-xs text-center font-medium">Coworking Space</p>
+          <Button onClick={() => downloadCSV(getFilteredProperties('coworking'), 'coworking_spaces.csv')}>Download</Button>
+        </div>
+        <div className="bg-white p-5 rounded-xl border border-line/50 shadow-sm flex flex-col items-center justify-center hover:shadow-md transition-shadow gap-2">
+          <div className="text-2xl font-bold text-ink">{getFilteredProperties('managed').length}</div>
+          <p className="text-muted text-xs text-center font-medium">Managed Office</p>
+          <Button onClick={() => downloadCSV(getFilteredProperties('managed'), 'managed_offices.csv')}>Download</Button>
+        </div>
+        <div className="bg-white p-5 rounded-xl border border-line/50 shadow-sm flex flex-col items-center justify-center hover:shadow-md transition-shadow gap-2">
+          <div className="text-2xl font-bold text-ink">{getFilteredProperties('virtual').length}</div>
+          <p className="text-muted text-xs text-center font-medium">Virtual Office</p>
+          <Button onClick={() => downloadCSV(getFilteredProperties('virtual'), 'virtual_offices.csv')}>Download</Button>
+        </div>
+        <div className="bg-white p-5 rounded-xl border border-line/50 shadow-sm flex flex-col items-center justify-center hover:shadow-md transition-shadow gap-2">
+          <div className="text-2xl font-bold text-ink">{getFilteredProperties('coliving').length}</div>
+          <p className="text-muted text-xs text-center font-medium">Coliving Office</p>
+          <Button onClick={() => downloadCSV(getFilteredProperties('coliving'), 'coliving_offices.csv')}>Download</Button>
+        </div>
+        <div className="bg-white p-5 rounded-xl border border-line/50 shadow-sm flex flex-col items-center justify-center hover:shadow-md transition-shadow gap-2">
+          <div className="text-2xl font-bold text-ink">{allBrands.length}</div>
+          <p className="text-muted text-xs text-center font-medium">Total Brands</p>
+          <Button onClick={() => downloadCSV(allBrands, 'brands.csv')}>Download</Button>
         </div>
       </div>
 

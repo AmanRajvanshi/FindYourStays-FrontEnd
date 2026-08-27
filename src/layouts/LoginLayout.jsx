@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { Outlet } from 'react-router';
 
 export function meta() {
-  return [{ title: 'Admin | Find Your Stays' }];
+  return [{ title: 'Admin | CostaHQ' }];
 }
 
 export default function LoginLayout() {

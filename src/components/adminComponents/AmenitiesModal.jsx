@@ -13,6 +13,7 @@ function AmenitiesModal({
   edit,
   get_all_amenities,
   amenity,
+  onComplete,
 }) {
   const { authData } = useContext(AuthContext);
   const [amenityName, setAmenityName] = useState('');
@@ -52,8 +53,9 @@ function AmenitiesModal({
       .then((response) => response.json())
       .then((json) => {
         if (json.status) {
-          setOpenAmenitiesModal(false);
-          get_all_amenities();
+          if (onComplete) onComplete();
+          else setOpenAmenitiesModal(false);
+          if (get_all_amenities) get_all_amenities();
           setAmenityName('');
           setAmenityIcon('');
           toast.success(json.message);
@@ -83,8 +85,9 @@ function AmenitiesModal({
       .then((response) => response.json())
       .then((json) => {
         if (json.status) {
-          setOpenAmenitiesModal(false);
-          get_all_amenities();
+          if (onComplete) onComplete();
+          else setOpenAmenitiesModal(false);
+          if (get_all_amenities) get_all_amenities();
           setAmenityName('');
           setAmenityIcon('');
           toast.success(json.message);

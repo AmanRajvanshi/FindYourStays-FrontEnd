@@ -43,6 +43,7 @@ const PRICING_CONFIG = {
       "Private Cabins",
     ],
     hasOccupancyType: false,
+    hasNoOfSeats: true,
   },
   virtual: {
     label: "Virtual Office",
@@ -88,6 +89,7 @@ const getPricingConfig = (propertyTypeLabel) => {
 const emptyPricingRow = () => ({
   seat_category: "",
   occupancy_type: "",
+  no_of_seats: "",
   duration: "",
   amount: "",
   marked_amount: "",
@@ -1268,12 +1270,15 @@ function PropertyForm({ mode = "add" }) {
                 style={{
                   gridTemplateColumns: pricingConfig.hasOccupancyType
                     ? "2fr 2fr 1.4fr 1fr 1fr 40px"
-                    : "2fr 1.4fr 1fr 1fr 40px",
+                    : pricingConfig.hasNoOfSeats
+                      ? "2fr 1.4fr 1.4fr 1fr 1fr 40px"
+                      : "2fr 1.4fr 1fr 1fr 40px",
                 }}
               >
                 <span>Category</span>
                 {pricingConfig.hasOccupancyType && <span>Occupancy Type</span>}
                 <span>Duration</span>
+                {pricingConfig.hasNoOfSeats && <span>No of Seats</span>}
                 <span>Amount</span>
                 <span>Marked Amount</span>
                 <span></span>
@@ -1288,7 +1293,9 @@ function PropertyForm({ mode = "add" }) {
                     style={{
                       gridTemplateColumns: pricingConfig.hasOccupancyType
                         ? "2fr 2fr 1.4fr 1fr 1fr 40px"
-                        : "2fr 1.4fr 1fr 1fr 40px",
+                        : pricingConfig.hasNoOfSeats
+                          ? "2fr 1.4fr 1.4fr 1fr 1fr 40px"
+                          : "2fr 1.4fr 1fr 1fr 40px",
                     }}
                   >
                     <SelectPicker
@@ -1314,6 +1321,13 @@ function PropertyForm({ mode = "add" }) {
                       value={pricing.duration}
                       onChange={(val) => handleMultiplePricingChange(index, "duration", val)}
                     />
+                    {pricingConfig.hasNoOfSeats && (
+                      <Input
+                        placeholder="No of Seats"
+                        value={pricing.no_of_seats}
+                        onChange={(val) => handleMultiplePricingChange(index, "no_of_seats", val)}
+                      />
+                    )}
                     <Input
                       placeholder="Amount"
                       value={pricing.amount}

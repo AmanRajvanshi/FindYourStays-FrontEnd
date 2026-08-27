@@ -6,7 +6,7 @@ import { apiUrl } from '../../envConfig';
 import { AuthContext } from '../../AuthContextProvider';
 import Button from '../ui/Button';
 
-function StateModal({ openStateModal, setOpenStateModal, edit }) {
+function StateModal({ openStateModal, setOpenStateModal, edit, onComplete }) {
   const { authData } = useContext(AuthContext);
   const [formValue, setFormValue] = useState({ state_name: '' });
   const [loading, setLoading] = useState(false);
@@ -39,7 +39,8 @@ function StateModal({ openStateModal, setOpenStateModal, edit }) {
       .then((res) => res.json())
       .then((json) => {
         if (json.status) {
-          setOpenStateModal(false);
+          if (onComplete) onComplete();
+          else setOpenStateModal(false);
           toast.success(json.message);
         } else {
           toast.error(json.message);
@@ -71,7 +72,8 @@ function StateModal({ openStateModal, setOpenStateModal, edit }) {
         .then((res) => res.json())
         .then((json) => {
           if (json.status) {
-            setOpenStateModal(false);
+            if (onComplete) onComplete();
+            else setOpenStateModal(false);
             toast.success(json.message);
           } else {
             toast.error(json.message);

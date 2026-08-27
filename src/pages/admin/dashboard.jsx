@@ -21,23 +21,71 @@ function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({ properties: 0, enquiries: 0, views: 0, contactEnquiries: 0 });
   const [graph, setGraph] = useState({ categories: [], series: [] });
+  const [allProperties, setAllProperties] = useState([]);
+  const [allBrands, setAllBrands] = useState([]);
+  const [propertyTypes, setPropertyTypes] = useState([]);
 
   useEffect(() => { fetchDashboardData(); }, []);
 
-  const fetchDashboardData = () => {
-    fetch(apiUrl + 'admin/get-dashboard-details', {
-      method: 'GET',
-      headers: { Accept: 'application/json', 'Content-Type': 'application/json', Authorization: authData?.token || '' },
-    })
-      .then((response) => response.json())
-      .then((json) => {
-        if (json.status) {
-          setStats({ properties: json.data.properties, enquiries: json.data.enquiries, views: json.data.views, contactEnquiries: json.data.contactEnquiries });
-          setGraph(json.data.propertyGraph);
-        }
-      })
-      .catch((error) => console.error('Error:', error))
-      .finally(() => setLoading(false));
+  const fetchDashboardData = async () => {
+    try {
+      const dashRes = await fetch(apiUrl + 'admin/get-dashboard-details', {
+        headers: { Accept: 'application/json', 'Content-Type': 'application/json', Authorization: authData?.token || '' },
+      });
+      const dashJson = await dashRes.json();
+      if (dashJson.status) {
+        setStats({ properties: dashJson.data.properties, enquiries: dashJson.data.enquiries, views: dashJson.data.views, contactEnquiries: dashJson.data.contactEnquiries });
+        setGraph(dashJson.data.propertyGraph);
+      }
+
+      const propsRes = await fetch(apiUrl + 'admin/get-all-properties', { headers: { Authorization: authData?.token || '', Accept: 'application/json' } });
+      const propsJson = await propsRes.json();
+      if (propsJson.status) setAllProperties(propsJson.data || []);
+
+      const brandsRes = await fetch(apiUrl + 'admin/get-all-brands', { headers: { Authorization: authData?.token || '', Accept: 'application/json' } });
+      const brandsJson = await brandsRes.json();
+      if (brandsJson.status) setAllBrands(brandsJson.data || []);
+
+      const typeRes = await fetch(apiUrl + 'admin/get-all-property-types', { headers: { Authorization: authData?.token || '', Accept: 'application/json' } });
+      const typeJson = await typeRes.json();
+      if (typeJson.status) setPropertyTypes(typeJson.data || []);
+    } catch (error) {
+      console.error('Error:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const downloadCSV = (data, filename) => {
+    if (!data || !data.length) {
+      alert("No data available to download.");
+      return;
+    }
+    const headers = Object.keys(data[0]).filter(k => typeof data[0][k] !== 'object');
+    const csvRows = [headers.join(',')];
+    for (const row of data) {
+      const values = headers.map(header => {
+        const val = row[header];
+        if (val === null || val === undefined) return '""';
+        const escaped = ('' + val).replace(/"/g, '""');
+        return `"${escaped}"`;
+      });
+      csvRows.push(values.join(','));
+    }
+    const blob = new Blob([csvRows.join('\n')], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.setAttribute('href', url);
+    a.setAttribute('download', filename);
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  };
+
+  const getFilteredProperties = (typeKeyword) => {
+    const pType = propertyTypes.find(t => t.name.toLowerCase().includes(typeKeyword.toLowerCase()));
+    if (!pType) return [];
+    return allProperties.filter(p => p.property_type === pType.id);
   };
 
   const options = {

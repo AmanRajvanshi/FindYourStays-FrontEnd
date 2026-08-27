@@ -6,7 +6,7 @@ import { AuthContext } from '../AuthContextProvider';
 import { apiUrl } from '../envConfig';
 
 export function meta() {
-  return [{ title: 'Admin | Find Your Stays' }];
+  return [{ title: 'Admin | CostaHQ' }];
 }
 
 export default function AdminLayout() {

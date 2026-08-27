@@ -12,6 +12,7 @@ function NearbyLocationsModal({
   edit,
   get_all_nearby_locations,
   selectedNearbyLocations, // receive selectedNearbyLocations instead of 'amenity'
+  onComplete,
 }) {
   const { authData } = useContext(AuthContext);
   const [nearbyLocationName, setNearbyLocationName] = useState('');
@@ -46,8 +47,9 @@ function NearbyLocationsModal({
       .then((response) => response.json())
       .then((json) => {
         if (json.status) {
-          setOpenAmenitiesModal(false);
-          get_all_nearby_locations();
+          if (onComplete) onComplete();
+          else setOpenAmenitiesModal(false);
+          if (get_all_nearby_locations) get_all_nearby_locations();
           setNearbyLocationName('');
           toast.success(json.message || 'Success!');
         } else {
@@ -88,8 +90,9 @@ function NearbyLocationsModal({
         .then((response) => response.json())
         .then((json) => {
           if (json.status) {
-            setOpenAmenitiesModal(false);
-            get_all_nearby_locations();
+            if (onComplete) onComplete();
+            else setOpenAmenitiesModal(false);
+            if (get_all_nearby_locations) get_all_nearby_locations();
             setNearbyLocationName('');
             toast.success(json.message || 'Deleted!');
           } else {

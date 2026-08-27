@@ -11,6 +11,7 @@ function PropertyTypesModal({
   edit,
   propertyType,
   get_all_property_types,
+  onComplete,
 }) {
   const { authData } = useContext(AuthContext);
   const [propertyTypeName, setPropertyTypeName] = useState('');
@@ -44,8 +45,9 @@ function PropertyTypesModal({
       .then((response) => response.json())
       .then((json) => {
         if (json.status) {
-          onClose();
-          get_all_property_types();
+          if (onComplete) onComplete();
+          else onClose();
+          if (get_all_property_types) get_all_property_types();
           setPropertyTypeName('');
           toast.success(json.message);
         } else {
@@ -75,8 +77,9 @@ function PropertyTypesModal({
       .then((response) => response.json())
       .then((json) => {
         if (json.status) {
-          onClose();
-          get_all_property_types();
+          if (onComplete) onComplete();
+          else onClose();
+          if (get_all_property_types) get_all_property_types();
           setPropertyTypeName('');
           toast.success(json.message);
         } else {
