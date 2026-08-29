@@ -1,3 +1,5 @@
+import toast from 'react-hot-toast';
+
 import { useEffect, useState } from 'react';
 import { Form, Input, Modal, SelectPicker, Uploader } from 'rsuite';
 import { apiUrl } from '../../envConfig';
@@ -11,6 +13,7 @@ function AreaModal({
   setAreaData,
   token,
   stateList,
+  onComplete,
 }) {
   const { editing, data } = edit || {};
 
@@ -103,15 +106,15 @@ function AreaModal({
       });
       const json = await res.json();
       if (json.status) {
-        setAreaData((prev) => {
+        if (setAreaData) { setAreaData((prev) => {
           if (edit.editing) {
             return prev.map((a) => (a.id === json.data.id ? json.data : a));
           }
           return [...prev, json.data];
-        });
-        setOpenAreaModal(false);
+        }); } toast.success(json.message || 'Area saved successfully');
+        if (onComplete) onComplete(); else setOpenAreaModal(false);
       } else {
-        alert('Failed to save area');
+        toast.error('Failed to save area');
       }
     } catch (err) {
       console.error('Save failed:', err);
@@ -142,10 +145,10 @@ function AreaModal({
         });
         const json = await res.json();
         if (json.status) {
-          setAreaData((prev) => prev.filter((a) => a.id !== edit.data.id));
-          setOpenAreaModal(false);
+          if (setAreaData) { setAreaData((prev) => prev.filter((a) => a.id !== edit.data.id)); } toast.success(json.message || 'Area saved successfully');
+        if (onComplete) onComplete(); else setOpenAreaModal(false);
         } else {
-          alert('Delete failed');
+          toast.error('Delete failed');
         }
       } catch (err) {
         console.error('Delete error:', err);
@@ -222,7 +225,7 @@ function AreaModal({
               type="button"
               appearance="primary" color="red" className="ml-auto"
               onClick={handleDelete}
-              disabled={loading}
+              disabled={loading} loading={loading}
             >
               Delete
             </Button>
@@ -231,7 +234,7 @@ function AreaModal({
             type="button"
             appearance="primary"
             onClick={handleSubmit}
-            disabled={loading}
+            disabled={loading} loading={loading}
           >
             Save
           </Button>

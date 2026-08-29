@@ -1,3 +1,4 @@
+
 import { useContext, useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import { Form, Modal } from 'rsuite';
@@ -109,7 +110,7 @@ function StateModal({ openStateModal, setOpenStateModal, edit, onComplete }) {
               type="button"
               appearance="primary" color="red" className="ml-auto" size="sm"
               onClick={handleDelete}
-              disabled={loading}
+              disabled={loading} loading={loading}
             >
               Delete
             </Button>
@@ -118,7 +119,7 @@ function StateModal({ openStateModal, setOpenStateModal, edit, onComplete }) {
             type="button"
             appearance="primary" size="sm"
             onClick={handleSubmit}
-            disabled={loading}
+            disabled={loading} loading={loading}
           >
             Save
           </Button>

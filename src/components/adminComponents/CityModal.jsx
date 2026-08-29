@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import { Form, Input, Modal, SelectPicker } from 'rsuite';
@@ -12,6 +13,7 @@ function CityModal({
   setCityData,
   token,
   stateList,
+  onComplete,
 }) {
   const [formValue, setFormValue] = useState({
     city_name: '',
@@ -114,15 +116,15 @@ function CityModal({
       const json = await res.json();
 
       if (json.status) {
-        setCityData((prev) => {
+        if (setCityData) { setCityData((prev) => {
           if (edit.editing) {
             return prev.map((c) => (c.id === json.data.id ? json.data : c));
           }
           return [...prev, json.data];
-        });
+        }); }
 
         toast.success(json.message || 'City saved successfully');
-        setOpenCityModal(false);
+        if (onComplete) { onComplete(); } else { setOpenCityModal(false); }
       } else {
         toast.error(json.message || 'Something went wrong. Please try again.');
       }
@@ -159,7 +161,7 @@ function CityModal({
         if (json.status) {
           setCityData((prev) => prev.filter((c) => c.id !== edit.data.id));
           toast.success(json.message || 'City deleted successfully');
-          setOpenCityModal(false);
+          if (onComplete) { onComplete(); } else { setOpenCityModal(false); }
         } else {
           toast.error(
             json.message || 'Something went wrong. Please try again.'
@@ -335,7 +337,7 @@ function CityModal({
               type="button"
               appearance="primary" color="red" className="ml-auto"
               onClick={handleDelete}
-              disabled={loading}
+              disabled={loading} loading={loading}
             >
               {loading ? 'Deleting...' : 'Delete'}
             </Button>
@@ -345,7 +347,7 @@ function CityModal({
               type="button"
               appearance="ghost"
               onClick={() => setOpenCityModal(false)}
-              disabled={loading}
+              disabled={loading} 
             >
               Cancel
             </Button>
@@ -353,7 +355,7 @@ function CityModal({
               type="button"
               appearance="primary"
               onClick={handleSubmit}
-              disabled={loading}
+              disabled={loading} loading={loading}
             >
               {loading ? 'Saving...' : 'Save'}
             </Button>

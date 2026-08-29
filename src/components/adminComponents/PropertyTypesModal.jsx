@@ -1,3 +1,4 @@
+
 import { useContext, useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import { Form, Input, Modal } from 'rsuite';
@@ -123,7 +124,7 @@ function PropertyTypesModal({
             <Button
               appearance="primary" color="red"
               onClick={handleDelete}
-              disabled={loading}
+              disabled={loading} loading={loading}
               type="button"
             >
               Delete
@@ -132,7 +133,7 @@ function PropertyTypesModal({
           <Button
             appearance="primary"
             onClick={handleSave}
-            disabled={loading}
+            disabled={loading} loading={loading}
             type="button"
           >
             {loading ? 'Saving...' : 'Save'}

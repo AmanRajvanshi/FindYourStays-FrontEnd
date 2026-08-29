@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import { Form, Input, Modal } from 'rsuite';
@@ -163,7 +164,7 @@ function TestimonialModal({
         <Button
           appearance="primary" size="sm"
           onClick={handleSubmit}
-          disabled={loading}
+          disabled={loading} loading={loading}
         >
           {loading ? 'Saving...' : edit ? 'Update' : 'Add'}
         </Button>

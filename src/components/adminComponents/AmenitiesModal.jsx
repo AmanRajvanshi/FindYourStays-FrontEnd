@@ -1,3 +1,4 @@
+
 import { useContext, useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import { Form, Input, Modal, SelectPicker } from 'rsuite';
@@ -184,7 +185,7 @@ function AmenitiesModal({
             <Button
               appearance="primary" color="red"
               onClick={handleDelete}
-              disabled={loading}
+              disabled={loading} loading={loading}
             >
               Delete
             </Button>
@@ -192,7 +193,7 @@ function AmenitiesModal({
           <Button
             appearance="primary"
             onClick={handleSave}
-            disabled={loading}
+            disabled={loading} loading={loading}
           >
             {loading ? 'Saving...' : 'Save'}
           </Button>
