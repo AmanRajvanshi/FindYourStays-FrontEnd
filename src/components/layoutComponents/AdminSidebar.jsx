@@ -141,9 +141,7 @@ function AdminSidebar() {
     <div className="flex flex-col h-full bg-white">
       {/* Brand Logo Area */}
       <div className="flex items-center justify-center h-16 border-b border-border shrink-0 px-6">
-        <p className="text-xl font-bold tracking-tight bg-linear-to-r from-coral to-coraldark bg-clip-text text-transparent">
-          Costahq Admin
-        </p>
+        <img src="/logo.png" alt="CostaHQ" className="h-10 w-auto" />
       </div>
 
       {/* Navigation Links */}
