@@ -75,11 +75,16 @@ export default function CitiesAndAreas() {
   };
 
   const getAllStates = () => {
-    fetch(`${apiUrl}admin/get-all-states`, {
+    fetch(`${apiUrl}admin/get-all-states?paginate=0`, {
       headers: { Accept: 'application/json', 'Content-Type': 'application/json', Authorization: authData.token },
     })
       .then((res) => res.json())
-      .then((json) => { if (json.status) setStateList(json.data.data.map((s) => ({ label: s.state_name, value: s.id }))); });
+      .then((json) => {
+        if (json.status) {
+          const list = Array.isArray(json.data) ? json.data : (json.data?.data || []);
+          setStateList(list.map((s) => ({ label: s.state_name, value: s.id })));
+        }
+      });
   };
 
   const handleSearchChange = (value) => { setSearchTerm(value); if (value.trim()) setSearching(true); };

@@ -20,7 +20,16 @@ function StateModal({ openStateModal, setOpenStateModal, edit, onComplete }) {
     }
   }, [edit]);
 
-  const handleSubmit = () => {
+  const handleSubmit = async (e) => {
+    if (e && e.preventDefault) e.preventDefault();
+    if (loading) return;
+
+    const trimmedStateName = (formValue.state_name || '').trim();
+    if (!trimmedStateName) {
+      toast.error('State name is required');
+      return;
+    }
+
     setLoading(true);
 
     const method = edit.editing ? 'PUT' : 'POST';
@@ -28,27 +37,38 @@ function StateModal({ openStateModal, setOpenStateModal, edit, onComplete }) {
       ? `${apiUrl}admin/update-state/${edit.data.id}`
       : `${apiUrl}admin/add-state`;
 
-    fetch(url, {
-      method,
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-        Authorization: authData.token,
-      },
-      body: JSON.stringify(formValue),
-    })
-      .then((res) => res.json())
-      .then((json) => {
-        if (json.status) {
-          if (onComplete) onComplete();
-          else setOpenStateModal(false);
-          toast.success(json.message);
-        } else {
-          toast.error(json.message);
+    try {
+      const res = await fetch(url, {
+        method,
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+          Authorization: authData.token,
+        },
+        body: JSON.stringify({ state_name: trimmedStateName }),
+      });
+      const json = await res.json();
+
+      if (res.ok && json.status) {
+        if (onComplete) onComplete();
+        else setOpenStateModal(false);
+        toast.success(json.message || 'State saved successfully');
+      } else {
+        let errorMsg = json.message || 'Something went wrong. Please try again.';
+        if (json.errors) {
+          const firstErrKey = Object.keys(json.errors)[0];
+          if (firstErrKey && Array.isArray(json.errors[firstErrKey])) {
+            errorMsg = json.errors[firstErrKey][0];
+          }
         }
-      })
-      .catch((err) => console.error(err))
-      .finally(() => setLoading(false));
+        toast.error(errorMsg);
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error('Network error. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleDelete = () => {
@@ -92,7 +112,7 @@ function StateModal({ openStateModal, setOpenStateModal, edit, onComplete }) {
       </Modal.Header>
 
       <Modal.Body>
-        <Form fluid formValue={formValue} onChange={setFormValue}>
+        <Form fluid formValue={formValue} onChange={setFormValue} onSubmit={(e) => { e?.preventDefault(); handleSubmit(e); }}>
           <Form.Group controlId="state_name">
             <Form.Label className="mb-2">State Name</Form.Label>
             <Form.Control name="state_name" placeholder="Enter State name" />

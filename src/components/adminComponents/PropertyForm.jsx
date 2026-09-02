@@ -269,6 +269,12 @@ function PropertyForm({ mode = "add" }) {
   const handleOpenDaysChange = (val) => setOpenDays((prev) => ({ ...prev, days: val }));
   const handleOpeningTimeChange = (val) => setOpenDays((prev) => ({ ...prev, opening_time: val }));
   const handleClosingTimeChange = (val) => setOpenDays((prev) => ({ ...prev, closing_time: val }));
+  const handleToggleAllDays = () => {
+    setOpenDays((prev) => ({
+      ...prev,
+      days: (prev.days || []).length === WEEK_DAYS.length ? [] : [...WEEK_DAYS],
+    }));
+  };
 
   // ---------- Lookups ----------
   const get_all_brands = () => {
@@ -294,14 +300,17 @@ function PropertyForm({ mode = "add" }) {
   };
 
   const fetchStates = () => {
-    fetch(`${apiUrl}admin/get-all-states`, {
+    fetch(`${apiUrl}admin/get-all-states?paginate=0`, {
       headers: { Accept: "application/json", Authorization: authData.token },
     })
       .then((r) => r.json())
       .then((json) => {
         if (json.status) {
+          const list = Array.isArray(json.data)
+            ? json.data
+            : json.data?.data || [];
           setStateList(
-            json.data.data.map((s) => ({ value: s.id, label: s.state_name })),
+            list.map((s) => ({ value: s.id, label: s.state_name })),
           );
         }
       })
@@ -768,13 +777,22 @@ function PropertyForm({ mode = "add" }) {
         headers: { Authorization: authData.token, Accept: "application/json" },
         body: formData,
       });
+      const textResult = await response.text();
+      console.log("HTTP Status:", response.status);
+      console.log("Response text:", textResult);
 
-      const result = await response.json();
-      if (response.ok && result.success) {
+      let result;
+      try {
+        result = textResult ? JSON.parse(textResult) : {};
+      } catch (e) {
+        throw new Error(`Server returned status ${response.status} with an invalid non-JSON response.`);
+      }
+
+      if (response.ok && result?.success) {
         toast.success(result.message || (isEdit ? "Property updated successfully!" : "Property added successfully!"));
         if (isEdit) navigate("/admin/properties");
       } else {
-        toast.error(result.message || "Something went wrong");
+        toast.error(result?.message || "Something went wrong");
       }
     } catch (error) {
       toast.error("Error: " + error.message);
@@ -789,6 +807,16 @@ function PropertyForm({ mode = "add" }) {
       amenities: checked
         ? [...prev.amenities, value]
         : prev.amenities.filter((id) => id !== value),
+    }));
+  };
+
+  const handleToggleAllAmenities = () => {
+    setFormValue((prev) => ({
+      ...prev,
+      amenities:
+        amenities.length > 0 && prev.amenities.length === amenities.length
+          ? []
+          : amenities.map((a) => a.id),
     }));
   };
 
@@ -1355,7 +1383,21 @@ function PropertyForm({ mode = "add" }) {
 
           {/* Open Days — weekly schedule sent as { days: [...], opening_time, closing_time } */}
           {(isCoworking || isManaged) && (
-            <SectionCard title="Open Days">
+            <SectionCard
+              title="Open Days"
+              action={
+                <Button
+                  type="button"
+                  appearance="subtle"
+                  size="sm"
+                  onClick={handleToggleAllDays}
+                >
+                  {(openDays.days || []).length === WEEK_DAYS.length
+                    ? "Deselect All"
+                    : "Select All"}
+                </Button>
+              }
+            >
               <div className="col-span-1 md:col-span-12">
                 <Form.Group controlId="openDays">
                   <Form.Label>Days Open</Form.Label>
@@ -1399,9 +1441,23 @@ function PropertyForm({ mode = "add" }) {
           <SectionCard
             title="Amenities *"
             action={
-              <Button type="button" appearance="link" size="sm" onClick={() => handleOpen("amenities")}>
-                Add Amenities
-              </Button>
+              <div className="flex items-center gap-2">
+                {amenities.length > 0 && (
+                  <Button
+                    type="button"
+                    appearance="subtle"
+                    size="sm"
+                    onClick={handleToggleAllAmenities}
+                  >
+                    {formValue.amenities.length === amenities.length
+                      ? "Deselect All"
+                      : "Select All"}
+                  </Button>
+                )}
+                <Button type="button" appearance="link" size="sm" onClick={() => handleOpen("amenities")}>
+                  Add Amenities
+                </Button>
+              </div>
             }
           >
             {amenities.map((amenity) => (

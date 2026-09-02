@@ -78,8 +78,10 @@ function CityModal({
     );
   };
 
-  const handleSubmit = async () => {
-    console.log('formValue', formValue);
+  const handleSubmit = async (e) => {
+    if (e && e.preventDefault) e.preventDefault();
+    if (loading) return;
+
     // Basic validation
     if (!formValue.city_name.trim()) {
       toast.error('City name is required');
@@ -96,7 +98,7 @@ function CityModal({
       : `${apiUrl}admin/add-city`;
 
     const formData = new FormData();
-    formData.append('city_name', formValue.city_name);
+    formData.append('city_name', formValue.city_name.trim());
     formData.append('state_id', formValue.state_id);
     formData.append('is_main', formValue.is_main === true ? '1' : '0');
     formData.append('status', formValue.status); // Add status to form data
@@ -110,23 +112,40 @@ function CityModal({
         method: 'POST',
         headers: {
           Authorization: token,
+          Accept: 'application/json',
         },
         body: formData,
       });
       const json = await res.json();
 
-      if (json.status) {
-        if (setCityData) { setCityData((prev) => {
-          if (edit.editing) {
-            return prev.map((c) => (c.id === json.data.id ? json.data : c));
-          }
-          return [...prev, json.data];
-        }); }
+      if (res.ok && json.status) {
+        if (setCityData) {
+          setCityData((prev) => {
+            if (edit.editing) {
+              return prev.map((c) => (c.id === json.data.id ? json.data : c));
+            }
+            if (prev.some((c) => c.id === json.data.id)) {
+              return prev;
+            }
+            return [...prev, json.data];
+          });
+        }
 
         toast.success(json.message || 'City saved successfully');
-        if (onComplete) { onComplete(); } else { setOpenCityModal(false); }
+        if (onComplete) {
+          onComplete();
+        } else {
+          setOpenCityModal(false);
+        }
       } else {
-        toast.error(json.message || 'Something went wrong. Please try again.');
+        let errorMsg = json.message || 'Something went wrong. Please try again.';
+        if (json.errors) {
+          const firstErrKey = Object.keys(json.errors)[0];
+          if (firstErrKey && Array.isArray(json.errors[firstErrKey])) {
+            errorMsg = json.errors[firstErrKey][0];
+          }
+        }
+        toast.error(errorMsg);
       }
     } catch (err) {
       console.error('Save failed:', err);
@@ -186,7 +205,7 @@ function CityModal({
         <Modal.Title>{edit.editing ? 'Edit City' : 'Add City'}</Modal.Title>
       </Modal.Header>
       <Modal.Body>
-        <Form fluid>
+        <Form fluid onSubmit={(e) => { e?.preventDefault(); handleSubmit(e); }}>
           <div className="flex flex-col gap-4 w-full">
             {/* Image Upload Section */}
             <div className="w-full">
@@ -347,7 +366,7 @@ function CityModal({
               type="button"
               appearance="ghost"
               onClick={() => setOpenCityModal(false)}
-              disabled={loading} 
+              disabled={loading}
             >
               Cancel
             </Button>

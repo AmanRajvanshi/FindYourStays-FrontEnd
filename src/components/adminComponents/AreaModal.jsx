@@ -84,15 +84,32 @@ function AreaModal({
   };
 
   // Form submit handler
-  const handleSubmit = async () => {
+  const handleSubmit = async (e) => {
+    if (e && e.preventDefault) e.preventDefault();
+    if (loading) return;
+
+    const trimmedAreaName = (formValue.area_name || '').trim();
+    if (!trimmedAreaName) {
+      toast.error('Area name is required');
+      return;
+    }
+    if (!formValue.state_id) {
+      toast.error('State selection is required');
+      return;
+    }
+    if (!formValue.city_id) {
+      toast.error('City selection is required');
+      return;
+    }
+
     setLoading(true);
-    const method = edit.editing ? 'POST' : 'POST';
-    const url = edit.editing
+    const method = 'POST';
+    const url = edit?.editing
       ? `${apiUrl}admin/update-area/${edit.data.id}`
       : `${apiUrl}admin/add-area`;
 
     const formData = new FormData();
-    formData.append('area_name', formValue.area_name);
+    formData.append('area_name', trimmedAreaName);
     formData.append('state_id', formValue.state_id);
     formData.append('city_id', formValue.city_id);
 
@@ -101,30 +118,47 @@ function AreaModal({
         method,
         headers: {
           Authorization: token,
+          Accept: 'application/json',
         },
         body: formData,
       });
       const json = await res.json();
-      if (json.status) {
-        if (setAreaData) { setAreaData((prev) => {
-          if (edit.editing) {
-            return prev.map((a) => (a.id === json.data.id ? json.data : a));
-          }
-          return [...prev, json.data];
-        }); } toast.success(json.message || 'Area saved successfully');
-        if (onComplete) onComplete(); else setOpenAreaModal(false);
+      if (res.ok && json.status) {
+        if (setAreaData) {
+          setAreaData((prev) => {
+            if (edit?.editing) {
+              return prev.map((a) => (a.id === json.data.id ? json.data : a));
+            }
+            if (prev.some((a) => a.id === json.data.id)) {
+              return prev;
+            }
+            return [...prev, json.data];
+          });
+        }
+        toast.success(json.message || 'Area saved successfully');
+        if (onComplete) onComplete();
+        else setOpenAreaModal(false);
       } else {
-        toast.error('Failed to save area');
+        let errorMsg = json.message || 'Failed to save area';
+        if (json.errors) {
+          const firstErrKey = Object.keys(json.errors)[0];
+          if (firstErrKey && Array.isArray(json.errors[firstErrKey])) {
+            errorMsg = json.errors[firstErrKey][0];
+          }
+        }
+        toast.error(errorMsg);
       }
     } catch (err) {
       console.error('Save failed:', err);
+      toast.error('Network error. Please try again.');
     } finally {
       setLoading(false);
     }
   };
 
   // Delete area handler (optional)
-  const handleDelete = async () => {
+  const handleDelete = async (e) => {
+    if (e && e.preventDefault) e.preventDefault();
     const result = await Swal.fire({
       title: 'Are you sure?',
       text: "You won't be able to revert this!",
@@ -146,7 +180,7 @@ function AreaModal({
         const json = await res.json();
         if (json.status) {
           if (setAreaData) { setAreaData((prev) => prev.filter((a) => a.id !== edit.data.id)); } toast.success(json.message || 'Area saved successfully');
-        if (onComplete) onComplete(); else setOpenAreaModal(false);
+          if (onComplete) onComplete(); else setOpenAreaModal(false);
         } else {
           toast.error('Delete failed');
         }
@@ -161,10 +195,10 @@ function AreaModal({
   return (
     <Modal open={openAreaModal} onClose={() => setOpenAreaModal(false)}>
       <Modal.Header>
-        <Modal.Title>{edit.editing ? 'Edit Area' : 'Add Area'}</Modal.Title>
+        <Modal.Title>{edit?.editing ? 'Edit Area' : 'Add Area'}</Modal.Title>
       </Modal.Header>
       <Modal.Body>
-        <Form fluid>
+        <Form fluid onSubmit={(e) => { e?.preventDefault(); handleSubmit(e); }}>
           <div className="flex flex-col gap-4 w-full">
             <div className="w-full">
               <Form.Group controlId="selectState">
@@ -217,10 +251,10 @@ function AreaModal({
 
       <Modal.Footer>
         <div
-          className={`flex items-center w-full ${edit.editing ? 'justify-between' : 'justify-end'
+          className={`flex items-center w-full ${edit?.editing ? 'justify-between' : 'justify-end'
             }`}
         >
-          {edit.editing && (
+          {edit?.editing && (
             <Button
               type="button"
               appearance="primary" color="red" className="ml-auto"
@@ -230,14 +264,24 @@ function AreaModal({
               Delete
             </Button>
           )}
-          <Button
-            type="button"
-            appearance="primary"
-            onClick={handleSubmit}
-            disabled={loading} loading={loading}
-          >
-            Save
-          </Button>
+          <div className="flex gap-3">
+            <Button
+              type="button"
+              appearance="ghost"
+              onClick={() => setOpenAreaModal(false)}
+              disabled={loading}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              appearance="primary"
+              onClick={handleSubmit}
+              disabled={loading} loading={loading}
+            >
+              {loading ? 'Saving...' : 'Save'}
+            </Button>
+          </div>
         </div>
       </Modal.Footer>
     </Modal>

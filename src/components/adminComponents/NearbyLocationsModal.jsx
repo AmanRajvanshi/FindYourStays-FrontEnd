@@ -27,14 +27,21 @@ function NearbyLocationsModal({
     }
   }, [edit, selectedNearbyLocations, openAmenitiesModal]);
 
-  const handleSave = () => {
+  const handleSave = (e) => {
+    if (e && e.preventDefault) e.preventDefault();
+    if (loading) return;
+    const trimmed = (nearbyLocationName || '').trim();
+    if (!trimmed) {
+      toast.error('Facility name is required');
+      return;
+    }
     setLoading(true);
     const url = edit
       ? `${apiUrl}admin/edit-nearby-locations/${selectedNearbyLocations.id}`
       : `${apiUrl}admin/add-nearby-locations`; // Set your API endpoints accordingly!
     const method = edit ? 'PUT' : 'POST';
     const body = {
-      name: nearbyLocationName,
+      name: trimmed,
     };
     fetch(url, {
       method,
@@ -66,16 +73,17 @@ function NearbyLocationsModal({
       });
   };
 
-  const handleDelete = () => {
+  const handleDelete = (e) => {
+    if (e && e.preventDefault) e.preventDefault();
     Swal.fire({
       title: 'Are you sure?',
-      text: "You won't be able to revert this!",
+      text: 'You will not be able to recover this!',
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonColor: '#3085d6',
-      cancelButtonColor: '#d33',
       confirmButtonText: 'Yes, delete it!',
+      cancelButtonText: 'No, keep it',
     }).then((result) => {
+      if (!result.isConfirmed) return;
       setLoading(true);
       fetch(
         `${apiUrl}admin/delete-nearby-locations/${selectedNearbyLocations.id}`,
@@ -126,7 +134,7 @@ function NearbyLocationsModal({
       </Modal.Header>
 
       <Modal.Body className="pb-4">
-        <Form fluid>
+        <Form fluid onSubmit={(e) => { e?.preventDefault(); handleSave(e); }}>
           <Form.Group controlId="name">
             <Form.Label>Nearby Facility Name</Form.Label>
             <Input

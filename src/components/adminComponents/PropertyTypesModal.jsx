@@ -26,13 +26,20 @@ function PropertyTypesModal({
     }
   }, [edit, propertyType, open]);
 
-  const handleSave = () => {
+  const handleSave = (e) => {
+    if (e && e.preventDefault) e.preventDefault();
+    if (loading) return;
+    const trimmed = (propertyTypeName || '').trim();
+    if (!trimmed) {
+      toast.error('Property type name is required');
+      return;
+    }
     setLoading(true);
     const url = edit
       ? apiUrl + 'admin/edit-property-type/' + propertyType.id
       : apiUrl + 'admin/add-property-type';
     const method = edit ? 'PUT' : 'POST';
-    const body = { name: propertyTypeName };
+    const body = { name: trimmed };
 
     fetch(url, {
       method,
@@ -64,7 +71,8 @@ function PropertyTypesModal({
       });
   };
 
-  const handleDelete = () => {
+  const handleDelete = (e) => {
+    if (e && e.preventDefault) e.preventDefault();
     if (!propertyType?.id) return;
     setLoading(true);
     fetch(apiUrl + 'admin/delete-property-type/' + propertyType.id, {
@@ -104,7 +112,7 @@ function PropertyTypesModal({
         </Modal.Title>
       </Modal.Header>
       <Modal.Body className="pb-4">
-        <Form fluid>
+        <Form fluid onSubmit={(e) => { e?.preventDefault(); handleSave(e); }}>
           <Form.Group controlId="name">
             <Form.Label>Property Type Name</Form.Label>
             <Input

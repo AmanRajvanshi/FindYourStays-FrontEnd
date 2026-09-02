@@ -78,12 +78,15 @@ export default function Cities() {
   };
 
   const getAllStates = () => {
-    fetch(`${apiUrl}admin/get-all-states`, {
+    fetch(`${apiUrl}admin/get-all-states?paginate=0`, {
       headers: { Accept: 'application/json', 'Content-Type': 'application/json', Authorization: authData.token },
     })
       .then((res) => res.json())
       .then((json) => {
-        if (json.status) setStateList(json.data.data.map((s) => ({ label: s.state_name, value: s.id })));
+        if (json.status) {
+          const list = Array.isArray(json.data) ? json.data : (json.data?.data || []);
+          setStateList(list.map((s) => ({ label: s.state_name, value: s.id })));
+        }
       });
   };
 
@@ -170,9 +173,9 @@ export default function Cities() {
                   <HeaderCell>Image</HeaderCell>
                   <Cell>
                     {(rowData) => rowData.image ? (
-                      <span className="text-emerald-500"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 13l4 4L19 7"/></svg></span>
+                      <span className="text-emerald-500"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 13l4 4L19 7" /></svg></span>
                     ) : (
-                      <span className="text-red-400"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 6l12 12M18 6L6 18"/></svg></span>
+                      <span className="text-red-400"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 6l12 12M18 6L6 18" /></svg></span>
                     )}
                   </Cell>
                 </Column>

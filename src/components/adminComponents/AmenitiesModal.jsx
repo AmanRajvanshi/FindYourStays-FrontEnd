@@ -31,14 +31,21 @@ function AmenitiesModal({
     }
   }, [edit, amenity, openAmenitiesModal]);
 
-  const handleSave = () => {
+  const handleSave = (e) => {
+    if (e && e.preventDefault) e.preventDefault();
+    if (loading) return;
+    const trimmed = (amenityName || '').trim();
+    if (!trimmed) {
+      toast.error('Amenity name is required');
+      return;
+    }
     setLoading(true);
     const url = edit
       ? apiUrl + 'admin/edit-amenities/' + amenity.id
       : apiUrl + 'admin/add-amenities';
     const method = edit ? 'PUT' : 'POST';
     const body = {
-      name: amenityName,
+      name: trimmed,
       icon: amenityIcon || '',
     };
 
@@ -72,7 +79,8 @@ function AmenitiesModal({
       });
   };
 
-  const handleDelete = () => {
+  const handleDelete = (e) => {
+    if (e && e.preventDefault) e.preventDefault();
     if (!amenity?.id) return;
     setLoading(true);
     fetch(apiUrl + 'admin/delete-amenities/' + amenity.id, {
@@ -118,7 +126,7 @@ function AmenitiesModal({
       </Modal.Header>
 
       <Modal.Body className="pb-4">
-        <Form fluid>
+        <Form fluid onSubmit={(e) => { e?.preventDefault(); handleSave(e); }}>
           <Form.Group controlId="name">
             <Form.Label>Amenity Name</Form.Label>
             <Input
