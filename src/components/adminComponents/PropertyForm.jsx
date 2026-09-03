@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useState, useRef } from "react";
 import toast from "react-hot-toast";
 import { useNavigate, useParams } from "react-router";
 import {
@@ -171,6 +171,7 @@ function PropertyForm({ mode = "add" }) {
   const [formValue, setFormValue] = useState(emptyFormValue);
   const [multiplePricings, setMultiplePricings] = useState([emptyPricingRow()]);
   const [openDays, setOpenDays] = useState(emptyOpenDays());
+  const isSubmitting = useRef(false);
 
   // Select data
   const [brandsList, setBrandsList] = useState([]);
@@ -233,6 +234,7 @@ function PropertyForm({ mode = "add" }) {
   const norm = normalizeTypeName(selectedTypeLabel);
   const isCoworking = norm.includes("coworking");
   const isManaged = norm.includes("managed");
+  const iscoliving = norm.includes("coliving")
 
   // ---------- Pricing row handlers ----------
   const addMultiplePricing = () =>
@@ -476,7 +478,7 @@ function PropertyForm({ mode = "add" }) {
           map_link: p.map,
           status: p.status,
           is_property_favourite:
-            p.is_property_favourite === "1" || p.is_property_favourite === 1,
+            p.is_property_favourite === "1" || p.is_property_favourite === 1 || p.is_property_favourite === true,
           average_rating: p.average_rating?.toString() || "",
           review_count: p.review_count?.toString() || "",
           year_built: p.year_built?.toString() || "",
@@ -758,12 +760,15 @@ function PropertyForm({ mode = "add" }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    if (isSubmitting.current) return;
+
     const validationErrors = validateForm();
     if (validationErrors.length > 0) {
       showValidationErrors(validationErrors);
       return;
     }
 
+    isSubmitting.current = true;
     setAddLoader(true);
     const formData = buildFormData();
 
@@ -798,6 +803,7 @@ function PropertyForm({ mode = "add" }) {
       toast.error("Error: " + error.message);
     } finally {
       setAddLoader(false);
+      isSubmitting.current = false;
     }
   };
 
@@ -1382,7 +1388,7 @@ function PropertyForm({ mode = "add" }) {
           </SectionCard>
 
           {/* Open Days — weekly schedule sent as { days: [...], opening_time, closing_time } */}
-          {(isCoworking || isManaged) && (
+          {(!iscoliving) && (
             <SectionCard
               title="Open Days"
               action={

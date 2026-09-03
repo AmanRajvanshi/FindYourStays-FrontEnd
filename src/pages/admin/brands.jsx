@@ -67,7 +67,18 @@ function Brands() {
             </Column>
             <Column flexGrow={1}>
               <HeaderCell>Brand Name</HeaderCell>
-              <Cell dataKey="operator_brand_name" />
+              <Cell>
+                {(rowData) => (
+                  <div className="flex items-center gap-2">
+                    <span>{rowData.operator_brand_name}</span>
+                    {rowData.is_main_brand ? (
+                      <span className="bg-coral/10 text-coral text-[10px] font-bold px-2 py-0.5 rounded-full whitespace-nowrap">
+                        MAIN BRAND
+                      </span>
+                    ) : null}
+                  </div>
+                )}
+              </Cell>
             </Column>
             <Column flexGrow={1}>
               <HeaderCell>Email</HeaderCell>

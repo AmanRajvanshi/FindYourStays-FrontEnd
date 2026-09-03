@@ -24,6 +24,7 @@ function BrandModal({
     alternate_number: '',
     logo: null,
     remove_logo: false,
+    is_main_brand: false,
   });
   const [loading, setLoading] = useState(false);
   const [previewImage, setPreviewImage] = useState(null);
@@ -39,6 +40,7 @@ function BrandModal({
         alternate_number: brand.alternate_number || '',
         logo: null,
         remove_logo: false,
+        is_main_brand: brand.is_main_brand ? true : false,
       });
       if (brand.logo) {
         setPreviewImage(`${imageUrl}${brand.logo}`);
@@ -55,6 +57,7 @@ function BrandModal({
         alternate_number: '',
         logo: null,
         remove_logo: false,
+        is_main_brand: false,
       });
       setPreviewImage(null);
     }
@@ -109,7 +112,8 @@ function BrandModal({
     if (formData.email) postData.append('email', formData.email);
     if (formData.address) postData.append('address', formData.address);
     if (formData.alternate_number) postData.append('alternate_number', formData.alternate_number);
-    
+    postData.append('is_main_brand', formData.is_main_brand ? '1' : '0');
+
     if (formData.logo) {
       postData.append('logo', formData.logo);
     }
@@ -327,6 +331,17 @@ function BrandModal({
                   value={formData.alternate_number}
                   onChange={(value) => handleChange(value, 'alternate_number')}
                 />
+              </Form.Group>
+              <Form.Group controlId="is_main_brand">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={formData.is_main_brand}
+                    onChange={(e) => handleChange(e.target.checked, 'is_main_brand')}
+                    className="w-4 h-4 rounded border-line text-coral focus:ring-coral/20 cursor-pointer"
+                  />
+                  <span className="font-medium text-ink">Set as Main Brand (Featured on Homepage)</span>
+                </label>
               </Form.Group>
             </div>
           </div>

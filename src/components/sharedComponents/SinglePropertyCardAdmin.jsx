@@ -14,7 +14,8 @@ function SinglePropertyCardAdmin({ property, fetchProperties }) {
 
   const [isFavourite, setIsFavourite] = useState(
     property.is_property_favourite === 1 ||
-    property.is_property_favourite === '1'
+    property.is_property_favourite === '1' ||
+    property.is_property_favourite === true
   );
 
   const mark_as_favourite = (id, favourite) => {
@@ -143,9 +144,9 @@ function SinglePropertyCardAdmin({ property, fetchProperties }) {
           className="absolute top-3.5 right-3.5 z-10 w-9 h-9 rounded-full bg-white/95 backdrop-blur-sm flex items-center justify-center transition-all hover:scale-110 active:scale-95 shadow-sm text-muted hover:text-red-500"
           title={isFavourite ? "Unmark Favorite" : "Mark Favorite"}
         >
-          <FontAwesomeIcon 
-            icon={faHeart} 
-            className={`text-sm transition-colors duration-300 ${isFavourite ? "text-red-500 scale-110" : "text-muted group-hover/fav:text-muted"}`} 
+          <FontAwesomeIcon
+            icon={faHeart}
+            className={`text-sm transition-colors duration-300 ${isFavourite ? "text-red-500 scale-110" : "text-muted group-hover/fav:text-muted"}`}
           />
         </button>
 
