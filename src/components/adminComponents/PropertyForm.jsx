@@ -505,6 +505,7 @@ function PropertyForm({ mode = "add" }) {
               seat_category: mp.seat_category || "",
               occupancy_type: mp.occupancy_type || "",
               duration: mp.duration || "",
+              no_of_seats: mp.no_of_seats || "",
               amount: mp.amount || "",
               marked_amount: mp.marked_amount || "",
             }))
@@ -733,6 +734,7 @@ function PropertyForm({ mode = "add" }) {
       formData.append(`multiple_pricings[${index}][seat_category]`, pricing.seat_category || "");
       formData.append(`multiple_pricings[${index}][occupancy_type]`, pricing.occupancy_type || "");
       formData.append(`multiple_pricings[${index}][duration]`, pricing.duration || "");
+      formData.append(`multiple_pricings[${index}][no_of_seats]`, pricing.no_of_seats || "");
       formData.append(`multiple_pricings[${index}][amount]`, pricing.amount || "");
       formData.append(`multiple_pricings[${index}][marked_amount]`, pricing.marked_amount || "");
     });
