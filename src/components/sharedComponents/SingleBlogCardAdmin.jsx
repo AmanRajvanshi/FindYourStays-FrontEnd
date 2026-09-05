@@ -3,7 +3,7 @@ import toast from 'react-hot-toast';
 import { Link } from 'react-router';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPencil, faTrash } from '@fortawesome/free-solid-svg-icons';
-import { apiUrl } from '../../envConfig';
+import { apiUrl, imageUrl } from '../../envConfig';
 import { AuthContext } from '../../AuthContextProvider';
 
 function SingleBlogCardAdmin({ blog, get_all_blogs }) {
@@ -79,7 +79,7 @@ function SingleBlogCardAdmin({ blog, get_all_blogs }) {
           </button>
         </div>
       </div>
-      
+
       <div className="p-4 flex-1 flex flex-col justify-start">
         <p className="text-xs font-semibold text-coral uppercase tracking-wider mb-2">
           {blog.created_at && new Date(blog.created_at).toLocaleDateString()} <span className="text-muted mx-1">•</span> <span className="text-muted text-sm">{blog.views} Views</span>
